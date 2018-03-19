@@ -9,11 +9,11 @@ Description: Implements a 1-dimensional kernel density estimator that can handle
 License: MIT
 Encoding: UTF-8
 LazyData: true
-LinkingTo: 
+LinkingTo:
     BH,
     Rcpp,
     RcppEigen
-Imports: 
+Imports:
     Rcpp, 
     KernSmooth, 
     MASS, 
@@ -21,3 +21,5 @@ Imports:
     qrng
 RoxygenNote: 6.0.1
 Suggests: testthat
+URL: https://github.com/tnagler/kde1d
+BugReports: https://github.com/tnagler/kde1d/issues
