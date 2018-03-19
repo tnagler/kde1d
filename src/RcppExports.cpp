@@ -19,9 +19,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// kde
+Eigen::MatrixXd kde(Eigen::VectorXd x, Eigen::VectorXd values, double bw);
+RcppExport SEXP _kde1d_kde(SEXP xSEXP, SEXP valuesSEXP, SEXP bwSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type values(valuesSEXP);
+    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    rcpp_result_gen = Rcpp::wrap(kde(x, values, bw));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_kde1d_interpolate", (DL_FUNC) &_kde1d_interpolate, 3},
+    {"_kde1d_kde", (DL_FUNC) &_kde1d_kde, 3},
     {NULL, NULL, 0}
 };
 

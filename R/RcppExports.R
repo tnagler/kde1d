@@ -5,3 +5,7 @@ interpolate <- function(x, values, grid) {
     .Call('_kde1d_interpolate', PACKAGE = 'kde1d', x, values, grid)
 }
 
+kde <- function(x, values, bw) {
+    .Call('_kde1d_kde', PACKAGE = 'kde1d', x, values, bw)
+}
+

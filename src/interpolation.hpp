@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Dense>
 #include <functional>
 
@@ -20,7 +22,7 @@ public:
 
     Eigen::VectorXd interpolate(const Eigen::VectorXd &x);
 
-    Eigen::VectorXd intergrate(const Eigen::VectorXd &u);
+    Eigen::VectorXd integrate(const Eigen::VectorXd &u);
 
 private:
     // Utility functions for spline Interpolation
@@ -73,8 +75,9 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_poin
 //! @param times how many times the normalization routine should run.
 void InterpolationGrid1d::normalize(int times)
 {
+    double x_max = grid_points_.maxCoeff();
     for (int k = 0; k < times; ++k) {
-        values_ /= int_on_grid(1.0, values_, grid_points_);
+        values_ /= int_on_grid(1.5 * x_max, values_, grid_points_);
     }
 }
 
@@ -125,12 +128,9 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x
 //! @param u mx2 matrix of evaluation points
 //! @param cond_var either 1 or 2; the axis considered fixed.
 //!
-inline Eigen::VectorXd InterpolationGrid1d::intergrate(const Eigen::VectorXd &u)
+inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd &u)
 {
-    ptrdiff_t m = grid_points_.size();
-    Eigen::VectorXd tmpvals(m);
-    Eigen::VectorXd out;
-
+    Eigen::VectorXd out(u.size());
     for (size_t i = 0; i < u.size(); i++) {
         out(i) = int_on_grid(u(i), values_, grid_points_);
     }
