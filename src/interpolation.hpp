@@ -24,6 +24,9 @@ public:
 
     Eigen::VectorXd integrate(const Eigen::VectorXd &u);
 
+    Eigen::VectorXd get_values() const {return values_;}
+    Eigen::VectorXd get_grid_points() const {return grid_points_;}
+
 private:
     // Utility functions for spline Interpolation
     double cubic_poly(const double &x, const Eigen::VectorXd &a);

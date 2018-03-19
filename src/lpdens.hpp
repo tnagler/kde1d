@@ -14,9 +14,10 @@ public:
         double range = x_max - x_min;
         x_min = x_min - 0.5 * range;
         x_max = x_max + 0.5 * range;
-        auto points = Eigen::VectorXd::LinSpaced(grid_size, x_min, x_max);
-        auto vals = eval_kde1d(points, x, bw);
-        grid_ = InterpolationGrid1d(points, vals, 3);
+        grid_points_ = Eigen::VectorXd::LinSpaced(grid_size, x_min, x_max);
+        values_ = eval_kde1d(grid_points_, x, bw);
+        grid_ = InterpolationGrid1d(grid_points_, values_, 3);
+        values_ = grid_.get_values();
     }
 
     Eigen::VectorXd d(const Eigen::VectorXd& x)
@@ -35,11 +36,20 @@ public:
             return grid_.integrate(xx);
         };
 
-        return invert_f(x, f, 0.0, 1.0, 20);
+        return invert_f(x,
+                        f,
+                        grid_.get_grid_points().minCoeff(),
+                        grid_.get_grid_points().maxCoeff(),
+                        20);
     }
+
+    Eigen::VectorXd get_values() const {return values_;}
+    Eigen::VectorXd get_grid_points() const {return grid_points_;}
 
 private:
     InterpolationGrid1d grid_;
+    Eigen::VectorXd grid_points_;
+    Eigen::VectorXd values_;
 
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x)
     {

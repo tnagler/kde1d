@@ -6,36 +6,60 @@
 
 using namespace Rcpp;
 
-// interpolate
-Eigen::VectorXd interpolate(Eigen::VectorXd x, Eigen::VectorXd values, Eigen::VectorXd grid);
-RcppExport SEXP _kde1d_interpolate(SEXP xSEXP, SEXP valuesSEXP, SEXP gridSEXP) {
+// fit_kde1d_cpp
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw);
+RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP bwSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type values(valuesSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type grid(gridSEXP);
-    rcpp_result_gen = Rcpp::wrap(interpolate(x, values, grid));
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, bw));
     return rcpp_result_gen;
 END_RCPP
 }
-// kde
-Eigen::MatrixXd kde(Eigen::VectorXd x, Eigen::VectorXd values, double bw);
-RcppExport SEXP _kde1d_kde(SEXP xSEXP, SEXP valuesSEXP, SEXP bwSEXP) {
+// dkde1d_cpp
+Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
+RcppExport SEXP _kde1d_dkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type values(valuesSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
-    rcpp_result_gen = Rcpp::wrap(kde(x, values, bw));
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
+    rcpp_result_gen = Rcpp::wrap(dkde1d_cpp(x, R_object));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pkde1d_cpp
+Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
+RcppExport SEXP _kde1d_pkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
+    rcpp_result_gen = Rcpp::wrap(pkde1d_cpp(x, R_object));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qkde1d_cpp
+Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
+RcppExport SEXP _kde1d_qkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
+    rcpp_result_gen = Rcpp::wrap(qkde1d_cpp(x, R_object));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_kde1d_interpolate", (DL_FUNC) &_kde1d_interpolate, 3},
-    {"_kde1d_kde", (DL_FUNC) &_kde1d_kde, 3},
+    {"_kde1d_fit_kde1d_cpp", (DL_FUNC) &_kde1d_fit_kde1d_cpp, 2},
+    {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
+    {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
+    {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
     {NULL, NULL, 0}
 };
 

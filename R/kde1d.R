@@ -77,16 +77,19 @@ kde1d <- function(x, mult = 1, xmin = -Inf, xmax = Inf, bw = NA) {
         bw <- try(KernSmooth::dpik(x_mod))
         # if it fails: normal rule of thumb
         if (inherits(bw, "try-error"))
-            bw <- MASS::bandwidth.nrd(x_cc)
+            bw <- MASS::bandwidth.nrd(x_mod)
     }
     # for discrete use 1 - theta as lower bound for bw
-    if (length(attr(x_cc, "i_disc")) == 1) {
+    if (length(attr(x_mod, "i_disc")) == 1) {
         bw <- max(bw, 0.5 - attr(x_mod, "theta"))
     }
+
+    fit <- fit_kde1d_cpp(x_mod, bw);
 
     ## return kde1d object
     res <- list(x_mod = x_mod,
                 levels = lvls,
+                fit = fit,
                 xmin = xmin,
                 xmax = xmax,
                 bw   = bw * mult)
@@ -128,11 +131,11 @@ dkde1d <- function(x, obj) {
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
     x <- cctools::expand_as_numeric(x)
-    f <- eval_kde1d(sort(obj$x_cc), x, obj$xmin, obj$xmax, obj$bw)
-    if (length(attr(obj$x_cc, "i_disc") == 1)) {
+    f <- dkde1d_cpp(x, obj$fit)
+    if (length(attr(obj$x_mod, "i_disc") == 1)) {
         # for discrete variables we can normalize
         x_all_num <- cctools::expand_as_numeric(as.ordered(obj$levels))
-        f_all <- eval_kde1d(sort(obj$x_cc), x_all_num, obj$xmin, obj$xmax, obj$bw)
+        f_all <- dkde1d_cpp(x_all_num, obj$fit)
         f <- f / sum(f_all)
     }
 
@@ -147,13 +150,13 @@ pkde1d <- function(x, obj) {
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
     x <- cctools::expand_as_numeric(x)
-    if (length(attr(obj$x_cc, "i_disc") == 1)) {
+    if (length(attr(obj$x_mod, "i_disc") == 1)) {
         # for discrete variables we have to add the missing probability mass
         x_all_num <- expand_as_numeric(as.ordered(obj$levels))
-        f_all <- dkde1d(x_all_num, obj)
+        f_all <- dkde1d(x_all_num, obj$fit)
         p <- sapply(x, function(y) sum(f_all[x_all_num <= y]))
     } else {
-        p <- eval_pkde1d(sort(obj$x_cc), x, obj$xmin, obj$xmax, obj$bw)
+        p <- pkde1d_cpp(x, obj$fit)
     }
 
     p
@@ -166,14 +169,14 @@ qkde1d <- function(x, obj) {
         x <- x[[1]]
     stopifnot(all((x >= 0) & (x <= 1)))
     x <- cctools::expand_as_numeric(x)
-    q <- eval_qkde1d(sort(obj$x_cc), x, obj$xmin, obj$xmax, obj$bw)
+    q <- qkde1d_cpp(x, obj$fit)
 
     ## for discrete variables compute quantile from the density
-    if (length(attr(obj$x_cc, "i_disc") == 1)) {
+    if (length(attr(obj$x_mod, "i_disc") == 1)) {
         x_all_num <- expand_as_numeric(as.ordered(obj$levels))
 
         # pdf at all possible values of x
-        dd <- eval_kde1d(sort(obj$x_cc), x_all_num, obj$xmin, obj$xmax, obj$bw)
+        dd <- dkde1d(x, obj$fit)
         pp <- c(cumsum(dd)) / sum(dd)
 
         # generalized inverse
@@ -228,11 +231,11 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #' @importFrom utils modifyList
 #' @export
 plot.kde1d <- function(x, ...) {
-    p.l <- if (is.nan(x$xmin)) min(x$x_cc) - x$bw else x$xmin
-    p.u <- if (is.nan(x$xmax)) max(x$x_cc) + x$bw else x$xmax
+    p.l <- if (is.nan(x$xmin)) min(x$x_mod) - x$bw else x$xmin
+    p.u <- if (is.nan(x$xmax)) max(x$x_mod) + x$bw else x$xmax
     ev <- seq(p.l, p.u, l = 100)
     plot_type <- "l"  # for continuous variables, use a line plot
-    if (length(attr(x$x_cc, "i_disc")) == 1) {
+    if (length(attr(x$x_mod, "i_disc")) == 1) {
         ev <- as.ordered(x$levels)
         plot_type <- "h"  # for discrete variables, use a histrogram
     }
@@ -255,10 +258,10 @@ plot.kde1d <- function(x, ...) {
 #' @importFrom utils modifyList
 #' @export
 lines.kde1d <- function(x, ...) {
-    if (length(attr(x$x_cc, "i_disc") == 1))
+    if (length(attr(x$x_mod, "i_disc") == 1))
         stop("lines does not work for discrete estimates.")
-    p.l <- if (is.nan(x$xmin)) min(x$x_cc) - x$bw else x$xmin
-    p.u <- if (is.nan(x$xmax)) max(x$x_cc) + x$bw else x$xmax
+    p.l <- if (is.nan(x$xmin)) min(x$x_mod) - x$bw else x$xmin
+    p.u <- if (is.nan(x$xmax)) max(x$x_mod) + x$bw else x$xmax
     ev <- seq(p.l, p.u, l = 100)
 
     fhat <- dkde1d(ev, x)
