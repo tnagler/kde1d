@@ -120,8 +120,6 @@ kde1d <- function(x, mult = 1, xmin = -Inf, xmax = Inf, bw = NA) {
 #' qkde1d(0.5, fit)         # quantile function
 #' hist(rkde1d(100, fit))   # simulate
 #'
-#' @useDynLib kdevine
-#' @importFrom Rcpp evalCpp
 #' @importFrom cctools expand_as_numeric
 #' @export
 dkde1d <- function(x, obj) {
