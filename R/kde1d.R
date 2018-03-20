@@ -84,7 +84,7 @@ kde1d <- function(x, mult = 1, xmin = -Inf, xmax = Inf, bw = NA) {
         bw <- max(bw, 0.5 - attr(x_mod, "theta"))
     }
 
-    fit <- fit_kde1d_cpp(x_mod, bw);
+    fit <- fit_kde1d_cpp(x_mod, bw)
 
     ## return kde1d object
     res <- list(x_mod = x_mod,
@@ -268,5 +268,12 @@ lines.kde1d <- function(x, ...) {
 
     pars <- list(x = ev, y = fhat)
     do.call(lines, modifyList(pars, list(...)))
+}
+
+#' @method logLik kde1d
+#'
+#' @export
+logLik.kde1d <- function(object, ...) {
+    structure(object$fit$loglik, "df" = object$fit$edf)
 }
 

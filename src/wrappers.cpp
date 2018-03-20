@@ -5,11 +5,11 @@
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw)
 {
     LPDens1d fit(x, 100, bw);
-    Eigen::VectorXd grid_points = fit.get_grid_points();
-    Eigen::VectorXd values = fit.get_values();
     return Rcpp::List::create(
-        Rcpp::Named("grid_points") = grid_points,
-        Rcpp::Named("values") = values
+        Rcpp::Named("grid_points") = fit.get_grid_points(),
+        Rcpp::Named("values") = fit.get_values(),
+        Rcpp::Named("edf") = fit.get_edf(),
+        Rcpp::Named("loglik") = fit.get_loglik()
     );
 }
 

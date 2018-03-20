@@ -15,9 +15,14 @@ public:
         x_min = x_min - 0.5 * range;
         x_max = x_max + 0.5 * range;
         grid_points_ = Eigen::VectorXd::LinSpaced(grid_size, x_min, x_max);
-        values_ = eval_kde1d(grid_points_, x, bw);
+        Eigen::MatrixXd fitted = fit_kde1d(grid_points_, x, bw);
+        values_ = fitted.col(0);
         grid_ = InterpolationGrid1d(grid_points_, values_, 3);
         values_ = grid_.get_values();
+        loglik_ = grid_.interpolate(x).array().log().sum();
+
+        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
+        edf_ = infl_grid.interpolate(x).sum();
     }
 
     Eigen::VectorXd d(const Eigen::VectorXd& x)
@@ -45,11 +50,15 @@ public:
 
     Eigen::VectorXd get_values() const {return values_;}
     Eigen::VectorXd get_grid_points() const {return grid_points_;}
+    double get_edf() const {return edf_;}
+    double get_loglik() const {return loglik_;}
 
 private:
     InterpolationGrid1d grid_;
     Eigen::VectorXd grid_points_;
     Eigen::VectorXd values_;
+    double loglik_;
+    double edf_;
 
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x)
     {
@@ -62,14 +71,22 @@ private:
         return x.unaryExpr(f);
     }
 
-    Eigen::VectorXd eval_kde1d(const Eigen::VectorXd& x_ev,
-                               const Eigen::VectorXd& x,
-                               double bw)
+    Eigen::MatrixXd fit_kde1d(const Eigen::VectorXd& x_ev,
+                              const Eigen::VectorXd& x,
+                              double bw)
     {
-        auto f = [&x, &bw, this] (double xx) {
+        Eigen::MatrixXd out(x_ev.size(), 2);
+
+        // density estimate
+        auto fhat = [&x, &bw, this] (double xx) {
             return this->kern_gauss((x.array() - xx) / bw).mean() / bw;
         };
+        out.col(0) = x_ev.unaryExpr(fhat);
 
-        return x_ev.unaryExpr(f);
+        // influence function estimate
+        double contrib = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
+        out.col(1) = contrib / out.col(0).array();
+
+        return out;
     }
 };
