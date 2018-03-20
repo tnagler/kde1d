@@ -7,16 +7,18 @@
 \alias{kde1d}
 \title{kde1d.}
 \usage{
-kde1d(x, mult = 1, xmin = -Inf, xmax = Inf, bw = NA)
+kde1d(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA)
 }
 \arguments{
 \item{x}{vector of length \eqn{n}.}
 
 \item{mult}{numeric; the actual bandwidth used is \eqn{bw*mult}.}
 
-\item{xmin}{lower bound for the support of the density.}
+\item{xmin}{lower bound for the support of the density, `NaN` means no
+boundary.}
 
-\item{xmax}{upper bound for the support of the density.}
+\item{xmax}{upper bound for the support of the density, `NaN` means no
+boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA};
 the latter calls [`KernSmooth::dpik()`].}
