@@ -85,6 +85,7 @@ private:
 
         // influence function estimate
         double contrib = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
+        contrib /= static_cast<double>(x.size());
         out.col(1) = contrib / out.col(0).array();
 
         return out;
