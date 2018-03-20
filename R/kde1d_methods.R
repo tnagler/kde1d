@@ -168,6 +168,36 @@ lines.kde1d <- function(x, ...) {
 #'
 #' @export
 logLik.kde1d <- function(object, ...) {
-    structure(object$fit$loglik, "df" = object$fit$edf)
+    structure(object$loglik, "df" = object$edf)
 }
 
+#' @method print kde1d
+#' @export
+print.kde1d <- function(x, ...) {
+    if (length(x$jitter_info$i_disc) == 1)
+        cat("(jittered) ")
+    cat("kernel density estimate ('kde1d')")
+    if (!is.nan(x$xmin) | !is.nan(x$xmax)) {
+        cat(" with bounded support (")
+        if (!is.nan(x$xmin))
+            cat("xmin =", round(x$xmin, 2))
+        if (!is.nan(x$xmax)) {
+            if (!is.nan(x$xmin))
+                cat(", ")
+            cat("xmax =", round(x$xmax, 2))
+        }
+        cat(")")
+    }
+    cat("\n")
+}
+
+#' @method summary kde1d
+#' @export
+summary.kde1d <- function(x, ...) {
+    print(x)
+    cat("---\n")
+    cat(paste0("nobs = ", x$nobs, ", "))
+    cat(paste0("bw = ", round(x$bw, 2), ", "))
+    cat(paste0("loglik = ", round(x$loglik, 2), ", "))
+    cat(paste0("d.f. = ", round(x$edf, 2)), "\n")
+}

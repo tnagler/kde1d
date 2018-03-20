@@ -38,7 +38,6 @@
 #' @export
 kde1d <- function(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA) {
     x <- na.omit(x)
-
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw)
 
@@ -51,8 +50,12 @@ kde1d <- function(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA) {
     # fit model
     fit <- fit_kde1d_cpp(x, bw, xmin, xmax)
 
-    # return as kde1d object
+    # add info
     fit$jitter_info <- attributes(x)
+    fit$var_name <- colnames(x)
+    fit$nobs <- length(x)
+
+    # return as kde1d object
     class(fit) <- "kde1d"
     fit
 }

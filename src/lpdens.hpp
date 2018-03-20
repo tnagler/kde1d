@@ -27,6 +27,10 @@ public:
         // fit model and evaluate in transformed domain
         Eigen::MatrixXd fitted = fit_kde1d(grid_points_, x, bw);
 
+        // calculate effective degrees of freedom
+        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
+        edf_ = infl_grid.interpolate(x).sum();
+
         // back-transform grid to original domain
         grid_points_ = boundary_transform(grid_points_, true);
 
@@ -45,10 +49,6 @@ public:
 
         // calculate log-likelihood of final estimate
         loglik_ = grid_.interpolate(x).array().log().sum();
-
-        // calculate effective degrees of freedom
-        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
-        edf_ = infl_grid.interpolate(x).sum();
     }
 
     Eigen::VectorXd d(const Eigen::VectorXd& x)
