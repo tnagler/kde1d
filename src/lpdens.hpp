@@ -210,9 +210,9 @@ private:
 
     Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid)
     {
-        if (std::isnan(xmin_))
+        if (!std::isnan(xmin_))
             grid(0) = xmin_;
-        if (std::isnan(xmax_))
+        if (!std::isnan(xmax_))
             grid(grid.size()) = xmax_;
         return grid;
     }
