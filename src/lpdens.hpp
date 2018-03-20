@@ -2,6 +2,7 @@
 
 #include "interpolation.hpp"
 #include "stats.hpp"
+#include "tools.hpp"
 #include <functional>
 
 class LPDens1d {
@@ -13,8 +14,8 @@ public:
         xmin_(xmin),
         xmax_(xmax)
     {
-        loglik_ = 0;
-        edf_ = 0;
+        // remove NaNs from the data
+        x = tools::nan_omit(x);
 
         // construct equally spaced grid on original domain
         grid_points_ = construct_grid_points(x);
@@ -66,11 +67,11 @@ public:
             return grid_.integrate(xx);
         };
 
-        return invert_f(x,
-                        f,
-                        grid_.get_grid_points().minCoeff(),
-                        grid_.get_grid_points().maxCoeff(),
-                        20);
+        return tools::invert_f(x,
+                               f,
+                               grid_.get_grid_points().minCoeff(),
+                               grid_.get_grid_points().maxCoeff(),
+                               20);
     }
 
     Eigen::VectorXd get_values() const {return values_;}

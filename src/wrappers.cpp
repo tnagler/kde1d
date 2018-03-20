@@ -49,9 +49,14 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
         return fit.integrate(xx);
     };
 
-    return invert_f(x,
-                    f,
-                    fit.get_grid_points().minCoeff(),
-                    fit.get_grid_points().maxCoeff(),
-                    20);
+    auto q = tools::invert_f(x,
+                             f,
+                             fit.get_grid_points().minCoeff(),
+                             fit.get_grid_points().maxCoeff(),
+                             20);
+    for (size_t i = 0; i < x.size(); i++) {
+        if (std::isnan(x(i)))
+            q(i) = std::numeric_limits<double>::quiet_NaN();
+    }
+    return q;
 }

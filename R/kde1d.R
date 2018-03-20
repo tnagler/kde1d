@@ -34,9 +34,12 @@
 #' @importFrom KernSmooth dpik
 #' @importFrom MASS bandwidth.nrd
 #' @importFrom cctools cont_conv
+#' @importFrom stats na.omit
 #' @export
 kde1d <- function(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA) {
-    # sanity checks and pre-processing of arguments
+    x <- na.omit(x)
+
+    # sanity checks
     check_arguments(x, mult, xmin, xmax, bw)
 
     # jittering for discrete variables

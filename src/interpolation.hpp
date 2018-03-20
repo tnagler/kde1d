@@ -2,8 +2,9 @@
 
 #include <Eigen/Dense>
 #include <functional>
+#include "tools.hpp"
 
-//! A class for cubic spline interpolation of bivariate copulas
+//! A class for cubic spline interpolation in one dimension
 //!
 //! The class is used for implementing kernel estimators. It makes storing the
 //! observations obsolete and allows for fast numerical integration.
@@ -55,10 +56,8 @@ private:
 
 //! Constructor
 //!
-//! @param grid_points an ascending sequence of grid_points; used in both
-//! dimensions.
-//! @param values a dxd matrix of copula density values evaluated at
-//! (grid_points_i, grid_points_j).
+//! @param grid_points an ascending sequence of grid points.
+//! @param values a vector of values of same length as grid_points.
 //! @param norm_times how many times the normalization routine should run.
 inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_points,
                                                 const Eigen::VectorXd &values,
@@ -73,7 +72,7 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_poin
     normalize(norm_times);
 }
 
-//! renormalizes the estimate to uniform margins
+//! renormalizes the estimate to integrate to one
 //!
 //! @param times how many times the normalization routine should run.
 void InterpolationGrid1d::normalize(int times)
@@ -99,17 +98,16 @@ inline size_t InterpolationGrid1d::find_cell(double x0)
     return cell_index;
 }
 
-//! Interpolation in two dimensions
-//!
-//! @param x mx2 matrix of evaluation points.
+//! Interpolation
+//! @param x vector of evaluation points.
 inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x)
 {
-    Eigen::VectorXd out(x.size()), tmpgrid(4), tmpvals(4);
+    Eigen::VectorXd tmpgrid(4), tmpvals(4);
     size_t m = grid_points_.size();
-    size_t j0, j3;
-    for (size_t i = 0; i < x.size(); i++) {
-        size_t j = find_cell(x(i));
-        // construct grid for first direction
+
+    auto interpolate_one = [&] (const double& xx) {
+        size_t j0, j3;
+        size_t j = find_cell(xx);
         j0 = std::max(j - 1, static_cast<size_t>(0));
         j3 = std::min(j + 2, m - 1);
         tmpgrid(0) = this->grid_points_(j0);
@@ -120,27 +118,23 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x
         tmpvals(1) = this->values_(j);
         tmpvals(2) = this->values_(j + 1);
         tmpvals(3) = this->values_(j3);
-        out(i) = this->interp_on_grid(x(i), tmpvals, tmpgrid);
-    }
+        return this->interp_on_grid(xx, tmpvals, tmpgrid);
+    };
 
-    return out;
+    return tools::unaryExpr_or_nan(x, interpolate_one);
 }
 
-//! Integrate the grid along one axis
+//! Integration along the grid
 //!
-//! @param u mx2 matrix of evaluation points
-//! @param cond_var either 1 or 2; the axis considered fixed.
-//!
-inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd &u)
+//! @param x a vector  of evaluation points
+inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd &x)
 {
-    Eigen::VectorXd out(u.size());
-    for (size_t i = 0; i < u.size(); i++) {
-        out(i) = int_on_grid(u(i), values_, grid_points_);
-    }
+    auto integrate_one = [this] (const double& xx) {
+        return int_on_grid(xx, this->values_, this->grid_points_);
+    };
 
-    return out;
+    return tools::unaryExpr_or_nan(x, integrate_one);
 }
-
 
 // ---------------- Utility functions for spline interpolation ----------------
 
@@ -287,25 +281,4 @@ inline double InterpolationGrid1d::int_on_grid(const double &upr,
     }
 
     return tmpint;
-}
-
-inline Eigen::VectorXd invert_f(const Eigen::VectorXd &x,
-                                std::function<
-                                    Eigen::VectorXd(const Eigen::VectorXd &)
-                                > f,
-                                const double lb,
-                                const double ub,
-                                int n_iter
-) {
-    Eigen::VectorXd xl = Eigen::VectorXd::Constant(x.size(), lb);
-    Eigen::VectorXd xh = Eigen::VectorXd::Constant(x.size(), ub);
-    Eigen::VectorXd x_tmp = x;
-    for (int iter = 0; iter < n_iter; ++iter) {
-        x_tmp = (xh + xl) / 2.0;
-        Eigen::VectorXd fm = f(x_tmp) - x;
-        xl = (fm.array() < 0).select(x_tmp, xl);
-        xh = (fm.array() < 0).select(xh, x_tmp);
-    }
-
-    return x_tmp;
 }

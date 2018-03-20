@@ -70,12 +70,7 @@ pkde1d <- function(x, obj) {
 #' @rdname dkde1d
 #' @export
 qkde1d <- function(x, obj) {
-    if (is.data.frame(x))
-        x <- x[[1]]
-    stopifnot(all((x >= 0) & (x <= 1)))
-
-    x <- expand_as_numeric(x)
-
+    stopifnot(all(na.omit(x) > 0.0) & all(na.omit(x) < 1.0))
     if (length(obj$jitter_info$i_disc) != 1) {
         q <- qkde1d_cpp(x, obj)
     } else {
