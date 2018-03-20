@@ -14,14 +14,14 @@ kde1d(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA)
 
 \item{mult}{numeric; the actual bandwidth used is \eqn{bw*mult}.}
 
-\item{xmin}{lower bound for the support of the density, `NaN` means no
+\item{xmin}{lower bound for the support of the density, \code{NaN} means no
 boundary.}
 
-\item{xmax}{upper bound for the support of the density, `NaN` means no
+\item{xmax}{upper bound for the support of the density, \code{NaN} means no
 boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA};
-the latter calls [`KernSmooth::dpik()`].}
+the latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}}.}
 }
 \value{
 An object of class \code{kde1d}.
@@ -31,13 +31,13 @@ kde1d.
 
 Discrete variables are handled via jittering (see, Nagler,
 2017). If a variable should be treated as discrete, declare it as
-[ordered()].
+\code{\link[=ordered]{ordered()}}.
 }
 \details{
 If \code{xmin} or \code{xmax} are finite, the density estimate will
-  be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
-  only one bounary; a probit transform is used if there are two. Discrete
-  variables are handled via jittering distribution (see, Nagler, 2017).
+be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
+only one bounary; a probit transform is used if there are two. Discrete
+variables are handled via jittering distribution (see, Nagler, 2017).
 }
 \examples{
 data(wdbc, package = "kdecopula")  # load data
@@ -46,10 +46,10 @@ dkde1d(1000, fit)                  # evaluate density estimate
 
 }
 \references{
-Nagler, T. (2017). *A generic approach to nonparametric function
-  estimation with mixed data.* [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+Nagler, T. (2017). \emph{A generic approach to nonparametric function
+estimation with mixed data.} \href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
 }
 \seealso{
 \code{\link{dkde1d}}, \code{\link{pkde1d}}, \code{\link{qkde1d}},
-  \code{\link{rkde1d}} \code{\link{plot.kde1d}} , \code{\link{lines.kde1d}}
+\code{\link{rkde1d}} \code{\link{plot.kde1d}} , \code{\link{lines.kde1d}}
 }
