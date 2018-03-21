@@ -6,7 +6,7 @@ Author: Thomas Nagler
 Maintainer: Thomas Nagler <mail@tnagler.com>
 Description: Implements a 1-dimensional kernel density estimator that can handle
     bounded and discrete data.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 LinkingTo:
