@@ -16,14 +16,11 @@ matrix:
 r_packages:
     BH,
     cctools,
-    graphics,
     KernSmooth,
     MASS,
     qrng,
     Rcpp,
     RcppEigen
-    stats,
-    utils
 
 before_install:
   ### Linux
