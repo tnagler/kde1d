@@ -189,15 +189,22 @@ print.kde1d <- function(x, ...) {
         cat(")")
     }
     cat("\n")
+    invisible(x)
 }
 
 #' @method summary kde1d
 #' @export
-summary.kde1d <- function(x, ...) {
-    print(x)
-    cat("---\n")
-    cat(paste0("nobs = ", x$nobs, ", "))
-    cat(paste0("bw = ", round(x$bw, 2), ", "))
-    cat(paste0("loglik = ", round(x$loglik, 2), ", "))
-    cat(paste0("d.f. = ", round(x$edf, 2)), "\n")
+summary.kde1d <- function(object, ...) {
+
+    df <- rep(NA, 4)
+    names(df) <- c("nobs", "bw", "loglik", "d.f.")
+    df[1] <- object$nobs
+    df[2] <- object$bw
+    df[3] <- object$loglik
+    df[4] <- object$edf
+
+    print(object)
+    cat(strrep("-", 65), "\n", sep = "")
+    cat(paste(names(df), round(df, 2), sep = " = ", collapse = ", "))
+    invisible(df)
 }
