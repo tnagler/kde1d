@@ -2,9 +2,9 @@
 % Please edit documentation in R/kde1d.R
 \name{kde1d}
 \alias{kde1d}
-\title{Univariate kernel density estimation}
+\title{Univariate local-polynial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -21,6 +21,9 @@ data); \code{NaN} means no boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
+
+\item{p}{order of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
+log-linear, and log-quadratic fitting, respectively.}
 }
 \value{
 An object of class \code{kde1d}.
@@ -30,11 +33,11 @@ The estimator can handle for bounded, unbounded, and discrete support, see
 \emph{Details}.
 }
 \details{
-If \code{xmin} or \code{xmax} are finite, the density estimate will
-be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
-only one boundary (see, Geenens and Wang, 2018); a probit transform is used
-if there are two (see, Geenens, 2014). Discrete variables are handled via
-jittering (see, Nagler, 2018a, 2018b).
+A gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
+finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
+log-transform is used if there is only one boundary (see, Geenens and Wang,
+2018); a probit transform is used if there are two (see, Geenens, 2014).
+Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 }
 \examples{
 ## For reproducibility

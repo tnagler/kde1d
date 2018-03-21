@@ -13,7 +13,8 @@
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
-#' @param p order of the polynomial; either `0`, `1`, or `2`.
+#' @param p order of the polynomial; either `0`, `1`, or `2` for log-constant,
+#'   log-linear, and log-quadratic fitting, respectively.
 #'
 #' @return An object of class `kde1d`.
 #'
