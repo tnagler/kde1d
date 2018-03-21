@@ -40,7 +40,7 @@ deviates from the estimated kernel density.
 }
 \description{
 Density, distribution function, quantile function and random generation
-for a kernel density estimate.
+for a 'kde1d' kernel density estimate.
 }
 \details{
 \code{\link{dkde1d}} gives the density, \code{\link{pkde1d}} gives

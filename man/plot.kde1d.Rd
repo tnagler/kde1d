@@ -19,12 +19,21 @@
 Plotting kde1d objects
 }
 \examples{
-data(wdbc)  # load data
-fit <- kde1d(wdbc[, 7])  # estimate density
-plot(fit)  # plot density estimate
+## continuous data
+x <- beta(100, shape1 = 0.3, shape2 = 0.4)    # simulate data
+fit <- kde1d(x)                               # unbounded estimate
+plot(fit, ylim = c(0, 4))                     # plot estimate
+curve(dbeta(x, 0.3, 0.4),                     # add true density
+      col = "red", add = TRUE)
+fit_bounded <- kde1d(x, xmin = 0, xmax = 1)   # bounded estimate
+lines(fit_bounded, col = "green")
 
-fit2 <- kde1d(as.ordered(wdbc[, 1])) # discrete variable
-plot(fit2, col = 2)
+## discrete data
+x <- rpois(100, 3)                        # simulate data
+x <- ordered(x, levels = 0:30)            # declare discrete variable as ordered
+fit <- kde1d(x)                           # estimate density
+plot(fit)                                 # plot density estimate
+points(0:30, dpois(0:30, 3), col = "red") # add true density values
 
 }
 \seealso{

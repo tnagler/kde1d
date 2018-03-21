@@ -46,7 +46,7 @@
 #' ## For reproducibility
 #' set.seed(0)
 #'
-#' ## Unbounded data
+#' ## unbounded data
 #' x <- rnorm(100)                    # simulate data
 #' fit <- kde1d(x)                    # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
@@ -55,7 +55,7 @@
 #' curve(dnorm(x), add = TRUE,        # add true density
 #'       col = "red")
 #'
-#' ## Bounded data
+#' ## bounded data
 #' x <- rgamma(100, shape = 1)        # simulate data
 #' fit <- kde1d(x, xmin = 0)          # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
@@ -65,7 +65,7 @@
 #'       add = TRUE, col = "red",
 #'       from = 1e-3)
 #'
-#' ## Discrete data
+#' ## discrete data
 #' x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
 #' x <- ordered(x, levels = 0:5)           # declare as ordered
 #' fit <- kde1d(x)                         # estimate density

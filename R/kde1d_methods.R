@@ -1,7 +1,7 @@
 #' Working with a kde1d object
 #'
 #' Density, distribution function, quantile function and random generation
-#' for a kernel density estimate.
+#' for a 'kde1d' kernel density estimate.
 #'
 #' @aliases pkde1d, qkde1d, rkde1d
 #'
@@ -44,7 +44,7 @@ dkde1d <- function(x, obj) {
 
     if (length(obj$jitter_info$i_disc) == 1) {
         # for discrete variables we can normalize
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels))
+        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
         f_all <- dkde1d_cpp(x_all_num, obj)
         fhat <- fhat / sum(f_all)
     }
@@ -67,7 +67,7 @@ pkde1d <- function(q, obj) {
         p <- pkde1d_cpp(q, obj)
     } else {
         # for discrete variables we have to add the missing probability mass
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels))
+        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
         f_all <- dkde1d(x_all_num, obj)
         p <- sapply(q, function(y) sum(f_all[x_all_num <= y]))
     }
@@ -84,7 +84,7 @@ qkde1d <- function(p, obj) {
         q <- qkde1d_cpp(p, obj)
     } else {
         ## for discrete variables compute quantile from the density
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels))
+        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
 
         # pdf at all possible values of x
         dd <- dkde1d(p, obj)
@@ -131,12 +131,21 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #' \code{\link{lines.kde1d}}
 #'
 #' @examples
-#' data(wdbc)  # load data
-#' fit <- kde1d(wdbc[, 7])  # estimate density
-#' plot(fit)  # plot density estimate
+#' ## continuous data
+#' x <- beta(100, shape1 = 0.3, shape2 = 0.4)    # simulate data
+#' fit <- kde1d(x)                               # unbounded estimate
+#' plot(fit, ylim = c(0, 4))                     # plot estimate
+#' curve(dbeta(x, 0.3, 0.4),                     # add true density
+#'       col = "red", add = TRUE)
+#' fit_bounded <- kde1d(x, xmin = 0, xmax = 1)   # bounded estimate
+#' lines(fit_bounded, col = "green")
 #'
-#' fit2 <- kde1d(as.ordered(wdbc[, 1])) # discrete variable
-#' plot(fit2, col = 2)
+#' ## discrete data
+#' x <- rpois(100, 3)                        # simulate data
+#' x <- ordered(x, levels = 0:30)            # declare discrete variable as ordered
+#' fit <- kde1d(x)                           # estimate density
+#' plot(fit)                                 # plot density estimate
+#' points(0:30, dpois(0:30, 3), col = "red") # add true density values
 #'
 #' @importFrom graphics plot
 #' @importFrom utils modifyList
@@ -144,8 +153,10 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 plot.kde1d <- function(x, ...) {
     plot_type <- "l"  # for continuous variables, use a line plot
     if (length(x$jitter_info$i_disc) == 1) {
-        ev <- as.ordered(x$jitter_info$levels)
+        ev <- as.ordered(x$jitter_info$levels$x)
         plot_type <- "h"  # for discrete variables, use a histrogram
+        x$values <- dkde1d(ev, x)
+        x$grid_points <- levels(ev)
     }
 
     pars <- list(
