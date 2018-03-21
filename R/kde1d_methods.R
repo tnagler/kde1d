@@ -227,5 +227,6 @@ summary.kde1d <- function(object, ...) {
     print(object)
     cat(strrep("-", 65), "\n", sep = "")
     cat(paste(names(df), round(df, 2), sep = " = ", collapse = ", "))
+    cat("\n")
     invisible(df)
 }
