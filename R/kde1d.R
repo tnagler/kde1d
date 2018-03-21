@@ -5,12 +5,12 @@
 #'
 #' @param x vector (or one-column matrix/data frame) of observations; can be
 #'   `numeric` or `ordered`.
-#' @param mult positive bandwidth multiplier; the actual bandwidth used is
-#'   \eqn{bw*mult}.
 #' @param xmin lower bound for the support of the density (only for continuous
 #'   data); `NaN` means no boundary.
 #' @param xmax upper bound for the support of the density (only for continuous
 #'   data); `NaN` means no boundary.
+#' @param mult positive bandwidth multiplier; the actual bandwidth used is
+#'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
 #'
@@ -80,7 +80,7 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw)

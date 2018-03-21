@@ -4,20 +4,20 @@
 \alias{kde1d}
 \title{Univariate kernel density estimation}
 \usage{
-kde1d(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
 \code{numeric} or \code{ordered}.}
-
-\item{mult}{positive bandwidth multiplier; the actual bandwidth used is
-\eqn{bw*mult}.}
 
 \item{xmin}{lower bound for the support of the density (only for continuous
 data); \code{NaN} means no boundary.}
 
 \item{xmax}{upper bound for the support of the density (only for continuous
 data); \code{NaN} means no boundary.}
+
+\item{mult}{positive bandwidth multiplier; the actual bandwidth used is
+\eqn{bw*mult}.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
