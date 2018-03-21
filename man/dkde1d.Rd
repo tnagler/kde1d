@@ -12,16 +12,20 @@
 \usage{
 dkde1d(x, obj)
 
-pkde1d(x, obj)
+pkde1d(q, obj)
 
-qkde1d(x, obj)
+qkde1d(p, obj)
 
 rkde1d(n, obj, quasi = FALSE)
 }
 \arguments{
-\item{x}{vector of evaluation points.}
+\item{x}{vector of density evaluation points.}
 
 \item{obj}{a \code{kde1d} object.}
+
+\item{q}{vector of quantiles.}
+
+\item{p}{vector of probabilities.}
 
 \item{n}{integer; number of observations.}
 
@@ -30,19 +34,29 @@ numbers, use \code{TRUE} for quasi-random numbers (generalized Halton, see
 \code{\link[qrng:ghalton]{ghalton}}).}
 }
 \value{
-The density or cdf estimate evaluated at \code{x}.
+The density, distribution function or quantile functions estimates
+evaluated respectively at \code{x}, \code{q}, or \code{p}, or a sample of \code{n} random
+deviates from the estimated kernel density.
 }
 \description{
-The density, cdf, or quantile function of a kernel density estimate are
-evaluated at arbitrary points with \code{\link{dkde1d}}, \code{\link{pkde1d}},
-and \code{\link{qkde1d}} respectively.
+Density, distribution function, quantile function and random generation
+for a kernel density estimate.
+}
+\details{
+\code{\link{dkde1d}} gives the density, \code{\link{pkde1d}} gives
+the distribution function, \code{\link{qkde1d}} gives the quantile function,
+and \code{\link{rkde1d}} generates random deviates.
+
+The length of the result is determined by \code{n} for \code{\link{rkde1d}}, and
+is the length of the numerical argument for the other functions.
 }
 \examples{
-data(wdbc)  # load data
-fit <- kde1d(wdbc[, 5])  # estimate density
-dkde1d(1000, fit)        # evaluate density estimate
-pkde1d(1000, fit)        # evaluate corresponding cdf
-qkde1d(0.5, fit)         # quantile function
+set.seed(0)              # for reproducibility
+x <- rnorm(100)          # simulate some data
+fit <- kde1d(x)          # estimate density
+dkde1d(0, fit)           # evaluate density estimate (close to dnorm(0))
+pkde1d(0, fit)           # evaluate corresponding cdf (close to pnorm(0))
+qkde1d(0.5, fit)         # quantile function (close to qnorm(0))
 hist(rkde1d(100, fit))   # simulate
 
 }
