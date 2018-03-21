@@ -1,4 +1,4 @@
-#' Univariate kernel density estimation
+#' Univariate local-polynial likelihood kernel density estimation
 #'
 #' The estimator can handle for bounded, unbounded, and discrete support, see
 #' *Details*.
@@ -13,14 +13,15 @@
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
+#' @param p order of the polynomial; either `0`, `1`, or `2`.
 #'
 #' @return An object of class `kde1d`.
 #'
-#' @details If `xmin` or `xmax` are finite, the density estimate will
-#'   be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
-#'   only one boundary (see, Geenens and Wang, 2018); a probit transform is used
-#'   if there are two (see, Geenens, 2014). Discrete variables are handled via
-#'   jittering (see, Nagler, 2018a, 2018b).
+#' @details A gaussian kernel is used in all cases. If `xmin` or `xmax` are
+#'   finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
+#'   log-transform is used if there is only one boundary (see, Geenens and Wang,
+#'   2018); a probit transform is used if there are two (see, Geenens, 2014).
+#'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
@@ -80,7 +81,7 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw)
@@ -92,7 +93,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
     bw <- select_bw(boundary_transform(x, xmin, xmax), bw, mult)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax)
+    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, p)
 
     # add info
     fit$jitter_info <- attributes(x)

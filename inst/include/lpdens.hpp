@@ -11,7 +11,7 @@ class LPDens1d {
 public:
     // constructors
     LPDens1d() {}
-    LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax);
+    LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax, size_t p);
 
     // getters
     Eigen::VectorXd get_values() const {return grid_.get_values();}
@@ -33,9 +33,16 @@ private:
 
     // private methods
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
-    Eigen::MatrixXd fit_kde1d(const Eigen::VectorXd& x_ev,
-                              const Eigen::VectorXd& x,
-                              double bw);
+    Eigen::MatrixXd fit_lp(const Eigen::VectorXd& x_ev,
+                           const Eigen::VectorXd& x,
+                           double bw,
+                           size_t p);
+    double calculate_infl(const size_t& n,
+                          const double& f0,
+                          const double& b,
+                          const double& bw,
+                          const double& s,
+                          const size_t& p);
     Eigen::VectorXd boundary_transform(const Eigen::VectorXd& x,
                                        bool inverse = false);
     Eigen::VectorXd boundary_correct(const Eigen::VectorXd& x,
@@ -52,10 +59,12 @@ private:
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
+//! @param order of the local polynomial.
 inline LPDens1d::LPDens1d(Eigen::VectorXd x,
                           double bw,
                           double xmin,
-                          double xmax) :
+                          double xmax,
+                          size_t p) :
     bw_(bw),
     xmin_(xmin),
     xmax_(xmax)
@@ -68,7 +77,7 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     x = boundary_transform(x);
 
     // fit model and evaluate in transformed domain
-    Eigen::MatrixXd fitted = fit_kde1d(grid_points, x, bw);
+    Eigen::MatrixXd fitted = fit_lp(grid_points, x, bw, p);
 
     // back-transform grid to original domain
     grid_points = boundary_transform(grid_points, true);
@@ -105,11 +114,8 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
         // truncate at +/- 5
         if (std::fabs(xx) > 5.0)
             return 0.0;
-
-        // otherwise calculate normal pdf
-        double val = stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0);
-
-        return val / 0.999999426697;  // correct for truncation
+        // otherwise calculate normal pdf (orrect for truncation)
+        return  stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0) / 0.999999426;
     };
     return x.unaryExpr(f);
 }
@@ -121,25 +127,98 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
 //! @param bw the bandwidth.
 //! @return a two-column matrix containing the density estimate in the first
 //!   and the influence function in the second column.
-inline Eigen::MatrixXd LPDens1d::fit_kde1d(const Eigen::VectorXd& x_ev,
-                                           const Eigen::VectorXd& x,
-                                           double bw)
+inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
+                                        const Eigen::VectorXd& x,
+                                        double bw,
+                                        size_t p)
 {
-    Eigen::MatrixXd out(x_ev.size(), 2);
+    Eigen::MatrixXd res(x_ev.size(), 2);
+    size_t n = x.size();
 
-    // density estimate
-    auto fhat = [&x, &bw, this] (double xx) {
-        return this->kern_gauss((x.array() - xx) / bw).mean() / bw;
-    };
-    out.col(0) = x_ev.unaryExpr(fhat);
+    double f0, f1, b;
+    double s = bw;
+    Eigen::VectorXd xx(x.size());
+    Eigen::VectorXd xx2(x.size());
+    Eigen::VectorXd kernels(x.size());
+    for (size_t k = 0; k < x_ev.size(); k++) {
+        // classical (local constant) kernel density estimate
+        xx = x.array() - x_ev(k);
+        kernels = kern_gauss(xx) / bw;
+        f0 = kernels.mean();
+        res(k, 0) = f0;
 
-    // influence function estimate
-    double contrib = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
-    contrib /= static_cast<double>(x.size());
-    out.col(1) = contrib / out.col(0).array();
+        if (p > 0) {
+            // calculate b for local linear
+            xx /= bw;
+            f1 = xx.cwiseProduct(kernels).mean(); // first order derivative
+            b = f1 / f0;
 
-    return out;
+            if (p > 1) {
+                // more calculations for local quadratic
+                xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
+                b *= std::pow(bw, 2);
+                s = 1.0 / (std::pow(bw, 4) * xx.cwiseProduct(xx2).sum() -
+                    std::pow(b, 2));
+                res(k, 0) *= std::sqrt(s) / bw;
+            }
+
+            // final estimate
+            res(k, 0) *= std::exp(-0.5 * std::pow(b, 2) * s);
+            if ((boost::math::isnan)(res(k)) |
+                (boost::math::isinf)(res(k))) {
+                // inverse operation might go wrong due to rounding when
+                // true value is equal or close to zero
+                res(k, 0) = 0.0;
+            }
+        }
+
+        // influence function estimate
+        res(k, 1) = calculate_infl(n, f0, b, bw, s, p);
+    }
+
+    return res;
 }
+
+//! calculate influence for data point for density estimate based on
+//! quantities pre-computed in `fit_lp()`.
+inline double LPDens1d::calculate_infl(const size_t &n,
+                                       const double& f0,
+                                       const double& b,
+                                       const double& bw,
+                                       const double& s,
+                                       const size_t& p)
+{
+    Eigen::MatrixXd M;
+    double bw2 = std::pow(bw, 2);
+    double b2 = std::pow(b, 2);
+    if (p == 0) {
+        M = Eigen::MatrixXd::Constant(1, 1, f0);
+    } else if (p == 1) {
+        M = Eigen::MatrixXd(2, 2);
+        M(0, 0) = f0;
+        M(0, 1) = bw2 * b * f0;
+        M(1, 0) = M(0, 1);
+        M(1, 1) = f0 * bw2 + f0 * bw2 * bw2 * b2;
+    } else if (p == 2) {
+        M = Eigen::MatrixXd(3, 3);
+        M(0, 0) = f0;
+        M(0, 1) = f0 * b;
+        M(1, 0) = M(0, 1);
+        M(1, 1) = f0 * bw2 + f0 * b2;
+        M(0, 2) = M(2, 2);
+        M(2, 0) = M(2, 2);
+        M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
+        M(2, 1) = M(1, 2);
+        M(2, 2) = 3.0 / std::pow(s, 2) + 6.0 * b2 / std::pow(s, 3);
+        M(2, 2) = 0.25 * f0;
+        M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2  + b2 * b2;
+    }
+
+    double infl = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
+    infl *= M.inverse()(0, 0) / static_cast<double>(n);
+    return infl;
+}
+
 
 //! transformations for density estimates with bounded support.
 //! @param x evaluation points.
