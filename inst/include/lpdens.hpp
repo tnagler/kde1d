@@ -60,12 +60,6 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     xmin_(xmin),
     xmax_(xmax)
 {
-    if (bw <= 0)
-        throw std::runtime_error("bw must be positive.");
-
-    // remove NaNs from the data
-    x = tools::nan_omit(x);
-
     // construct equally spaced grid on original domain
     Eigen::VectorXd grid_points = construct_grid_points(x);
 
