@@ -13,7 +13,7 @@ public:
     LPDens1d() {}
     LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax);
 
-    // gettters
+    // getters
     Eigen::VectorXd get_values() const {return grid_.get_values();}
     Eigen::VectorXd get_grid_points() const {return grid_.get_grid_points();}
     double get_bw() const {return bw_;}
@@ -120,7 +120,7 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
     return x.unaryExpr(f);
 }
 
-//! (analytitcally) evaluates the kernel density estimate and its influence
+//! (analytically) evaluates the kernel density estimate and its influence
 //! function on a user-supplied grid.
 //! @param x_ev evaluation points.
 //! @param x observations.
@@ -219,7 +219,7 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
 
 //! constructs a grid that is later used for interpolation.
 //! @param x vector of observations.
-//! @return a grid of size 200.
+//! @return a grid of size 50.
 inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
 {
     double x_min = x.minCoeff();
