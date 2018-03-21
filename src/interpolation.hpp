@@ -118,7 +118,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x
         tmpvals(1) = this->values_(j);
         tmpvals(2) = this->values_(j + 1);
         tmpvals(3) = this->values_(j3);
-        return this->interp_on_grid(xx, tmpvals, tmpgrid);
+        return std::max(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);

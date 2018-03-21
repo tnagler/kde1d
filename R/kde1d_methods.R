@@ -92,7 +92,8 @@ qkde1d <- function(p, obj) {
 
         # generalized inverse
         q <- x_all_num[vapply(p, function(y) which(y <= pp)[1], integer(1))]
-        q <- ordered(obj$fitter_info$levels[q], levels = obj$fitter_info$levels)
+        q <- ordered(obj$jitter_info$levels$x[q],
+                     levels = obj$jitter_info$levels$x)
     }
 
     q
@@ -142,10 +143,11 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #'
 #' ## discrete data
 #' x <- rpois(100, 3)                        # simulate data
-#' x <- ordered(x, levels = 0:30)            # declare discrete variable as ordered
+#' x <- ordered(x, levels = 0:20)            # declare variable as ordered
 #' fit <- kde1d(x)                           # estimate density
-#' plot(fit)                                 # plot density estimate
-#' points(0:30, dpois(0:30, 3), col = "red") # add true density values
+#' plot(fit, ylim = c(0, 0.25))              # plot density estimate
+#' points(ordered(0:20, 0:20),               # add true density values
+#'        dpois(0:20, 3), col = "red")
 #'
 #' @importFrom graphics plot
 #' @importFrom utils modifyList
@@ -153,10 +155,11 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 plot.kde1d <- function(x, ...) {
     plot_type <- "l"  # for continuous variables, use a line plot
     if (length(x$jitter_info$i_disc) == 1) {
-        ev <- as.ordered(x$jitter_info$levels$x)
+        ev <- ordered(x$jitter_info$levels$x,
+                      levels = x$jitter_info$levels$x)
         plot_type <- "h"  # for discrete variables, use a histrogram
         x$values <- dkde1d(ev, x)
-        x$grid_points <- levels(ev)
+        x$grid_points <- ev
     }
 
     pars <- list(
