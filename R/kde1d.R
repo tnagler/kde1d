@@ -84,7 +84,7 @@
 kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
     x <- na.omit(x)
     # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw)
+    check_arguments(x, mult, xmin, xmax, bw, p)
 
     # jittering for discrete variables
     x <- cctools::cont_conv(x)
@@ -107,7 +107,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
 
 #' check and pre-process arguments passed to kde1d()
 #' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw) {
+check_arguments <- function(x, mult, xmin, xmax, bw, p) {
     stopifnot(NCOL(x) == 1)
 
     if (!is.ordered(x) & is.factor(x))
@@ -130,6 +130,9 @@ check_arguments <- function(x, mult, xmin, xmax, bw) {
         if (any(x > xmax))
             stop("Not all data are samller than xmax.")
     }
+
+    if (!(p %in% 0:2))
+        stop("p must be either 0, 1, or 2.")
 }
 
 #' adjusts observations and evaluation points for boundary effects
