@@ -4,7 +4,7 @@
 \alias{kde1d}
 \title{Univariate local-polynial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 2)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
