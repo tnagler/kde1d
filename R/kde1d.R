@@ -7,10 +7,10 @@
 #'   `numeric`` or `ordered`.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
-#' @param xmin lower bound for the support of the density, `NaN` means no
-#'   boundary.
-#' @param xmax upper bound for the support of the density, `NaN` means no
-#'   boundary.
+#' @param xmin lower bound for the support of the density (only for continuous
+#'   data), `NaN` means no boundary.
+#' @param xmax upper bound for the support of the density (only for continuous
+#'   data), `NaN` means no boundary.
 #' @param bw bandwidth parameter; has to be a positive number or \code{NA}; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
 #'

@@ -13,11 +13,11 @@ kde1d(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA)
 \item{mult}{positive bandwidth multiplier; the actual bandwidth used is
 \eqn{bw*mult}.}
 
-\item{xmin}{lower bound for the support of the density, \code{NaN} means no
-boundary.}
+\item{xmin}{lower bound for the support of the density (only for continuous
+data), \code{NaN} means no boundary.}
 
-\item{xmax}{upper bound for the support of the density, \code{NaN} means no
-boundary.}
+\item{xmax}{upper bound for the support of the density (only for continuous
+data), \code{NaN} means no boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
