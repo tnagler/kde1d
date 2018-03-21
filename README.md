@@ -13,12 +13,12 @@ work is done in C++ for extra speed.
 
 ### How to install
 
--   the latest development version:
+The latest development version:
 
-    ``` r
-    # install.packages("devtools")
-    devtools::install_github("tnagler/kde1d")
-    ```
+``` r
+# install.packages("devtools")
+devtools::install_github("tnagler/kde1d")
+```
 
 ### Details
 
