@@ -66,8 +66,8 @@ fit <- kde1d(x)                         # estimate density
 dkde1d(2, fit)                          # evaluate density estimate
 summary(fit)                            # information about the estimate
 plot(fit)                               # plot the density estimate
-points(0:5, dbinom(0:5, 5, 0.5),        # add true density
-       col = "red")
+points(ordered(0:5, 0:5),               # add true density
+       dbinom(0:5, 5, 0.5), col = "red")
 
 }
 \references{
