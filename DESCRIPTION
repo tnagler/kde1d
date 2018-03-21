@@ -25,8 +25,8 @@ Imports:
     stats,
     utils
 RoxygenNote: 6.0.1
-Suggests: testthat,
-    covr
+Suggests: 
+    testthat
 URL: https://github.com/tnagler/kde1d
 BugReports: https://github.com/tnagler/kde1d/issues
 Roxygen: list(markdown = TRUE)
