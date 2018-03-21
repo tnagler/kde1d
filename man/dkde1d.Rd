@@ -31,7 +31,7 @@ rkde1d(n, obj, quasi = FALSE)
 
 \item{quasi}{logical; the default (\code{FALSE}) returns pseudo-random
 numbers, use \code{TRUE} for quasi-random numbers (generalized Halton, see
-\code{\link[qrng:ghalton]{ghalton}}).}
+\code{\link[qrng:ghalton]{qrng::ghalton()}}).}
 }
 \value{
 The density, distribution function or quantile functions estimates
@@ -43,11 +43,11 @@ Density, distribution function, quantile function and random generation
 for a 'kde1d' kernel density estimate.
 }
 \details{
-\code{\link{dkde1d}} gives the density, \code{\link{pkde1d}} gives
-the distribution function, \code{\link{qkde1d}} gives the quantile function,
-and \code{\link{rkde1d}} generates random deviates.
+\code{\link[=dkde1d]{dkde1d()}} gives the density, \code{\link[=pkde1d]{pkde1d()}} gives
+the distribution function, \code{\link[=qkde1d]{qkde1d()}} gives the quantile function,
+and \code{\link[=rkde1d]{rkde1d()}} generates random deviates.
 
-The length of the result is determined by \code{n} for \code{\link{rkde1d}}, and
+The length of the result is determined by \code{n} for \code{\link[=rkde1d]{rkde1d()}}, and
 is the length of the numerical argument for the other functions.
 }
 \examples{
@@ -61,5 +61,5 @@ hist(rkde1d(100, fit))   # simulate
 
 }
 \seealso{
-\code{\link{kde1d}}
+\code{\link[=kde1d]{kde1d()}}
 }

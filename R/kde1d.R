@@ -4,26 +4,26 @@
 #' *Details*.
 #'
 #' @param x vector (or one-column matrix/data frame) of observations; can be
-#'   `numeric`` or `ordered`.
+#'   `numeric` or `ordered`.
+#' @param xmin lower bound for the support of the density (only for continuous
+#'   data); `NaN` means no boundary.
+#' @param xmax upper bound for the support of the density (only for continuous
+#'   data); `NaN` means no boundary.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
-#' @param xmin lower bound for the support of the density, `NaN` means no
-#'   boundary.
-#' @param xmax upper bound for the support of the density, `NaN` means no
-#'   boundary.
-#' @param bw bandwidth parameter; has to be a positive number or \code{NA}; the
+#' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
 #'
-#' @return An object of class \code{kde1d}.
+#' @return An object of class `kde1d`.
 #'
-#' @details If \code{xmin} or \code{xmax} are finite, the density estimate will
+#' @details If `xmin` or `xmax` are finite, the density estimate will
 #'   be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
 #'   only one boundary (see, Geenens and Wang, 2018); a probit transform is used
 #'   if there are two (see, Geenens, 2014). Discrete variables are handled via
 #'   jittering (see, Nagler, 2018a, 2018b).
 #'
-#' @seealso \code{\link{dkde1d}}, \code{\link{pkde1d}}, \code{\link{qkde1d}},
-#'   \code{\link{rkde1d}} \code{\link{plot.kde1d}} , \code{\link{lines.kde1d}}
+#' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
+#'   [`plot.kde1d()`], [`lines.kde1d()`]
 #'
 #' @references Nagler, T. (2018a). *A generic approach to nonparametric function
 #'   estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
@@ -80,7 +80,7 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw)

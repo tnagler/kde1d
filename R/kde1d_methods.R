@@ -6,21 +6,20 @@
 #' @aliases pkde1d, qkde1d, rkde1d
 #'
 #' @param x vector of density evaluation points.
-#' @param obj a \code{kde1d} object.
+#' @param obj a `kde1d` object.
 #'
-#' @details \code{\link{dkde1d}} gives the density, \code{\link{pkde1d}} gives
-#' the distribution function, \code{\link{qkde1d}} gives the quantile function,
-#' and \code{\link{rkde1d}} generates random deviates.
+#' @details [`dkde1d()`] gives the density, [`pkde1d()`] gives
+#' the distribution function, [`qkde1d()`] gives the quantile function,
+#' and [`rkde1d()`] generates random deviates.
 #'
-#' The length of the result is determined by `n` for \code{\link{rkde1d}}, and
+#' The length of the result is determined by `n` for [`rkde1d()`], and
 #' is the length of the numerical argument for the other functions.
 #'
 #' @return The density, distribution function or quantile functions estimates
 #' evaluated respectively at `x`, `q`, or `p`, or a sample of `n` random
 #' deviates from the estimated kernel density.
 #'
-#' @seealso
-#' \code{\link{kde1d}}
+#' @seealso [`kde1d()`]
 #'
 #' @examples
 #' set.seed(0)              # for reproducibility
@@ -100,9 +99,9 @@ qkde1d <- function(p, obj) {
 }
 
 #' @param n integer; number of observations.
-#' @param quasi logical; the default (\code{FALSE}) returns pseudo-random
-#' numbers, use \code{TRUE} for quasi-random numbers (generalized Halton, see
-#' \code{\link[qrng:ghalton]{ghalton}}).
+#' @param quasi logical; the default (`FALSE`) returns pseudo-random
+#' numbers, use `TRUE` for quasi-random numbers (generalized Halton, see
+#' [`qrng::ghalton()`]).
 #'
 #' @rdname dkde1d
 #' @importFrom qrng ghalton
@@ -124,16 +123,14 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #' @aliases lines.kde1d
 #' @method plot kde1d
 #'
-#' @param x \code{kde1d} object.
-#' @param ... further arguments passed to \code{\link{plot.default}}.
+#' @param x `kde1d` object.
+#' @param ... further arguments passed to [`plot.default()`]
 #'
-#' @seealso
-#' \code{\link{kde1d}}
-#' \code{\link{lines.kde1d}}
+#' @seealso [`kde1d()`]
 #'
 #' @examples
 #' ## continuous data
-#' x <- beta(100, shape1 = 0.3, shape2 = 0.4)    # simulate data
+#' x <- rbeta(100, shape1 = 0.3, shape2 = 0.4)   # simulate data
 #' fit <- kde1d(x)                               # unbounded estimate
 #' plot(fit, ylim = c(0, 4))                     # plot estimate
 #' curve(dbeta(x, 0.3, 0.4),                     # add true density
