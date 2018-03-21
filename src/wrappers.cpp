@@ -1,4 +1,5 @@
 #include <RcppEigen.h>
+#include "dpik.hpp"
 #include "lpdens.hpp"
 
 //' fits a kernel density estimate and calculates the effective degrees of
@@ -92,4 +93,41 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
     }
 
     return q;
+}
+
+// Bandwidth for Kernel Density Estimation
+//' @param x vector of observations
+//' @param grid_size number of equally-spaced points over which binning is
+//' performed to obtain kernel functional approximation
+//' @return the selected bandwidth
+//' @noRd
+// [[Rcpp::export]]
+double dpik_cpp(const Eigen::VectorXd& x, size_t grid_size = 401) {
+
+    double del0 = 1.0 / std::pow(4 * M_PI, 1/10.0);
+    double n = static_cast<double>(x.size());
+
+    double a = x.minCoeff();
+    double b = x.maxCoeff();
+
+    double m_x = x.mean();
+    Eigen::VectorXd sx = (x - Eigen::VectorXd::Constant(x.size(), m_x));
+    double sd_x = std::sqrt(sx.cwiseAbs2().sum()/(n - 1));
+    Eigen::VectorXd q_x(2);
+    q_x(0) = 0.75;
+    q_x(1) = 0.25;
+    q_x = stats::quantile(x, q_x);
+    double scale = std::min((q_x(0) - q_x(1))/1.349, sd_x);
+
+    sx /= scale;
+    double sa = (a - m_x) / scale;
+    double sb = (b - m_x) / scale;
+    auto x2 = linbin(sx, sa, sb, grid_size);
+
+    double alpha = std::pow(std::pow(2.0, 11.0 / 2.0)/(7.0 * n), 1.0 / 9.0);
+    double psi6hat = bkfe(x2, 6, alpha, sa, sb);
+    alpha = std::pow(-3.0 * std::sqrt(2.0 / M_PI)/(psi6hat * n), 1.0 / 7.0);
+    double psi4hat = bkfe(x2, 4, alpha, sa, sb);
+
+    return(scale * del0 * std::pow(1.0 / (psi4hat * n), 1.0 / 5.0));
 }

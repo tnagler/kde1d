@@ -19,8 +19,6 @@ Imports:
     cctools, 
     graphics,
     Rcpp, 
-    KernSmooth, 
-    MASS, 
     qrng,
     stats,
     utils

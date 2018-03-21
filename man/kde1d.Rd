@@ -20,7 +20,11 @@ data); \code{NaN} means no boundary.}
 \eqn{bw*mult}.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
-latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
+latter uses the direct plug-in methodology, where unknown functionals that
+appear in expressions for the asymptotically optimal bandwidths are
+replaced by kernel estimates, is used for automatic selection (default).
+
+U}
 }
 \value{
 An object of class \code{kde1d}.

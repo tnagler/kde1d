@@ -12,7 +12,11 @@
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
-#'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
+#'   latter uses the direct plug-in methodology, where unknown functionals that
+#'   appear in expressions for the asymptotically optimal bandwidths are
+#'   replaced by kernel estimates, is used for automatic selection (default).
+#'
+#'   U
 #'
 #' @return An object of class `kde1d`.
 #'
@@ -75,8 +79,6 @@
 #' points(ordered(0:5, 0:5),               # add true density
 #'        dbinom(0:5, 5, 0.5), col = "red")
 #'
-#' @importFrom KernSmooth dpik
-#' @importFrom MASS bandwidth.nrd
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
@@ -152,10 +154,12 @@ boundary_transform <- function(x, xmin, xmax) {
 select_bw <- function(x, bw, mult) {
     if (is.na(bw)) {
         # plug in method
-        bw <- try(KernSmooth::dpik(x))
+        bw <- try(dpik_cpp(x))
         # if it fails: normal rule of thumb
-        if (inherits(bw, "try-error"))
-            bw <- MASS::bandwidth.nrd(x)
+        if (inherits(bw, "try-error")) {
+            h <- diff(quantile(x, c(0.25, 0.75))) / 1.349
+            bw <- 4 * 1.06 * min(sqrt(var(x)), h) * length(x)^(-1/5)
+        }
     }
 
     bw <- mult * bw
