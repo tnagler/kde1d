@@ -48,7 +48,9 @@ public:
         loglik_ = grid_.interpolate(x).array().log().sum();
 
         // calculate effective degrees of freedom
-        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
+        InterpolationGrid1d infl_grid(without_boundary_ext(grid_points_),
+                                      without_boundary_ext(fitted.col(1)),
+                                      0);
         edf_ = infl_grid.interpolate(x).sum();
     }
 
@@ -209,12 +211,25 @@ private:
         return grid_points;
     }
 
-    Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid)
+    Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid_points)
     {
         if (!std::isnan(xmin_))
-            grid(0) = xmin_;
+            grid_points(0) = xmin_;
         if (!std::isnan(xmax_))
-            grid(grid.size() - 1) = xmax_;
-        return grid;
+            grid_points(grid_points.size() - 1) = xmax_;
+        return grid_points;
+    }
+
+    Eigen::VectorXd without_boundary_ext(const Eigen::VectorXd& grid_points) {
+        size_t grid_start = 0;
+        size_t grid_size = grid_points.size();
+        if (std::isnan(xmin_)) {
+            grid_start += 4;
+            grid_size -= 4;
+        }
+        if (std::isnan(xmax_))
+            grid_size -= 4;
+
+        return grid_points.segment(grid_start, grid_size);
     }
 };
