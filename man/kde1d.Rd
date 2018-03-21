@@ -40,9 +40,27 @@ only one bounary; a probit transform is used if there are two. Discrete
 variables are handled via jittering distribution (see, Nagler, 2017).
 }
 \examples{
-data(wdbc, package = "kdecopula")  # load data
-fit <- kde1d(wdbc[, 5])            # estimate density
+## For reproducibility
+set.seed(0)
+
+## Unbounded data
+x <- rnorm(100)                    # simulate data
+fit <- kde1d(x)                    # estimate density
 dkde1d(1000, fit)                  # evaluate density estimate
+summary(fit)                       # information about the density estimate
+plot(fit)                          # plot the density estimate
+curve(dnorm(x), add = TRUE,        # add true density
+      col = "red")
+
+## Bounded data
+x <- rgamma(100, shape = 1)        # simulate data
+fit <- kde1d(x, xmin = 0)          # estimate density
+dkde1d(1000, fit)                  # evaluate density estimate
+summary(fit)                       # information about the density estimate
+plot(fit)                          # plot the density estimate
+curve(dgamma(x, shape = 1),        # add true density
+      add = TRUE, col = "red",
+      from = 1e-3)
 
 }
 \references{
