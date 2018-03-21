@@ -50,7 +50,7 @@
 #' x <- rnorm(100)                    # simulate data
 #' fit <- kde1d(x)                    # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
-#' summary(fit)                       # information about the density estimate
+#' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
 #' curve(dnorm(x), add = TRUE,        # add true density
 #'       col = "red")
@@ -59,13 +59,21 @@
 #' x <- rgamma(100, shape = 1)        # simulate data
 #' fit <- kde1d(x, xmin = 0)          # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
-#' summary(fit)                       # information about the density estimate
+#' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
 #' curve(dgamma(x, shape = 1),        # add true density
 #'       add = TRUE, col = "red",
 #'       from = 1e-3)
 #'
-#'
+#' ## Discrete data
+#' x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
+#' x <- ordered(x, levels = 0:5)           # declare as ordered
+#' fit <- kde1d(x)                         # estimate density
+#' dkde1d(2, fit)                          # evaluate density estimate
+#' summary(fit)                            # information about the estimate
+#' plot(fit)                               # plot the density estimate
+#' points(0:5, dbinom(0:5, 5, 0.5),        # add true density
+#'        col = "red")
 #'
 #' @importFrom KernSmooth dpik
 #' @importFrom MASS bandwidth.nrd
