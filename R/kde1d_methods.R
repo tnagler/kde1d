@@ -133,7 +133,7 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #'
 #' @examples
 #' ## continuous data
-#' x <- beta(100, shape1 = 0.3, shape2 = 0.4)    # simulate data
+#' x <- rbeta(100, shape1 = 0.3, shape2 = 0.4)   # simulate data
 #' fit <- kde1d(x)                               # unbounded estimate
 #' plot(fit, ylim = c(0, 4))                     # plot estimate
 #' curve(dbeta(x, 0.3, 0.4),                     # add true density
