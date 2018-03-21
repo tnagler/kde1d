@@ -4,38 +4,6 @@
 
 namespace tools {
 
-//! remove rows of a matrix which contain nan values
-//! @param x the matrix.
-//! @return a new matrix without the rows containing nan values
-inline Eigen::MatrixXd nan_omit(const Eigen::MatrixXd &x)
-{
-    // find rows with nans
-    Eigen::Matrix<bool, 1, Eigen::Dynamic>
-    nans = x.array().isNaN().matrix().rowwise().any();
-
-    // if there is no nan, just return x
-    if (!nans.array().any()) {
-        return x;
-    }
-
-    // copy data to not modify input
-    Eigen::MatrixXd out = x;
-    size_t last = x.rows() - 1;
-    for (size_t i = 0; i < last + 1;) {
-        // put nan rows at the end
-        if (nans(i)) {
-            out.row(i).swap(out.row(last));
-            nans.segment<1>(i).swap(nans.segment<1>(last));
-            --last;
-        } else {
-            ++i;
-        }
-    }
-    out.conservativeResize(last + 1, out.cols());
-
-    return out;
-}
-
 //! applies a function to each non-NaN value, otherwise returns NaN
 //! @param x function argument.
 //! @param func function to be applied.
@@ -83,4 +51,3 @@ inline Eigen::VectorXd invert_f(const Eigen::VectorXd &x,
 }
 
 }
-
