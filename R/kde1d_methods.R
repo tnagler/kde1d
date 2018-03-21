@@ -87,12 +87,12 @@ qkde1d <- function(p, obj) {
         x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
 
         # pdf at all possible values of x
-        dd <- dkde1d(p, obj)
+        dd <- dkde1d(x_all_num, obj)
         pp <- c(cumsum(dd)) / sum(dd)
 
         # generalized inverse
         q <- x_all_num[vapply(p, function(y) which(y <= pp)[1], integer(1))]
-        q <- ordered(obj$jitter_info$levels$x[q],
+        q <- ordered(obj$jitter_info$levels$x[q + 1],
                      levels = obj$jitter_info$levels$x)
     }
 
