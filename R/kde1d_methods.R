@@ -164,6 +164,7 @@ lines.kde1d <- function(x, ...) {
     do.call(lines, modifyList(pars, list(...)))
 }
 
+#' @importFrom stats logLik
 #' @method logLik kde1d
 #'
 #' @export

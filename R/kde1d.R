@@ -88,6 +88,7 @@ check_arguments <- function(x, mult, xmin, xmax, bw) {
 }
 
 #' adjusts observations and evaluation points for boundary effects
+#' @importFrom stats qnorm
 #' @noRd
 boundary_transform <- function(x, xmin, xmax) {
     if (!is.nan(xmin) & !is.nan(xmax)) {  # two boundaries
