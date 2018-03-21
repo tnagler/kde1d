@@ -196,13 +196,13 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
         corr_term = (x.array() - xmin_ + 5e-3) / (xmax_ - xmin_ + 1e-2);
         corr_term = stats::dnorm(stats::qnorm(corr_term));
         corr_term /= (xmax_ - xmin_ + 1e-2);
-        corr_term = 1 / corr_term.array().max(1e-4);
+        corr_term = 1.0 / corr_term.array().max(1e-4);
     } else if (!std::isnan(xmin_)) {
         // left boundary -> log transform
-        corr_term = 1 / (1e-3 + x.array() - xmin_);
+        corr_term = 1.0 / (1e-3 + x.array() - xmin_);
     } else if (!std::isnan(xmax_)) {
         // right boundary -> negative log transform
-        corr_term = 1 / (1e-3 + xmax_ - x.array());
+        corr_term = 1.0 / (1e-3 + xmax_ - x.array());
     } else {
         // no boundary -> no transform
         corr_term.fill(1.0);
