@@ -1,30 +1,46 @@
-#' Univariate kernel density estimation for bounded and unbounded support
+#' Univariate kernel density estimation
 #'
-#' Discrete variables are handled via jittering (see, Nagler,
-#' 2017). If a variable should be treated as discrete, declare it as
-#' [ordered()].
+#' The estimator can handle for bounded, unbounded, and discrete support, see
+#' *Details*.
 #'
-#' @param x vector of length \eqn{n}.
-#' @param mult numeric; the actual bandwidth used is \eqn{bw*mult}.
+#' @param x vector (or one-column matrix/data frame) of observations; can be
+#'   `numeric`` or `ordered`.
+#' @param mult positive bandwidth multiplier; the actual bandwidth used is
+#'   \eqn{bw*mult}.
 #' @param xmin lower bound for the support of the density, `NaN` means no
 #'   boundary.
 #' @param xmax upper bound for the support of the density, `NaN` means no
 #'   boundary.
-#' @param bw bandwidth parameter; has to be a positive number or \code{NA};
-#'   the latter calls [`KernSmooth::dpik()`].
+#' @param bw bandwidth parameter; has to be a positive number or \code{NA}; the
+#'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
 #'
 #' @return An object of class \code{kde1d}.
 #'
 #' @details If \code{xmin} or \code{xmax} are finite, the density estimate will
 #'   be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
-#'   only one bounary; a probit transform is used if there are two. Discrete
-#'   variables are handled via jittering distribution (see, Nagler, 2017).
+#'   only one boundary (see, Geenens and Wang, 2018); a probit transform is used
+#'   if there are two (see, Geenens, 2014). Discrete variables are handled via
+#'   jittering (see, Nagler, 2018a, 2018b).
 #'
 #' @seealso \code{\link{dkde1d}}, \code{\link{pkde1d}}, \code{\link{qkde1d}},
 #'   \code{\link{rkde1d}} \code{\link{plot.kde1d}} , \code{\link{lines.kde1d}}
 #'
-#' @references Nagler, T. (2017). *A generic approach to nonparametric function
-#'   estimation with mixed data.* [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+#' @references Nagler, T. (2018a). *A generic approach to nonparametric function
+#'   estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
+#'   [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+#'
+#'   Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
+#'   estimator.* Mathematical Methods of Statistics, in press,
+#'   [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
+#'
+#'   Geenens, G. (2014). *Probit transformation for kernel density estimation on
+#'   the unit interval*. Journal of the American Statistical Association,
+#'   109:505, 346-358, [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
+#'
+#'   Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
+#'   density estimation for positive random variables.* Journal of Computational
+#'   and Graphical Statistics, to appear,
+#'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
 #'
 #' @examples
 #' ## For reproducibility
@@ -48,6 +64,8 @@
 #' curve(dgamma(x, shape = 1),        # add true density
 #'       add = TRUE, col = "red",
 #'       from = 1e-3)
+#'
+#'
 #'
 #' @importFrom KernSmooth dpik
 #' @importFrom MASS bandwidth.nrd
