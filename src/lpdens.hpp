@@ -27,12 +27,9 @@ public:
         // fit model and evaluate in transformed domain
         Eigen::MatrixXd fitted = fit_kde1d(grid_points_, x, bw);
 
-        // calculate effective degrees of freedom
-        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
-        edf_ = infl_grid.interpolate(x).sum();
-
         // back-transform grid to original domain
         grid_points_ = boundary_transform(grid_points_, true);
+        x = boundary_transform(x, true);
 
         // correct estimated density for transformation
         values_ = boundary_correct(grid_points_, fitted.col(0));
@@ -49,6 +46,11 @@ public:
 
         // calculate log-likelihood of final estimate
         loglik_ = grid_.interpolate(x).array().log().sum();
+
+        // calculate effective degrees of freedom
+        std::cout << fitted.col(1);
+        InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
+        edf_ = infl_grid.interpolate(x).sum();
     }
 
     Eigen::VectorXd d(const Eigen::VectorXd& x)
@@ -144,7 +146,7 @@ private:
             } else if (!std::isnan(xmin_)) {                // left boundary
                 x_new = x.array().exp() + xmin_ - 1e-3;
             } else if (!std::isnan(xmax_)) {                // right boundary
-                x_new = -x.array().exp() - xmax_ - 1e-3;
+                x_new = -(x.array().exp() - xmax_ - 1e-3);
             }
         }
 
@@ -177,14 +179,14 @@ private:
         double x_max = x.maxCoeff();
         double range = x_max - x_min;
 
-        size_t grid_size = 200;
+        size_t grid_size = 50;
         Eigen::VectorXd lowr_ext, uppr_ext, grid_points(grid_size);
 
         // no left boundary -> add a few points to the left
         if (std::isnan(xmin_)) {
             lowr_ext = Eigen::VectorXd::LinSpaced(5,
-                                                  x_min - range,
-                                                  x_min - 0.1 * range);
+                                                  x_min - 0.5 * range,
+                                                  x_min - 0.05 * range);
             grid_size -= 5;
         } else {
             lowr_ext = Eigen::VectorXd();
@@ -193,8 +195,8 @@ private:
         // no right boundary -> add a few points to the right
         if (std::isnan(xmax_)) {
             uppr_ext = Eigen::VectorXd::LinSpaced(5,
-                                                  x_max + 0.1 * range,
-                                                  x_max + range);
+                                                  x_max + 0.05 * range,
+                                                  x_max + 0.5 * range);
             grid_size -= 5;
         } else {
             uppr_ext = Eigen::VectorXd();
@@ -213,7 +215,7 @@ private:
         if (!std::isnan(xmin_))
             grid(0) = xmin_;
         if (!std::isnan(xmax_))
-            grid(grid.size()) = xmax_;
+            grid(grid.size() - 1) = xmax_;
         return grid;
     }
 };

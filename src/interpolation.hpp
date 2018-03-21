@@ -77,9 +77,9 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_poin
 //! @param times how many times the normalization routine should run.
 void InterpolationGrid1d::normalize(int times)
 {
-    double x_max = grid_points_.maxCoeff();
+    double x_max = grid_points_(grid_points_.size() - 1);
     for (int k = 0; k < times; ++k) {
-        values_ /= int_on_grid(1.5 * x_max, values_, grid_points_);
+        values_ /= int_on_grid(x_max, values_, grid_points_);
     }
 }
 
