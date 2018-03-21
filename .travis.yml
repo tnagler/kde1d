@@ -16,6 +16,7 @@ matrix:
 r_packages:
     - BH
     - cctools
+    - devtools
     - KernSmooth
     - MASS
     - qrng
