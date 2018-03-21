@@ -1,6 +1,6 @@
 Package: kde1d
 Type: Package
-Title: 1-Dimensional Kernel Density Estimation
+Title: One-Dimensional Kernel Density Estimation
 Version: 0.1.0
 Author: Thomas Nagler
 Maintainer: Thomas Nagler <mail@tnagler.com>

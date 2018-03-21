@@ -48,7 +48,6 @@ public:
         loglik_ = grid_.interpolate(x).array().log().sum();
 
         // calculate effective degrees of freedom
-        std::cout << fitted.col(1);
         InterpolationGrid1d infl_grid(grid_points_, fitted.col(1), 0);
         edf_ = infl_grid.interpolate(x).sum();
     }
