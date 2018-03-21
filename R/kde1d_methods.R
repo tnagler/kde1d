@@ -1,26 +1,34 @@
 #' Working with a kde1d object
 #'
-#' The density, cdf, or quantile function of a kernel density estimate are
-#' evaluated at arbitrary points with \code{\link{dkde1d}}, \code{\link{pkde1d}},
-#' and \code{\link{qkde1d}} respectively.
+#' Density, distribution function, quantile function and random generation
+#' for a kernel density estimate.
 #'
 #' @aliases pkde1d, qkde1d, rkde1d
 #'
-#' @param x vector of evaluation points.
+#' @param x vector of density evaluation points.
 #' @param obj a \code{kde1d} object.
 #'
+#' @details \code{\link{dkde1d}} gives the density, \code{\link{pkde1d}} gives
+#' the distribution function, \code{\link{qkde1d}} gives the quantile function,
+#' and \code{\link{rkde1d}} generates random deviates.
 #'
-#' @return The density or cdf estimate evaluated at \code{x}.
+#' The length of the result is determined by `n` for \code{\link{rkde1d}}, and
+#' is the length of the numerical argument for the other functions.
+#'
+#' @return The density, distribution function or quantile functions estimates
+#' evaluated respectively at `x`, `q`, or `p`, or a sample of `n` random
+#' deviates from the estimated kernel density.
 #'
 #' @seealso
 #' \code{\link{kde1d}}
 #'
 #' @examples
-#' data(wdbc)  # load data
-#' fit <- kde1d(wdbc[, 5])  # estimate density
-#' dkde1d(1000, fit)        # evaluate density estimate
-#' pkde1d(1000, fit)        # evaluate corresponding cdf
-#' qkde1d(0.5, fit)         # quantile function
+#' set.seed(0)              # for reproducibility
+#' x <- rnorm(100)          # simulate some data
+#' fit <- kde1d(x)          # estimate density
+#' dkde1d(0, fit)           # evaluate density estimate (close to dnorm(0))
+#' pkde1d(0, fit)           # evaluate corresponding cdf (close to pnorm(0))
+#' qkde1d(0.5, fit)         # quantile function (close to qnorm(0))
 #' hist(rkde1d(100, fit))   # simulate
 #'
 #' @importFrom cctools expand_as_numeric
@@ -44,45 +52,46 @@ dkde1d <- function(x, obj) {
     as.vector(fhat)
 }
 
-
+#' @param q vector of quantiles.
 #' @rdname dkde1d
 #' @export
-pkde1d <- function(x, obj) {
-    if (is.data.frame(x))
-        x <- x[[1]]
-    if (!is.ordered(x))
-        stopifnot(!is.factor(x))
+pkde1d <- function(q, obj) {
+    if (is.data.frame(q))
+        q <- q[[1]]
+    if (!is.ordered(q))
+        stopifnot(!is.factor(q))
 
-    x <- expand_as_numeric(x)
+    q <- expand_as_numeric(q)
 
     if (length(obj$jitter_info$i_disc) != 1) {
-        p <- pkde1d_cpp(x, obj)
+        p <- pkde1d_cpp(q, obj)
     } else {
         # for discrete variables we have to add the missing probability mass
         x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels))
         f_all <- dkde1d(x_all_num, obj)
-        p <- sapply(x, function(y) sum(f_all[x_all_num <= y]))
+        p <- sapply(q, function(y) sum(f_all[x_all_num <= y]))
     }
 
     p
 }
 
+#' @param p vector of probabilities.
 #' @rdname dkde1d
 #' @export
-qkde1d <- function(x, obj) {
-    stopifnot(all(na.omit(x) > 0.0) & all(na.omit(x) < 1.0))
+qkde1d <- function(p, obj) {
+    stopifnot(all(na.omit(p) > 0.0) & all(na.omit(p) < 1.0))
     if (length(obj$jitter_info$i_disc) != 1) {
-        q <- qkde1d_cpp(x, obj)
+        q <- qkde1d_cpp(p, obj)
     } else {
         ## for discrete variables compute quantile from the density
         x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels))
 
         # pdf at all possible values of x
-        dd <- dkde1d(x, obj)
+        dd <- dkde1d(p, obj)
         pp <- c(cumsum(dd)) / sum(dd)
 
         # generalized inverse
-        q <- x_all_num[vapply(x, function(y) which(y <= pp)[1], integer(1))]
+        q <- x_all_num[vapply(p, function(y) which(y <= pp)[1], integer(1))]
         q <- ordered(obj$fitter_info$levels[q], levels = obj$fitter_info$levels)
     }
 
