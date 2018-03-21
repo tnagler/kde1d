@@ -8,16 +8,16 @@ kde1d(x, mult = 1, xmin = NaN, xmax = NaN, bw = NA)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
-\code{numeric`` or}ordered`.}
+\code{numeric} or \code{ordered}.}
 
 \item{mult}{positive bandwidth multiplier; the actual bandwidth used is
 \eqn{bw*mult}.}
 
 \item{xmin}{lower bound for the support of the density (only for continuous
-data), \code{NaN} means no boundary.}
+data); \code{NaN} means no boundary.}
 
 \item{xmax}{upper bound for the support of the density (only for continuous
-data), \code{NaN} means no boundary.}
+data); \code{NaN} means no boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
@@ -89,6 +89,6 @@ and Graphical Statistics, to appear,
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
 }
 \seealso{
-\code{\link{dkde1d}}, \code{\link{pkde1d}}, \code{\link{qkde1d}},
-\code{\link{rkde1d}} \code{\link{plot.kde1d}} , \code{\link{lines.kde1d}}
+\code{\link[=dkde1d]{dkde1d()}}, \code{\link[=pkde1d]{pkde1d()}}, \code{\link[=qkde1d]{qkde1d()}}, \code{\link[=rkde1d]{rkde1d()}},
+\code{\link[=plot.kde1d]{plot.kde1d()}}, \code{\link[=lines.kde1d]{lines.kde1d()}}
 }

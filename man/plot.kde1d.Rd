@@ -13,7 +13,7 @@
 \arguments{
 \item{x}{\code{kde1d} object.}
 
-\item{...}{further arguments passed to \code{\link{plot.default}}.}
+\item{...}{further arguments passed to \code{\link[=plot.default]{plot.default()}}}
 }
 \description{
 Plotting kde1d objects
@@ -38,6 +38,5 @@ points(ordered(0:20, 0:20),               # add true density values
 
 }
 \seealso{
-\code{\link{kde1d}}
-\code{\link{lines.kde1d}}
+\code{\link[=kde1d]{kde1d()}}
 }
