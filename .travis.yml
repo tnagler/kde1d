@@ -14,12 +14,12 @@ matrix:
       env: R_CODECOV=true
 
 r_packages:
-    - BH,
-    - cctools,
-    - KernSmooth,
-    - MASS,
-    - qrng,
-    - Rcpp,
+    - BH
+    - cctools
+    - KernSmooth
+    - MASS
+    - qrng
+    - Rcpp
     - RcppEigen
 
 before_install:
