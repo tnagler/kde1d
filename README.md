@@ -6,26 +6,30 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/tnagler/kde1d/master.svg)](https://codecov.io/github/tnagler/kde1d?branch=master)
 
 
-The package implements a univariate kernel density estimator that can handle
-bounded and discrete data. The implementation utilizes spline interpolation
-to reduce memory usage and computational demand for large data sets. Most 
-work is done in C++ for extra speed. Classical kernel density as well as
-log-linear and log-quadratic methods are available
+### Summary
+
+- implements a univariate kernel density estimator that can handle
+bounded and discrete data. 
+- provides classical kernel density as well as log-linear and log-quadratic methods. 
+- is highly efficient due to spline interpolation and a C++ backend.
+
+For details, see the 
+[API documentation](https://tnagler.github.io/VineCopula/).
 
 ### How to install
 
-The latest development version:
+- the stable release from CRAN:
+
+``` r
+install.packages("kde1d")
+```
+
+- the latest development version:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("tnagler/kde1d")
 ```
-
-### Details
-
-A log-transform is used if there is only one boundary (see, Geenens and Wang, 
-2018); a probit transform is used if there are two (see, Geenens, 2014). 
-Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 
 ### Examples
 
@@ -53,7 +57,7 @@ curve(dgamma(x, shape = 1),        # add true density
 ```
 
 ##### Discrete data
-```
+``` r
 x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
 x <- ordered(x, levels = 0:5)           # declare as ordered
 fit <- kde1d(x)                         # estimate density
@@ -65,13 +69,6 @@ points(ordered(0:5, 0:5),               # add true density
 ```
 
 ### References
-Nagler, T. (2018a). *A generic approach to nonparametric function
-estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
-[arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
-
-Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
-estimator.* Mathematical Methods of Statistics, in press,
-[arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
 
 Geenens, G. (2014). *Probit transformation for kernel density estimation on
 the unit interval*. Journal of the American Statistical Association,
@@ -81,3 +78,14 @@ Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
 density estimation for positive random variables.* Journal of Computational
 and Graphical Statistics, to appear,
 [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+
+Loader, C. (2006). *Local regression and likelihood*. Springer Science & 
+Business Media.
+
+Nagler, T. (2018a). *A generic approach to nonparametric function
+estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
+[arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+
+Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
+estimator.* Mathematical Methods of Statistics, in press,
+[arXiv:1705.05431](https://arxiv.org/abs/1705.05431)

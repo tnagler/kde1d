@@ -1,13 +1,13 @@
 Package: kde1d
 Type: Package
-Title: One-Dimensional Kernel Density Estimation
+Title: Univariate Kernel Density Estimation
 Version: 0.1.0
 Authors@R: c(
         person("Thomas", "Nagler",, "mail@tnagler.com", role = c("aut", "cre")),
         person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("ctb"))
         )
-Description: Implements a 1-dimensional kernel density estimator that can handle
-    bounded and discrete data.
+Description: Provides an efficient implementation of univariate local polynomial
+    kernel density estimators that can handle bounded and discrete data. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
