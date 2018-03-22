@@ -26,9 +26,9 @@ private:
     // data members
     InterpolationGrid1d grid_;
     double bw_;
-    size_t deg_;
     double xmin_;
     double xmax_;
+    size_t deg_;
     double loglik_;
     double edf_;
 
