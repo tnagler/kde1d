@@ -4,7 +4,7 @@
 \alias{kde1d}
 \title{Univariate local-polynial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 2)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -52,9 +52,9 @@ plot(fit)                          # plot the density estimate
 curve(dnorm(x), add = TRUE,        # add true density
       col = "red")
 
-## bounded data
+## bounded data, log-quadratic
 x <- rgamma(100, shape = 1)        # simulate data
-fit <- kde1d(x, xmin = 0)          # estimate density
+fit <- kde1d(x, xmin = 0, p = 2)   # estimate density
 dkde1d(1000, fit)                  # evaluate density estimate
 summary(fit)                       # information about the estimate
 plot(fit)                          # plot the density estimate
