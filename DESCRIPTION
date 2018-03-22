@@ -4,7 +4,7 @@ Title: Univariate Kernel Density Estimation
 Version: 0.1.0
 Authors@R: c(
         person("Thomas", "Nagler",, "mail@tnagler.com", role = c("aut", "cre")),
-        person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("ctb"))
+        person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("aut"))
         )
 Description: Provides an efficient implementation of univariate local polynomial
     kernel density estimators that can handle bounded and discrete data. 
