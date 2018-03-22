@@ -12,7 +12,7 @@
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
-#'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
+#'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
 #'   log-linear, and log-quadratic fitting, respectively.
 #'
@@ -43,6 +43,10 @@
 #'   density estimation for positive random variables.* Journal of Computational
 #'   and Graphical Statistics, to appear,
 #'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+#'
+#'   Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
+#'   selection method for kernel density estimation. Journal of the Royal
+#'   Statistical Society, Series B, 53, 683–690.
 #'
 #' @examples
 #' ## For reproducibility
@@ -77,8 +81,6 @@
 #' points(ordered(0:5, 0:5),               # add true density
 #'        dbinom(0:5, 5, 0.5), col = "red")
 #'
-#' @importFrom KernSmooth dpik
-#' @importFrom MASS bandwidth.nrd
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
@@ -91,7 +93,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2) {
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
-    bw <- select_bw(boundary_transform(x, xmin, xmax), bw, mult)
+    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax), bw, mult,
+                        length(attr(x, "i_disc")) == 1)
 
     # fit model
     fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg)
@@ -151,24 +154,3 @@ boundary_transform <- function(x, xmin, xmax) {
     x
 }
 
-
-#' select's and adjust the bandwidth
-#' @noRd
-select_bw <- function(x, bw, mult) {
-    if (is.na(bw)) {
-        # plug in method
-        bw <- try(KernSmooth::dpik(x))
-        # if it fails: normal rule of thumb
-        if (inherits(bw, "try-error"))
-            bw <- MASS::bandwidth.nrd(x)
-    }
-
-    bw <- mult * bw
-
-    # for discrete use 1 - theta as lower bound for bw
-    if (length(attr(x, "i_disc")) == 1) {
-        bw <- max(bw, 0.5 - attr(x, "theta"))
-    }
-
-    bw
-}
