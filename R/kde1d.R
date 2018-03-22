@@ -57,9 +57,9 @@
 #' curve(dnorm(x), add = TRUE,        # add true density
 #'       col = "red")
 #'
-#' ## bounded data, log-quadratic
+#' ## bounded data, log-linear
 #' x <- rgamma(100, shape = 1)        # simulate data
-#' fit <- kde1d(x, xmin = 0, deg = 2)   # estimate density
+#' fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate

@@ -4,7 +4,7 @@
 \alias{kde1d}
 \title{Univariate local-polynial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -22,7 +22,7 @@ data); \code{NaN} means no boundary.}
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter calls \code{\link[KernSmooth:dpik]{KernSmooth::dpik()}} for automatic selection (default).}
 
-\item{p}{order of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
+\item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
 log-linear, and log-quadratic fitting, respectively.}
 }
 \value{
@@ -52,9 +52,9 @@ plot(fit)                          # plot the density estimate
 curve(dnorm(x), add = TRUE,        # add true density
       col = "red")
 
-## bounded data, log-quadratic
+## bounded data, log-linear
 x <- rgamma(100, shape = 1)        # simulate data
-fit <- kde1d(x, xmin = 0, p = 2)   # estimate density
+fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
 dkde1d(1000, fit)                  # evaluate density estimate
 summary(fit)                       # information about the estimate
 plot(fit)                          # plot the density estimate

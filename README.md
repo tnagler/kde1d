@@ -9,7 +9,8 @@
 The package implements a univariate kernel density estimator that can handle
 bounded and discrete data. The implementation utilizes spline interpolation
 to reduce memory usage and computational demand for large data sets. Most 
-work is done in C++ for extra speed.
+work is done in C++ for extra speed. Classical kernel density as well as
+log-linear and log-quadratic methods are available
 
 ### How to install
 
@@ -39,10 +40,10 @@ curve(dnorm(x), add = TRUE,        # add true density
       col = "red")
 ```
 
-##### Bounded data
+##### Bounded data, log-linear
 ``` r
 x <- rgamma(100, shape = 1)        # simulate data
-fit <- kde1d(x, xmin = 0)          # estimate density
+fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
 dkde1d(1000, fit)                  # evaluate density estimate
 summary(fit)                       # information about the estimate
 plot(fit)                          # plot the density estimate
