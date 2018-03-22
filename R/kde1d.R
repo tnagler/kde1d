@@ -1,4 +1,4 @@
-#' Univariate local-polynial likelihood kernel density estimation
+#' Univariate local-polynomial likelihood kernel density estimation
 #'
 #' The estimator can handle for bounded, unbounded, and discrete support, see
 #' *Details*.

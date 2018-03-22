@@ -2,7 +2,7 @@
 % Please edit documentation in R/kde1d.R
 \name{kde1d}
 \alias{kde1d}
-\title{Univariate local-polynial likelihood kernel density estimation}
+\title{Univariate local-polynomial likelihood kernel density estimation}
 \usage{
 kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2)
 }
