@@ -28,3 +28,4 @@ Suggests:
 URL: https://github.com/tnagler/kde1d
 BugReports: https://github.com/tnagler/kde1d/issues
 Roxygen: list(markdown = TRUE)
+SystemRequirements: C++11
