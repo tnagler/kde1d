@@ -117,7 +117,7 @@ inline double dpik(const Eigen::VectorXd& x, size_t grid_size = 401) {
         double del0 = 1.0 / std::pow(4 * M_PI, 1/10.0);
         bw = scale * del0 * std::pow(1.0 / (psi4hat * n), 1.0 / 5.0);
     } catch (...) {
-        bw = 4 * 1.06 *scale * std::pow(1 / n, 1.0 / 5.0);
+        bw = 4.0 * 1.06 *scale * std::pow(1.0 / n, 1.0 / 5.0);
     }
 
     return(bw);
