@@ -198,6 +198,12 @@ print.kde1d <- function(x, ...) {
     if (length(x$jitter_info$i_disc) == 1)
         cat("(jittered) ")
     cat("kernel density estimate ('kde1d')")
+    if (x$deg > 0) {
+        if (x$deg == 1)
+            cat(", log-linear")
+        if (x$deg == 2)
+            cat(", log-quadratic")
+    }
     if (!is.nan(x$xmin) | !is.nan(x$xmax)) {
         cat(" with bounded support (")
         if (!is.nan(x$xmin))

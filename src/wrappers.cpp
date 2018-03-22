@@ -10,6 +10,7 @@
 //'   boundary.
 //' @param xmax upper bound for the support of the density, `NaN` means no
 //'   boundary.
+//' @param deg order of the local polynomial.
 //' @return `An Rcpp::List` containing the fitted density values on a grid and
 //'   additional information.
 //' @noRd
@@ -17,15 +18,17 @@
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          double bw,
                          double xmin,
-                         double xmax)
+                         double xmax,
+                         size_t deg)
 {
-    LPDens1d fit(x, bw, xmin, xmax);
+    LPDens1d fit(x, bw, xmin, xmax, deg);
     return Rcpp::List::create(
         Rcpp::Named("grid_points") = fit.get_grid_points(),
         Rcpp::Named("values") = fit.get_values(),
         Rcpp::Named("bw") = bw,
         Rcpp::Named("xmin") = xmin,
         Rcpp::Named("xmax") = xmax,
+        Rcpp::Named("deg") = deg,
         Rcpp::Named("edf") = fit.get_edf(),
         Rcpp::Named("loglik") = fit.get_loglik()
     );

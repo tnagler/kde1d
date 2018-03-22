@@ -1,4 +1,4 @@
-#' Univariate kernel density estimation
+#' Univariate local-polynial likelihood kernel density estimation
 #'
 #' The estimator can handle for bounded, unbounded, and discrete support, see
 #' *Details*.
@@ -13,16 +13,16 @@
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
-#'
-#'   U
+#' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
+#'   log-linear, and log-quadratic fitting, respectively.
 #'
 #' @return An object of class `kde1d`.
 #'
-#' @details If `xmin` or `xmax` are finite, the density estimate will
-#'   be 0 outside of \eqn{[xmin, xmax]}. A log-transform is used if there is
-#'   only one boundary (see, Geenens and Wang, 2018); a probit transform is used
-#'   if there are two (see, Geenens, 2014). Discrete variables are handled via
-#'   jittering (see, Nagler, 2018a, 2018b).
+#' @details A gaussian kernel is used in all cases. If `xmin` or `xmax` are
+#'   finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
+#'   log-transform is used if there is only one boundary (see, Geenens and Wang,
+#'   2018); a probit transform is used if there are two (see, Geenens, 2014).
+#'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
@@ -61,9 +61,9 @@
 #' curve(dnorm(x), add = TRUE,        # add true density
 #'       col = "red")
 #'
-#' ## bounded data
+#' ## bounded data, log-linear
 #' x <- rgamma(100, shape = 1)        # simulate data
-#' fit <- kde1d(x, xmin = 0)          # estimate density
+#' fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
@@ -84,10 +84,10 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2) {
     x <- na.omit(x)
     # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw)
+    check_arguments(x, mult, xmin, xmax, bw, deg)
 
     # jittering for discrete variables
     x <- cctools::cont_conv(x)
@@ -97,7 +97,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
                         length(attr(x, "i_disc")) == 1)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax)
+    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg)
 
     # add info
     fit$jitter_info <- attributes(x)
@@ -111,7 +111,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
 
 #' check and pre-process arguments passed to kde1d()
 #' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw) {
+check_arguments <- function(x, mult, xmin, xmax, bw, deg) {
     stopifnot(NCOL(x) == 1)
 
     if (!is.ordered(x) & is.factor(x))
@@ -134,6 +134,9 @@ check_arguments <- function(x, mult, xmin, xmax, bw) {
         if (any(x > xmax))
             stop("Not all data are samller than xmax.")
     }
+
+    if (!(deg %in% 0:2))
+        stop("deg must be either 0, 1, or 2.")
 }
 
 #' adjusts observations and evaluation points for boundary effects
