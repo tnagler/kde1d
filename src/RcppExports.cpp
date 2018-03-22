@@ -56,15 +56,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// dpik_cpp
-double dpik_cpp(const Eigen::VectorXd& x, size_t grid_size);
-RcppExport SEXP _kde1d_dpik_cpp(SEXP xSEXP, SEXP grid_sizeSEXP) {
+// select_bw_cpp
+double select_bw_cpp(const Eigen::VectorXd& x);
+RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< size_t >::type grid_size(grid_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(dpik_cpp(x, grid_size));
+    rcpp_result_gen = Rcpp::wrap(select_bw_cpp(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -74,7 +73,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
-    {"_kde1d_dpik_cpp", (DL_FUNC) &_kde1d_dpik_cpp, 2},
+    {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 1},
     {NULL, NULL, 0}
 };
 

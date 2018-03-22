@@ -12,9 +12,7 @@
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
-#'   latter uses the direct plug-in methodology, where unknown functionals that
-#'   appear in expressions for the asymptotically optimal bandwidths are
-#'   replaced by kernel estimates, is used for automatic selection (default).
+#'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
 #'
 #'   U
 #'
@@ -45,6 +43,10 @@
 #'   density estimation for positive random variables.* Journal of Computational
 #'   and Graphical Statistics, to appear,
 #'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+#'
+#'   Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
+#'   selection method for kernel density estimation. Journal of the Royal
+#'   Statistical Society, Series B, 53, 683–690.
 #'
 #' @examples
 #' ## For reproducibility
@@ -152,14 +154,9 @@ boundary_transform <- function(x, xmin, xmax) {
 #' select's and adjust the bandwidth
 #' @noRd
 select_bw <- function(x, bw, mult) {
+
     if (is.na(bw)) {
-        # plug in method
-        bw <- try(dpik_cpp(x))
-        # if it fails: normal rule of thumb
-        if (inherits(bw, "try-error")) {
-            h <- diff(quantile(x, c(0.25, 0.75))) / 1.349
-            bw <- 4 * 1.06 * min(sqrt(var(x)), h) * length(x)^(-1/5)
-        }
+        bw <- select_bw_cpp(x)
     }
 
     bw <- mult * bw

@@ -49,7 +49,7 @@ qkde1d_cpp <- function(x, R_object) {
 #' performed to obtain kernel functional approximation
 #' @return the selected bandwidth
 #' @noRd
-dpik_cpp <- function(x, grid_size = 401L) {
-    .Call('_kde1d_dpik_cpp', PACKAGE = 'kde1d', x, grid_size)
+select_bw_cpp <- function(x) {
+    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x)
 }
 
