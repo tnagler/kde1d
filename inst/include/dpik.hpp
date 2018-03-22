@@ -102,7 +102,7 @@ inline double dpik(const Eigen::VectorXd& x, size_t grid_size = 401) {
     q_x = stats::quantile(x, q_x);
     double scale = std::min((q_x(0) - q_x(1))/1.349, sd_x);
 
-    double bw = 0;
+    double bw = 0.0;
     try {
         sx /= scale;
         double sa = (a - m_x) / scale;
@@ -114,7 +114,7 @@ inline double dpik(const Eigen::VectorXd& x, size_t grid_size = 401) {
         alpha = std::pow(-3.0 * std::sqrt(2.0 / M_PI)/(psi6hat * n), 1.0 / 7.0);
         double psi4hat = bkfe(x2, 4, alpha, sa, sb);
 
-        double del0 = 1.0 / std::pow(4 * M_PI, 1/10.0);
+        double del0 = 1.0 / std::pow(4.0 * M_PI, 1 / 10.0);
         bw = scale * del0 * std::pow(1.0 / (psi4hat * n), 1.0 / 5.0);
     } catch (...) {
         bw = 4.0 * 1.06 *scale * std::pow(1.0 / n, 1.0 / 5.0);

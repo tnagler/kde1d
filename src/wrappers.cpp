@@ -102,7 +102,20 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 //' @return the selected bandwidth
 //' @noRd
 // [[Rcpp::export]]
-double select_bw_cpp(const Eigen::VectorXd& x) {
+double select_bw_cpp(const Eigen::VectorXd& x,
+                     double bw,
+                     double mult,
+                     bool discrete) {
 
-    return(dpik(x));
+    if (std::isnan(bw)) {
+        bw = dpik(x);
+    }
+
+    bw *= mult;
+
+    if (discrete) {
+        bw = std::max(bw, 0.5);
+    }
+
+    return(bw);
 }

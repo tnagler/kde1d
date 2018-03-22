@@ -20,9 +20,7 @@ data); \code{NaN} means no boundary.}
 \eqn{bw*mult}.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
-latter uses the direct plug-in methodology, where unknown functionals that
-appear in expressions for the asymptotically optimal bandwidths are
-replaced by kernel estimates, is used for automatic selection (default).
+latter uses the direct plug-in methodology of Sheather and Jones (1991).
 
 U}
 }
@@ -91,6 +89,10 @@ Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel
 density estimation for positive random variables.} Journal of Computational
 and Graphical Statistics, to appear,
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
+
+Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
+selection method for kernel density estimation. Journal of the Royal
+Statistical Society, Series B, 53, 683–690.
 }
 \seealso{
 \code{\link[=dkde1d]{dkde1d()}}, \code{\link[=pkde1d]{pkde1d()}}, \code{\link[=qkde1d]{qkde1d()}}, \code{\link[=rkde1d]{rkde1d()}},

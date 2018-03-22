@@ -93,7 +93,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA) {
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
-    bw <- select_bw(boundary_transform(x, xmin, xmax), bw, mult)
+    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax), bw, mult,
+                        length(attr(x, "i_disc")) == 1)
 
     # fit model
     fit <- fit_kde1d_cpp(x, bw, xmin, xmax)
@@ -150,21 +151,3 @@ boundary_transform <- function(x, xmin, xmax) {
     x
 }
 
-
-#' select's and adjust the bandwidth
-#' @noRd
-select_bw <- function(x, bw, mult) {
-
-    if (is.na(bw)) {
-        bw <- select_bw_cpp(x)
-    }
-
-    bw <- mult * bw
-
-    # for discrete use 1 - theta as lower bound for bw
-    if (length(attr(x, "i_disc")) == 1) {
-        bw <- max(bw, 0.5 - attr(x, "theta"))
-    }
-
-    bw
-}

@@ -57,13 +57,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // select_bw_cpp
-double select_bw_cpp(const Eigen::VectorXd& x);
-RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP) {
+double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult, bool discrete);
+RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP discreteSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(select_bw_cpp(x));
+    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
+    rcpp_result_gen = Rcpp::wrap(select_bw_cpp(x, bw, mult, discrete));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -73,7 +76,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
-    {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 1},
+    {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 4},
     {NULL, NULL, 0}
 };
 
