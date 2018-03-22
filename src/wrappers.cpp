@@ -1,4 +1,5 @@
 #include <RcppEigen.h>
+#include "dpik.hpp"
 #include "lpdens.hpp"
 
 //' fits a kernel density estimate and calculates the effective degrees of
@@ -92,4 +93,29 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
     }
 
     return q;
+}
+
+//  Bandwidth for Kernel Density Estimation
+//' @param x vector of observations
+//' @param grid_size number of equally-spaced points over which binning is
+//' performed to obtain kernel functional approximation
+//' @return the selected bandwidth
+//' @noRd
+// [[Rcpp::export]]
+double select_bw_cpp(const Eigen::VectorXd& x,
+                     double bw,
+                     double mult,
+                     bool discrete) {
+
+    if (std::isnan(bw)) {
+        bw = dpik(x);
+    }
+
+    bw *= mult;
+
+    if (discrete) {
+        bw = std::max(bw, 0.5);
+    }
+
+    return(bw);
 }

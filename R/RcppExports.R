@@ -44,3 +44,12 @@ qkde1d_cpp <- function(x, R_object) {
     .Call('_kde1d_qkde1d_cpp', PACKAGE = 'kde1d', x, R_object)
 }
 
+#' @param x vector of observations
+#' @param grid_size number of equally-spaced points over which binning is
+#' performed to obtain kernel functional approximation
+#' @return the selected bandwidth
+#' @noRd
+select_bw_cpp <- function(x, bw, mult, discrete) {
+    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete)
+}
+
