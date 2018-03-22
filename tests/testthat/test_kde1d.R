@@ -4,9 +4,9 @@ set.seed(0)
 n_sim <- 1e2
 data_types <- c("unbounded", "left_boundary", "right_boundary",
                 "two_boundaries", "discrete")
-p <- 0:2
+deg <- 0:2
 
-scenarios <- expand.grid(data_types = data_types, p = p)
+scenarios <- expand.grid(data_types = data_types, deg = deg)
 scenarios <- split(scenarios, seq_len(nrow(scenarios)))
 fits <- lapply(scenarios,
                function(scenario) {
@@ -27,7 +27,7 @@ fits <- lapply(scenarios,
                        x <- ordered(rbinom(n_sim, size = 5, prob = 0.5),
                                     levels = 0:5)
                    }
-                   return(kde1d(x, xmin = xmin, xmax = xmax, p = scenario$p))
+                   kde1d(x, xmin = xmin, xmax = xmax, deg = scenario$deg)
                })
 
 test_that("detects wrong arguments", {
@@ -36,7 +36,7 @@ test_that("detects wrong arguments", {
     expect_error(kde1d(x, xmax = 0))
     expect_error(kde1d(x, xmin = 10, xmax = -10))
     expect_error(kde1d(x, mult = 0))
-    expect_error(kde1d(x, p = 3))
+    expect_error(kde1d(x, deg = 3))
 
     x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
     expect_error(kde1d(x, xmax = 0))
@@ -45,7 +45,7 @@ test_that("detects wrong arguments", {
 test_that("returns proper 'kde1d' object", {
     lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
-    class_members <- c("grid_points", "values", "bw", "xmin", "xmax", "p",
+    class_members <- c("grid_points", "values", "bw", "xmin", "xmax", "deg",
                        "edf", "loglik", "jitter_info", "var_name", "nobs")
     lapply(fits, function(x) expect_identical(names(x), class_members))
 })

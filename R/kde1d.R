@@ -13,7 +13,7 @@
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter calls [`KernSmooth::dpik()`] for automatic selection (default).
-#' @param p order of the polynomial; either `0`, `1`, or `2` for log-constant,
+#' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
 #'   log-linear, and log-quadratic fitting, respectively.
 #'
 #' @return An object of class `kde1d`.
@@ -59,7 +59,7 @@
 #'
 #' ## bounded data, log-quadratic
 #' x <- rgamma(100, shape = 1)        # simulate data
-#' fit <- kde1d(x, xmin = 0, p = 2)   # estimate density
+#' fit <- kde1d(x, xmin = 0, deg = 2)   # estimate density
 #' dkde1d(1000, fit)                  # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
@@ -82,10 +82,10 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 0) {
     x <- na.omit(x)
     # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw, p)
+    check_arguments(x, mult, xmin, xmax, bw, deg)
 
     # jittering for discrete variables
     x <- cctools::cont_conv(x)
@@ -94,7 +94,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
     bw <- select_bw(boundary_transform(x, xmin, xmax), bw, mult)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, p)
+    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg)
 
     # add info
     fit$jitter_info <- attributes(x)
@@ -108,7 +108,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, p = 0) {
 
 #' check and pre-process arguments passed to kde1d()
 #' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw, p) {
+check_arguments <- function(x, mult, xmin, xmax, bw, deg) {
     stopifnot(NCOL(x) == 1)
 
     if (!is.ordered(x) & is.factor(x))
@@ -132,8 +132,8 @@ check_arguments <- function(x, mult, xmin, xmax, bw, p) {
             stop("Not all data are samller than xmax.")
     }
 
-    if (!(p %in% 0:2))
-        stop("p must be either 0, 1, or 2.")
+    if (!(deg %in% 0:2))
+        stop("deg must be either 0, 1, or 2.")
 }
 
 #' adjusts observations and evaluation points for boundary effects

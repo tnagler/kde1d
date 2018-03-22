@@ -9,12 +9,12 @@
 #'   boundary.
 #' @param xmax upper bound for the support of the density, `NaN` means no
 #'   boundary.
-#' @param p order of the local polynomial.
+#' @param deg order of the local polynomial.
 #' @return `An Rcpp::List` containing the fitted density values on a grid and
 #'   additional information.
 #' @noRd
-fit_kde1d_cpp <- function(x, bw, xmin, xmax, p) {
-    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, bw, xmin, xmax, p)
+fit_kde1d_cpp <- function(x, bw, xmin, xmax, deg) {
+    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, bw, xmin, xmax, deg)
 }
 
 #' computes the pdf of a kernel density estimate by interpolation.

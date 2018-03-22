@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // fit_kde1d_cpp
-Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw, double xmin, double xmax, size_t p);
-RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP pSEXP) {
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw, double xmin, double xmax, size_t deg);
+RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,8 +16,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
-    Rcpp::traits::input_parameter< size_t >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, bw, xmin, xmax, p));
+    Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
+    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, bw, xmin, xmax, deg));
     return rcpp_result_gen;
 END_RCPP
 }

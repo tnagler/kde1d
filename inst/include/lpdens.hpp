@@ -16,7 +16,7 @@ public:
     Eigen::VectorXd get_values() const {return grid_.get_values();}
     Eigen::VectorXd get_grid_points() const {return grid_.get_grid_points();}
     double get_bw() const {return bw_;}
-    double get_p() const {return p_;}
+    double get_p() const {return deg_;}
     double get_xmin() const {return xmin_;}
     double get_xmax() const {return xmax_;}
     double get_edf() const {return edf_;}
@@ -26,7 +26,7 @@ private:
     // data members
     InterpolationGrid1d grid_;
     double bw_;
-    size_t p_;
+    size_t deg_;
     double xmin_;
     double xmax_;
     double loglik_;
@@ -62,11 +62,11 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
                           double bw,
                           double xmin,
                           double xmax,
-                          size_t p) :
+                          size_t deg) :
     bw_(bw),
     xmin_(xmin),
     xmax_(xmax),
-    p_(p)
+    deg_(deg)
 {
     // construct equally spaced grid on original domain
     Eigen::VectorXd grid_points = construct_grid_points(x);
@@ -143,13 +143,13 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
         f0 = kernels.mean();
         res(k, 0) = f0;
 
-        if (p_ > 0) {
+        if (deg_ > 0) {
             // calculate b for local linear
             xx /= bw_;
             f1 = xx.cwiseProduct(kernels).mean(); // first order derivative
             b = f1 / f0;
 
-            if (p_ > 1) {
+            if (deg_ > 1) {
                 // more calculations for local quadratic
                 xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
                 b *= std::pow(bw_, 2);
@@ -186,15 +186,15 @@ inline double LPDens1d::calculate_infl(const size_t &n,
     Eigen::MatrixXd M;
     double bw2 = std::pow(bw, 2);
     double b2 = std::pow(b, 2);
-    if (p_ == 0) {
+    if (deg_ == 0) {
         M = Eigen::MatrixXd::Constant(1, 1, f0);
-    } else if (p_ == 1) {
+    } else if (deg_ == 1) {
         M = Eigen::MatrixXd(2, 2);
         M(0, 0) = f0;
         M(0, 1) = bw2 * b * f0;
         M(1, 0) = M(0, 1);
         M(1, 1) = f0 * bw2 + f0 * bw2 * bw2 * b2;
-    } else if (p_ == 2) {
+    } else if (deg_ == 2) {
         M = Eigen::MatrixXd(3, 3);
         M(0, 0) = f0;
         M(0, 1) = f0 * b;
