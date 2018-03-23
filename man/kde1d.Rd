@@ -74,14 +74,6 @@ points(ordered(0:5, 0:5),               # add true density
 
 }
 \references{
-Nagler, T. (2018a). \emph{A generic approach to nonparametric function
-estimation with mixed data.} Statistics & Probability Letters, 137:326–330,
-\href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
-
-Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density
-estimator.} Mathematical Methods of Statistics, in press,
-\href{https://arxiv.org/abs/1705.05431}{arXiv:1705.05431}
-
 Geenens, G. (2014). \emph{Probit transformation for kernel density estimation on
 the unit interval}. Journal of the American Statistical Association,
 109:505, 346-358, \href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
@@ -90,6 +82,14 @@ Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel
 density estimation for positive random variables.} Journal of Computational
 and Graphical Statistics, to appear,
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
+
+Nagler, T. (2018a). \emph{A generic approach to nonparametric function
+estimation with mixed data.} Statistics & Probability Letters, 137:326–330,
+\href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
+
+Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density
+estimator.} Mathematical Methods of Statistics, in press,
+\href{https://arxiv.org/abs/1705.05431}{arXiv:1705.05431}
 
 Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
 selection method for kernel density estimation. Journal of the Royal
