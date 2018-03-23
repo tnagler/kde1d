@@ -67,6 +67,9 @@ Details." />
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../news/index.html">News</a>
+</li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
@@ -183,7 +186,7 @@ Statistical Society, Series B, 53, 683–690.</p>
 <span class='co'>## bounded data, log-linear</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rgamma</span>(<span class='fl'>100</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>)        <span class='co'># simulate data</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>1</span>) <span class='co'># estimate density</span>
-<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>1000</span>, <span class='no'>fit</span>)                  <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 135250.5</div><div class='input'><span class='fu'>summary</span>(<span class='no'>fit</span>)                       <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-linear with bounded support (xmin = 0)
+<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>1000</span>, <span class='no'>fit</span>)                  <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 1e-12</div><div class='input'><span class='fu'>summary</span>(<span class='no'>fit</span>)                       <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-linear with bounded support (xmin = 0)
 #&gt; -----------------------------------------------------------------
 #&gt; nobs = 100, bw = 0.46, loglik = -98.66, d.f. = 3.64</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                          <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>curve</span>(<span class='fu'>dgamma</span>(<span class='no'>x</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>),        <span class='co'># add true density</span>
       <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
