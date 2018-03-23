@@ -1,4 +1,7 @@
-This is a new release.
+## Resubmission
+
+Added references to the Description field, following a request from Swetlana 
+Herbrandt.
 
 ## Test environments
 * local OS X install (release)
