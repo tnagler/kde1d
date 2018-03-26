@@ -25,13 +25,13 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
+  
+  
 <meta property="og:title" content="Working with a kde1d object — dkde1d" />
 
 <meta property="og:description" content="Density, distribution function, quantile function and random generation
 for a 'kde1d' kernel density estimate." />
 <meta name="twitter:card" content="summary" />
-
-
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -54,12 +54,8 @@ for a 'kde1d' kernel density estimate." />
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
-      </span>
+      <a class="navbar-brand" href="../index.html">kde1d</a>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -70,6 +66,9 @@ for a 'kde1d' kernel density estimate." />
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
@@ -92,7 +91,6 @@ for a 'kde1d' kernel density estimate." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Working with a kde1d object</h1>
-    <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/R/kde1d_methods.R'><code>R/kde1d_methods.R</code></a></small>
     </div>
 
     
@@ -108,7 +106,7 @@ for a 'kde1d' kernel density estimate.</p>
 
 <span class='fu'>rkde1d</span>(<span class='no'>n</span>, <span class='no'>obj</span>, <span class='kw'>quasi</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -162,7 +160,7 @@ is the length of the numerical argument for the other functions.</p>
     <pre class="examples"><div class='input'><span class='fu'>set.seed</span>(<span class='fl'>0</span>)              <span class='co'># for reproducibility</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rnorm</span>(<span class='fl'>100</span>)          <span class='co'># simulate some data</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>)          <span class='co'># estimate density</span>
-<span class='fu'>dkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>)           <span class='co'># evaluate density estimate (close to dnorm(0))</span></div><div class='output co'>#&gt; [1] 0.451555</div><div class='input'><span class='fu'>pkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>)           <span class='co'># evaluate corresponding cdf (close to pnorm(0))</span></div><div class='output co'>#&gt; [1] 0.4972006</div><div class='input'><span class='fu'>qkde1d</span>(<span class='fl'>0.5</span>, <span class='no'>fit</span>)         <span class='co'># quantile function (close to qnorm(0))</span></div><div class='output co'>#&gt; [1] 0.006201171</div><div class='input'><span class='fu'>hist</span>(<span class='fu'>rkde1d</span>(<span class='fl'>100</span>, <span class='no'>fit</span>))   <span class='co'># simulate</span></div><div class='img'><img src='dkde1d-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>dkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>)           <span class='co'># evaluate density estimate (close to dnorm(0))</span></div><div class='output co'>#&gt; [1] 0.451555</div><div class='input'><span class='fu'>pkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>)           <span class='co'># evaluate corresponding cdf (close to pnorm(0))</span></div><div class='output co'>#&gt; [1] 0.4972006</div><div class='input'><span class='fu'>qkde1d</span>(<span class='fl'>0.5</span>, <span class='no'>fit</span>)         <span class='co'># quantile function (close to qnorm(0))</span></div><div class='output co'>#&gt; [1] 0.006201171</div><div class='input'><span class='fu'>hist</span>(<span class='fu'>rkde1d</span>(<span class='fl'>100</span>, <span class='no'>fit</span>))   <span class='co'># simulate</span></div><div class='img'><img src='dkde1d-1.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -184,7 +182,7 @@ is the length of the numerical argument for the other functions.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Thomas Nagler.</p>
+  <p>Developed by Thomas Nagler, Thibault Vatter.</p>
 </div>
 
 <div class="pkgdown">
@@ -196,4 +194,3 @@ is the length of the numerical argument for the other functions.</p>
 
   </body>
 </html>
-

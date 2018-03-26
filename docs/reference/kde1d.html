@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Univariate local-polynial likelihood kernel density estimation — kde1d • kde1d</title>
+<title>Univariate local-polynomial likelihood kernel density estimation — kde1d • kde1d</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -25,13 +25,13 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-<meta property="og:title" content="Univariate local-polynial likelihood kernel density estimation — kde1d" />
+  
+  
+<meta property="og:title" content="Univariate local-polynomial likelihood kernel density estimation — kde1d" />
 
 <meta property="og:description" content="The estimator can handle for bounded, unbounded, and discrete support, see
 Details." />
 <meta name="twitter:card" content="summary" />
-
-
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -54,12 +54,8 @@ Details." />
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
-      </span>
+      <a class="navbar-brand" href="../index.html">kde1d</a>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -70,6 +66,9 @@ Details." />
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
@@ -91,8 +90,7 @@ Details." />
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Univariate local-polynial likelihood kernel density estimation</h1>
-    <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/R/kde1d.R'><code>R/kde1d.R</code></a></small>
+    <h1>Univariate local-polynomial likelihood kernel density estimation</h1>
     </div>
 
     
@@ -102,7 +100,7 @@ Details." />
 
     <pre class="usage"><span class='fu'>kde1d</span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>NaN</span>, <span class='kw'>xmax</span> <span class='kw'>=</span> <span class='fl'>NaN</span>, <span class='kw'>mult</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>bw</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>2</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -151,19 +149,19 @@ Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Nagler, T. (2018a). <em>A generic approach to nonparametric function
-estimation with mixed data.</em> Statistics &amp; Probability Letters, 137:326–330,
-<a href='https://arxiv.org/abs/1704.07457'>arXiv:1704.07457</a></p>
-<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density
-estimator.</em> Mathematical Methods of Statistics, in press,
-<a href='https://arxiv.org/abs/1705.05431'>arXiv:1705.05431</a></p>
-<p>Geenens, G. (2014). <em>Probit transformation for kernel density estimation on
+    <p>Geenens, G. (2014). <em>Probit transformation for kernel density estimation on
 the unit interval</em>. Journal of the American Statistical Association,
 109:505, 346-358, <a href='https://arxiv.org/abs/1303.4121'>arXiv:1303.4121</a></p>
 <p>Geenens, G., Wang, C. (2018). <em>Local-likelihood transformation kernel
 density estimation for positive random variables.</em> Journal of Computational
 and Graphical Statistics, to appear,
 <a href='https://arxiv.org/abs/1602.04862'>arXiv:1602.04862</a></p>
+<p>Nagler, T. (2018a). <em>A generic approach to nonparametric function
+estimation with mixed data.</em> Statistics &amp; Probability Letters, 137:326–330,
+<a href='https://arxiv.org/abs/1704.07457'>arXiv:1704.07457</a></p>
+<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density
+estimator.</em> Mathematical Methods of Statistics, in press,
+<a href='https://arxiv.org/abs/1705.05431'>arXiv:1705.05431</a></p>
 <p>Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
 selection method for kernel density estimation. Journal of the Royal
 Statistical Society, Series B, 53, 683–690.</p>
@@ -184,23 +182,23 @@ Statistical Society, Series B, 53, 683–690.</p>
 <span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>1000</span>, <span class='no'>fit</span>)                  <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 40.69814</div><div class='input'><span class='fu'>summary</span>(<span class='no'>fit</span>)                       <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-quadratic
 #&gt; -----------------------------------------------------------------
 #&gt; nobs = 100, bw = 0.37, loglik = -128.39, d.f. = 2.24</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                          <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>curve</span>(<span class='fu'>dnorm</span>(<span class='no'>x</span>), <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,        <span class='co'># add true density</span>
-      <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='kde1d-1.png' alt='' width='700' height='433' /></div><div class='input'>
+      <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='kde1d-1.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 <span class='co'>## bounded data, log-linear</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rgamma</span>(<span class='fl'>100</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>)        <span class='co'># simulate data</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>1</span>) <span class='co'># estimate density</span>
 <span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>1000</span>, <span class='no'>fit</span>)                  <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 1e-12</div><div class='input'><span class='fu'>summary</span>(<span class='no'>fit</span>)                       <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-linear with bounded support (xmin = 0)
 #&gt; -----------------------------------------------------------------
-#&gt; nobs = 100, bw = 0.46, loglik = -97.82, d.f. = 3.64</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                          <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>curve</span>(<span class='fu'>dgamma</span>(<span class='no'>x</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>),        <span class='co'># add true density</span>
+#&gt; nobs = 100, bw = 0.46, loglik = -98.66, d.f. = 3.64</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                          <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>curve</span>(<span class='fu'>dgamma</span>(<span class='no'>x</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>),        <span class='co'># add true density</span>
       <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-      <span class='kw'>from</span> <span class='kw'>=</span> <span class='fl'>1e-3</span>)</div><div class='img'><img src='kde1d-2.png' alt='' width='700' height='433' /></div><div class='input'>
+      <span class='kw'>from</span> <span class='kw'>=</span> <span class='fl'>1e-3</span>)</div><div class='img'><img src='kde1d-2.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 <span class='co'>## discrete data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rbinom</span>(<span class='fl'>100</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)  <span class='co'># simulate data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>ordered</span>(<span class='no'>x</span>, <span class='kw'>levels</span> <span class='kw'>=</span> <span class='fl'>0</span>:<span class='fl'>5</span>)           <span class='co'># declare as ordered</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>)                         <span class='co'># estimate density</span>
 <span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>2</span>, <span class='no'>fit</span>)                          <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 0.332243</div><div class='input'><span class='fu'>summary</span>(<span class='no'>fit</span>)                            <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; (jittered) kernel density estimate ('kde1d'), log-quadratic
 #&gt; -----------------------------------------------------------------
-#&gt; nobs = 100, bw = 0.5, loglik = -154.49, d.f. = 3.31</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                               <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>points</span>(<span class='fu'>ordered</span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>0</span>:<span class='fl'>5</span>),               <span class='co'># add true density</span>
-       <span class='fu'>dbinom</span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>5</span>, <span class='fl'>0.5</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='kde1d-3.png' alt='' width='700' height='433' /></div><div class='input'>
+#&gt; nobs = 100, bw = 0.5, loglik = -154.49, d.f. = 3.14</div><div class='input'><span class='fu'>plot</span>(<span class='no'>fit</span>)                               <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'>points</span>(<span class='fu'>ordered</span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>0</span>:<span class='fl'>5</span>),               <span class='co'># add true density</span>
+       <span class='fu'>dbinom</span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>5</span>, <span class='fl'>0.5</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='kde1d-3.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -224,7 +222,7 @@ Statistical Society, Series B, 53, 683–690.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Thomas Nagler.</p>
+  <p>Developed by Thomas Nagler, Thibault Vatter.</p>
 </div>
 
 <div class="pkgdown">
@@ -236,4 +234,3 @@ Statistical Society, Series B, 53, 683–690.</p>
 
   </body>
 </html>
-

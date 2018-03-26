@@ -25,12 +25,12 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
+  
+  
 <meta property="og:title" content="Plotting kde1d objects — plot.kde1d" />
 
 <meta property="og:description" content="Plotting kde1d objects" />
 <meta name="twitter:card" content="summary" />
-
-
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -53,12 +53,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
-      </span>
+      <a class="navbar-brand" href="../index.html">kde1d</a>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -69,6 +65,9 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
@@ -91,7 +90,6 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plotting kde1d objects</h1>
-    <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/R/kde1d_methods.R'><code>R/kde1d_methods.R</code></a></small>
     </div>
 
     
@@ -104,7 +102,7 @@
 <span class='co'># S3 method for kde1d</span>
 <span class='fu'>lines</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -128,13 +126,13 @@
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>)                               <span class='co'># unbounded estimate</span>
 <span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>4</span>))                     <span class='co'># plot estimate</span></div><div class='input'><span class='fu'>curve</span>(<span class='fu'>dbeta</span>(<span class='no'>x</span>, <span class='fl'>0.3</span>, <span class='fl'>0.4</span>),                     <span class='co'># add true density</span>
       <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>, <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='input'><span class='no'>fit_bounded</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>xmax</span> <span class='kw'>=</span> <span class='fl'>1</span>)   <span class='co'># bounded estimate</span>
-<span class='fu'>lines</span>(<span class='no'>fit_bounded</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"green"</span>)</div><div class='img'><img src='plot.kde1d-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>lines</span>(<span class='no'>fit_bounded</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"green"</span>)</div><div class='img'><img src='plot.kde1d-1.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 <span class='co'>## discrete data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rpois</span>(<span class='fl'>100</span>, <span class='fl'>3</span>)                        <span class='co'># simulate data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>ordered</span>(<span class='no'>x</span>, <span class='kw'>levels</span> <span class='kw'>=</span> <span class='fl'>0</span>:<span class='fl'>20</span>)            <span class='co'># declare variable as ordered</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>)                           <span class='co'># estimate density</span>
 <span class='fu'>plot</span>(<span class='no'>fit</span>, <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>0.25</span>))              <span class='co'># plot density estimate</span></div><div class='input'><span class='fu'>points</span>(<span class='fu'>ordered</span>(<span class='fl'>0</span>:<span class='fl'>20</span>, <span class='fl'>0</span>:<span class='fl'>20</span>),               <span class='co'># add true density values</span>
-       <span class='fu'>dpois</span>(<span class='fl'>0</span>:<span class='fl'>20</span>, <span class='fl'>3</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='plot.kde1d-2.png' alt='' width='700' height='433' /></div><div class='input'>
+       <span class='fu'>dpois</span>(<span class='fl'>0</span>:<span class='fl'>20</span>, <span class='fl'>3</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>)</div><div class='img'><img src='plot.kde1d-2.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -152,7 +150,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Thomas Nagler.</p>
+  <p>Developed by Thomas Nagler, Thibault Vatter.</p>
 </div>
 
 <div class="pkgdown">
@@ -164,4 +162,3 @@
 
   </body>
 </html>
-

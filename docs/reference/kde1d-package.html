@@ -25,14 +25,15 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
+  
+  
 <meta property="og:title" content="One-Dimensional Kernel Density Estimation — kde1d-package" />
 
-<meta property="og:description" content="Implements a 1-dimensional kernel density estimator that can handle
-bounded and discrete data. The implementation utilizes spline interpolation
-to reduce memory usage and computational demand for large data sets." />
+<meta property="og:description" content="Provides an efficient implementation of univariate local polynomial
+kernel density estimators that can handle bounded and discrete data. The
+implementation utilizes spline interpolation to reduce memory usage and
+computational demand for large data sets." />
 <meta name="twitter:card" content="summary" />
-
-
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -55,12 +56,8 @@ to reduce memory usage and computational demand for large data sets." />
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
-      </span>
+      <a class="navbar-brand" href="../index.html">kde1d</a>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -71,6 +68,9 @@ to reduce memory usage and computational demand for large data sets." />
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
@@ -93,31 +93,31 @@ to reduce memory usage and computational demand for large data sets." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>One-Dimensional Kernel Density Estimation</h1>
-    <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/R/kde1d-package.R'><code>R/kde1d-package.R</code></a></small>
     </div>
 
     
-    <p>Implements a 1-dimensional kernel density estimator that can handle
-bounded and discrete data. The implementation utilizes spline interpolation
-to reduce memory usage and computational demand for large data sets.</p>
+    <p>Provides an efficient implementation of univariate local polynomial
+kernel density estimators that can handle bounded and discrete data. The
+implementation utilizes spline interpolation to reduce memory usage and
+computational demand for large data sets.</p>
     
 
         
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Nagler, T. (2018a). <em>A generic approach to nonparametric function
-estimation with mixed data.</em> Statistics &amp; Probability Letters, 137:326–330,
-<a href='https://arxiv.org/abs/1704.07457'>arXiv:1704.07457</a></p>
-<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density
-estimator.</em> Mathematical Methods of Statistics, in press,
-<a href='https://arxiv.org/abs/1705.05431'>arXiv:1705.05431</a></p>
-<p>Geenens, G. (2014). <em>Probit transformation for kernel density estimation on
+    <p>Geenens, G. (2014). <em>Probit transformation for kernel density estimation on
 the unit interval</em>. Journal of the American Statistical Association,
 109:505, 346-358, <a href='https://arxiv.org/abs/1303.4121'>arXiv:1303.4121</a></p>
 <p>Geenens, G., Wang, C. (2018). <em>Local-likelihood transformation kernel
 density estimation for positive random variables.</em> Journal of Computational
 and Graphical Statistics, to appear,
 <a href='https://arxiv.org/abs/1602.04862'>arXiv:1602.04862</a></p>
+<p>Nagler, T. (2018a). <em>A generic approach to nonparametric function
+estimation with mixed data.</em> Statistics &amp; Probability Letters, 137:326–330,
+<a href='https://arxiv.org/abs/1704.07457'>arXiv:1704.07457</a></p>
+<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density
+estimator.</em> Mathematical Methods of Statistics, in press,
+<a href='https://arxiv.org/abs/1705.05431'>arXiv:1705.05431</a></p>
     
 
   </div>
@@ -133,7 +133,7 @@ and Graphical Statistics, to appear,
 
       <footer>
       <div class="copyright">
-  <p>Developed by Thomas Nagler.</p>
+  <p>Developed by Thomas Nagler, Thibault Vatter.</p>
 </div>
 
 <div class="pkgdown">
@@ -145,4 +145,3 @@ and Graphical Statistics, to appear,
 
   </body>
 </html>
-

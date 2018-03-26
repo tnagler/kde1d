@@ -4,10 +4,14 @@ Title: Univariate Kernel Density Estimation
 Version: 0.1.0
 Authors@R: c(
         person("Thomas", "Nagler",, "mail@tnagler.com", role = c("aut", "cre")),
-        person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("ctb"))
+        person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("aut"))
         )
 Description: Provides an efficient implementation of univariate local polynomial
-    kernel density estimators that can handle bounded and discrete data. 
+    kernel density estimators that can handle bounded and discrete data. See 
+    Geenens (2014) <arXiv:1303.4121>, 
+    Geenens and Wang (2018) <arXiv:1602.04862>, 
+    Nagler (2018a) <arXiv:1704.07457>, 
+    Nagler (2018b) <arXiv:1705.05431>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -28,3 +32,4 @@ Suggests:
 URL: https://github.com/tnagler/kde1d
 BugReports: https://github.com/tnagler/kde1d/issues
 Roxygen: list(markdown = TRUE)
+SystemRequirements: C++11
