@@ -1,4 +1,4 @@
-language: R
+language: r
 cache: packages
 sudo: required
 warnings_are_errors: false
@@ -13,6 +13,11 @@ matrix:
       r: devel
       env: R_CODECOV=true
 
+r_check_args: '--use-valgrind'
+
+env:
+  - VALGRIND_OPTS='--leak-check=full --track-origins=yes'
+
 r_packages:
     - BH
     - cctools
@@ -22,12 +27,12 @@ r_packages:
     - RcppEigen
 
 before_install:
-  ### Linux
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -q; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install gcc-5 g++-5 gfortran-5; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 100; fi
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -q
+  - sudo apt-get install gcc-5 g++-5 gfortran-5
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+  - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 100
+  - sudo apt-get install valgrind
 
 repos:
   CRAN: http://cran.rstudio.com
