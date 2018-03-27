@@ -13,11 +13,6 @@ matrix:
       r: devel
       env: R_CODECOV=true
 
-r_check_args: '--use-valgrind'
-
-env:
-  - VALGRIND_OPTS='--leak-check=full --track-origins=yes'
-
 r_packages:
     - BH
     - cctools
@@ -32,7 +27,6 @@ before_install:
   - sudo apt-get install gcc-5 g++-5 gfortran-5
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
   - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 100
-  - sudo apt-get install valgrind
 
 repos:
   CRAN: http://cran.rstudio.com
