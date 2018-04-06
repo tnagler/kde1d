@@ -15,39 +15,44 @@ public:
     {
     }
 
-    InterpolationGrid1d(const Eigen::VectorXd &grid_points,
-                        const Eigen::VectorXd &values,
+    InterpolationGrid1d(const Eigen::VectorXd& grid_points,
+                        const Eigen::VectorXd& values,
                         int norm_times);
 
     void normalize(int times);
 
-    Eigen::VectorXd interpolate(const Eigen::VectorXd &x);
+    Eigen::VectorXd interpolate(const Eigen::VectorXd& x);
 
-    Eigen::VectorXd integrate(const Eigen::VectorXd &u);
+    Eigen::VectorXd integrate(const Eigen::VectorXd& u);
 
     Eigen::VectorXd get_values() const {return values_;}
     Eigen::VectorXd get_grid_points() const {return grid_points_;}
 
 private:
     // Utility functions for spline Interpolation
-    double cubic_poly(const double &x, const Eigen::VectorXd &a);
+    double cubic_poly(const double& x,
+                      const Eigen::VectorXd& a);
 
-    double cubic_indef_integral(const double &x, const Eigen::VectorXd &a);
+    double cubic_indef_integral(const double& x,
+                                const Eigen::VectorXd& a);
 
-    double cubic_integral(const double &lower, const double &upper,
-                          const Eigen::VectorXd &a);
+    double cubic_integral(const double& lower,
+                          const double& upper,
+                          const Eigen::VectorXd& a);
 
-    Eigen::VectorXd
-        find_coefs(const Eigen::VectorXd &vals, const Eigen::VectorXd &grid);
+    Eigen::VectorXd find_coefs(const Eigen::VectorXd& vals,
+                               const Eigen::VectorXd& grid);
 
-    double interp_on_grid(const double &x, const Eigen::VectorXd &vals,
-                          const Eigen::VectorXd &grid);
+    double interp_on_grid(const double& x,
+                          const Eigen::VectorXd& vals,
+                          const Eigen::VectorXd& grid);
 
     size_t find_cell(double x0);
 
     // Utility functions for integration
-    double int_on_grid(const double &upr, const Eigen::VectorXd &vals,
-                       const Eigen::VectorXd &grid);
+    double int_on_grid(const double& upr,
+                       const Eigen::VectorXd& vals,
+                       const Eigen::VectorXd& grid);
 
     Eigen::VectorXd grid_points_;
     Eigen::MatrixXd values_;
@@ -59,8 +64,8 @@ private:
 //! @param grid_points an ascending sequence of grid points.
 //! @param values a vector of values of same length as grid_points.
 //! @param norm_times how many times the normalization routine should run.
-inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_points,
-                                                const Eigen::VectorXd &values,
+inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd& grid_points,
+                                                const Eigen::VectorXd& values,
                                                 int norm_times)
 {
     if (grid_points.size() != values.size()) {
@@ -69,7 +74,7 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_poin
 
     grid_points_ = grid_points;
     values_ = values;
-    normalize(norm_times);
+    this->normalize(norm_times);
 }
 
 //! renormalizes the estimate to integrate to one
@@ -78,8 +83,10 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd &grid_poin
 void InterpolationGrid1d::normalize(int times)
 {
     double x_max = grid_points_(grid_points_.size() - 1);
+    double int_max;
     for (int k = 0; k < times; ++k) {
-        values_ /= int_on_grid(x_max, values_, grid_points_);
+        int_max = int_on_grid(x_max, values_, grid_points_);
+        values_ /= int_max;
     }
 }
 
@@ -87,7 +94,7 @@ inline size_t InterpolationGrid1d::find_cell(double x0)
 {
     size_t cell_index = 0;
     size_t m = grid_points_.size();
-    for (size_t k = 1; k < m; ++k) {
+    for (size_t k = 1; k < m - 1; ++k) {
         if (x0 >= grid_points_(k)) {
             cell_index = k;
         } else {
@@ -99,24 +106,24 @@ inline size_t InterpolationGrid1d::find_cell(double x0)
 
 //! Interpolation
 //! @param x vector of evaluation points.
-inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x)
+inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x)
 {
     Eigen::VectorXd tmpgrid(4), tmpvals(4);
     size_t m = grid_points_.size();
 
     auto interpolate_one = [&] (const double& xx) {
-        size_t j0, j3;
-        size_t j = find_cell(xx);
-        j0 = std::max(j - 1, static_cast<size_t>(0));
-        j3 = std::min(j + 2, m - 1);
-        tmpgrid(0) = this->grid_points_(j0);
-        tmpgrid(1) = this->grid_points_(j);
-        tmpgrid(2) = this->grid_points_(j + 1);
-        tmpgrid(3) = this->grid_points_(j3);
-        tmpvals(0) = this->values_(j0);
-        tmpvals(1) = this->values_(j);
-        tmpvals(2) = this->values_(j + 1);
-        tmpvals(3) = this->values_(j3);
+        size_t i0, i3;
+        size_t i = find_cell(xx);
+        i0 = std::max(i - 1, static_cast<size_t>(0));
+        i3 = std::min(i + 2, m - 1);
+        tmpgrid(0) = this->grid_points_(i0);
+        tmpgrid(1) = this->grid_points_(i);
+        tmpgrid(2) = this->grid_points_(i + 1);
+        tmpgrid(3) = this->grid_points_(i3);
+        tmpvals(0) = this->values_(i0);
+        tmpvals(1) = this->values_(i);
+        tmpvals(2) = this->values_(i + 1);
+        tmpvals(3) = this->values_(i3);
         return std::max(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
     };
 
@@ -126,7 +133,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd &x
 //! Integration along the grid
 //!
 //! @param x a vector  of evaluation points
-inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd &x)
+inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
 {
     auto integrate_one = [this] (const double& xx) {
         return int_on_grid(xx, this->values_, this->grid_points_);
@@ -142,7 +149,7 @@ inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd &x)
 //! @param x evaluation point.
 //! @param a polynomial coefficients
 inline double
-    InterpolationGrid1d::cubic_poly(const double &x, const Eigen::VectorXd &a)
+    InterpolationGrid1d::cubic_poly(const double& x, const Eigen::VectorXd& a)
     {
         double x2 = x * x;
         double x3 = x2 * x;
@@ -153,8 +160,8 @@ inline double
 //!
 //! @param x evaluation point.
 //! @param a polynomial coefficients.
-inline double InterpolationGrid1d::cubic_indef_integral(const double &x,
-                                                        const Eigen::VectorXd &a)
+inline double InterpolationGrid1d::cubic_indef_integral(const double& x,
+                                                        const Eigen::VectorXd& a)
 {
     double x2 = x * x;
     double x3 = x2 * x;
@@ -167,9 +174,9 @@ inline double InterpolationGrid1d::cubic_indef_integral(const double &x,
 //! @param lower lower limit of the integral.
 //! @param upper upper limit of the integral.
 //! @param a polynomial coefficients.
-inline double InterpolationGrid1d::cubic_integral(const double &lower,
-                                                  const double &upper,
-                                                  const Eigen::VectorXd &a)
+inline double InterpolationGrid1d::cubic_integral(const double& lower,
+                                                  const double& upper,
+                                                  const Eigen::VectorXd& a)
 {
     return cubic_indef_integral(upper, a) - cubic_indef_integral(lower, a);
 }
@@ -179,8 +186,8 @@ inline double InterpolationGrid1d::cubic_integral(const double &lower,
 //! @param vals length 4 vector of function values.
 //! @param grid length 4 vector of grid points.
 inline Eigen::VectorXd
-    InterpolationGrid1d::find_coefs(const Eigen::VectorXd &vals,
-                                    const Eigen::VectorXd &grid)
+    InterpolationGrid1d::find_coefs(const Eigen::VectorXd& vals,
+                                    const Eigen::VectorXd& grid)
     {
         Eigen::VectorXd a(4);
 
@@ -222,9 +229,9 @@ inline Eigen::VectorXd
 //! @param x evaluation point.
 //! @param vals length 4 vector of function values.
 //! @param grid length 4 vector of grid points.
-inline double InterpolationGrid1d::interp_on_grid(const double &x,
-                                                  const Eigen::VectorXd &vals,
-                                                  const Eigen::VectorXd &grid)
+inline double InterpolationGrid1d::interp_on_grid(const double& x,
+                                                  const Eigen::VectorXd& vals,
+                                                  const Eigen::VectorXd& grid)
 {
     Eigen::VectorXd a = find_coefs(vals, grid);
     double xev = fmax((x - grid(1)), 0) / (grid(2) - grid(1));
@@ -242,12 +249,12 @@ inline double InterpolationGrid1d::interp_on_grid(const double &x,
 //! @param grid vector of grid points on which vals has been computed.
 //!
 //! @return Integral of interpolation spline defined by (vals, grid).
-inline double InterpolationGrid1d::int_on_grid(const double &upr,
-                                               const Eigen::VectorXd &vals,
-                                               const Eigen::VectorXd &grid)
+inline double InterpolationGrid1d::int_on_grid(const double& upr,
+                                               const Eigen::VectorXd& vals,
+                                               const Eigen::VectorXd& grid)
 {
     size_t m = grid.size();
-    Eigen::VectorXd tmpvals(4), tmpgrid(4), tmpa(4), a(4);
+    Eigen::VectorXd tmpvals(4), tmpgrid(4), tmpa(4);
     double uprnew, newint;
 
     double tmpint = 0.0;
