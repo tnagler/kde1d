@@ -66,7 +66,7 @@ Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
 Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& x,
                            const Rcpp::List& R_object)
 {
-    return wrap_to_cpp(R_object).integrate(x).array().max(1e-30).min(1.0 - 1e-30);
+    return wrap_to_cpp(R_object).integrate(x).array().max(0.0).min(1.0);
 }
 
 //' computes the quantile of a kernel density estimate by numerical inversion
