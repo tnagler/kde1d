@@ -17,8 +17,7 @@ cache:
   - C:\RLibrary
 
 environment:
-  global:
-    PKGTYPE: source
+    R_VERSION: release
 
 build_script:
   - travis-tool.sh install_deps
