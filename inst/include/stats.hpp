@@ -1,5 +1,6 @@
 #pragma once
 
+#define BOOST_MATH_PROMOTE_DOUBLE_POLICY false
 #include <Eigen/Dense>
 #include <boost/math/distributions.hpp>
 #include <algorithm>

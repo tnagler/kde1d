@@ -16,6 +16,9 @@ install:
 cache:
   - C:\RLibrary
 
+environment:
+    R_VERSION: release
+
 build_script:
   - travis-tool.sh install_deps
 

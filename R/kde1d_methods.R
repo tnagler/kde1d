@@ -69,6 +69,7 @@ pkde1d <- function(q, obj) {
         x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
         f_all <- dkde1d(x_all_num, obj)
         p <- sapply(q, function(y) sum(f_all[x_all_num <= y]))
+        p <- pmin(pmax(p, 0), 1)
     }
 
     p
