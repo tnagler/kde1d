@@ -16,6 +16,10 @@ install:
 cache:
   - C:\RLibrary
 
+environment:
+  global:
+    PKGTYPE: source
+
 build_script:
   - travis-tool.sh install_deps
 
