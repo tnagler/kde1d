@@ -47,7 +47,7 @@ private:
                           const Eigen::VectorXd& vals,
                           const Eigen::VectorXd& grid);
 
-    size_t find_cell(double x0);
+    ptrdiff_t find_cell(double x0);
 
     // Utility functions for integration
     double int_on_grid(const double& upr,
@@ -90,11 +90,11 @@ void InterpolationGrid1d::normalize(int times)
     }
 }
 
-inline size_t InterpolationGrid1d::find_cell(double x0)
+inline ptrdiff_t InterpolationGrid1d::find_cell(double x0)
 {
-    size_t cell_index = 0;
-    size_t m = grid_points_.size();
-    for (size_t k = 1; k < m - 1; ++k) {
+    ptrdiff_t cell_index = 0;
+    ptrdiff_t m = grid_points_.size();
+    for (ptrdiff_t k = 1; k < m - 1; ++k) {
         if (x0 >= grid_points_(k)) {
             cell_index = k;
         } else {
@@ -109,12 +109,12 @@ inline size_t InterpolationGrid1d::find_cell(double x0)
 inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x)
 {
     Eigen::VectorXd tmpgrid(4), tmpvals(4);
-    size_t m = grid_points_.size();
+    ptrdiff_t m = grid_points_.size();
 
     auto interpolate_one = [&] (const double& xx) {
-        size_t i0, i3;
-        size_t i = find_cell(xx);
-        i0 = std::max(i - 1, static_cast<size_t>(0));
+        ptrdiff_t i0, i3;
+        ptrdiff_t i = find_cell(xx);
+        i0 = std::max(i - 1, static_cast<ptrdiff_t>(0));
         i3 = std::min(i + 2, m - 1);
         tmpgrid(0) = this->grid_points_(i0);
         tmpgrid(1) = this->grid_points_(i);
@@ -124,7 +124,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
         tmpvals(1) = this->values_(i);
         tmpvals(2) = this->values_(i + 1);
         tmpvals(3) = this->values_(i3);
-        return std::max(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
+        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);
