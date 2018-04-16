@@ -47,7 +47,7 @@ private:
                           const Eigen::VectorXd& vals,
                           const Eigen::VectorXd& grid);
 
-    ptrdiff_t find_cell(double x0);
+    ptrdiff_t find_cell(const double& x0);
 
     // Utility functions for integration
     double int_on_grid(const double& upr,
@@ -90,18 +90,19 @@ void InterpolationGrid1d::normalize(int times)
     }
 }
 
-inline ptrdiff_t InterpolationGrid1d::find_cell(double x0)
+inline ptrdiff_t InterpolationGrid1d::find_cell(const double& x0)
 {
-    ptrdiff_t cell_index = 0;
-    ptrdiff_t m = grid_points_.size();
-    for (ptrdiff_t k = 1; k < m - 1; ++k) {
-        if (x0 >= grid_points_(k)) {
-            cell_index = k;
-        } else {
-            break;
-        }
+    ptrdiff_t low = 0, high = grid_points_.size() - 1;
+    ptrdiff_t mid;
+    while (low < high - 1) {
+        mid = low + (high - low) / 2;
+        if (x0 < grid_points_(mid))
+            high = mid;
+        else
+            low = mid;
     }
-    return cell_index;
+
+    return low;
 }
 
 //! Interpolation
