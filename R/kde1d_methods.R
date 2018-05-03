@@ -40,6 +40,14 @@ dkde1d <- function(x, obj) {
     check_boundary_violations(x, obj$xmin, obj$xmax)
 
     x <- expand_as_numeric(x)
+
+    # adjust grid to stabilize estimates
+    rng <- diff(range(obj$grid_points))
+    if (!is.nan(obj$xmin))
+        obj$grid_points[1] <- obj$xmin - 0.1 * rng
+    if (!is.nan(obj$xmax))
+        obj$grid_points[length(obj$grid_points)] <- obj$xmax + 0.1 * rng
+
     fhat <- dkde1d_cpp(x, obj)
 
     if (length(obj$jitter_info$i_disc) == 1) {
@@ -158,13 +166,19 @@ plot.kde1d <- function(x, ...) {
         ev <- ordered(x$jitter_info$levels$x,
                       levels = x$jitter_info$levels$x)
         plot_type <- "h"  # for discrete variables, use a histrogram
-        x$values <- dkde1d(ev, x)
-        x$grid_points <- ev
+    } else {
+        # adjust grid if necessary
+        ev <- x$grid_points
+        if (!is.nan(x$xmin))
+            ev[1] <- x$xmin
+        if (!is.nan(x$xmax))
+            ev[length(ev)] <- x$xmax
     }
+    vals <- dkde1d(ev, x)
 
     pars <- list(
-        x = x$grid_points,
-        y = x$values,
+        x = ev,
+        y = vals,
         type = plot_type,
         xlab = "x",
         ylab = "density",
