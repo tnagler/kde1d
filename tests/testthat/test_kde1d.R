@@ -73,10 +73,19 @@ test_that("d/p/r/h functions work", {
         expect_lte(max(pkde1d(sim, fit), 1), 1)
         expect_that(all(qkde1d(u, fit) >= xmin), equals(TRUE))
         expect_that(all(qkde1d(u, fit) <= xmax), equals(TRUE))
+        if (!is.nan(fit$xmin)) {
+            expect_error(dkde1d(xmin - 1, fit))
+            expect_error(pkde1d(xmin - 1, fit))
+        }
+
+        if (!is.nan(fit$xmax)) {
+            expect_error(dkde1d(xmax + 1, fit))
+            expect_error(pkde1d(xmax + 1, fit))
+        }
     }
 
     sims <- lapply(fits, function(x) rkde1d(n, x))
-    mapply(test_dpqr, fits, sims)
+    mapply(test_dpqr, fits[2], sims[2])
 
     sim <- lapply(fits, function(x) rkde1d(n, x, quasi = TRUE))
     mapply(test_dpqr, fits, sims)
