@@ -37,6 +37,7 @@ dkde1d <- function(x, obj) {
         x <- x[[1]]
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
+    check_boundary_violations(x, obj$xmin, obj$xmax)
 
     x <- expand_as_numeric(x)
     fhat <- dkde1d_cpp(x, obj)
@@ -59,6 +60,7 @@ pkde1d <- function(q, obj) {
         q <- q[[1]]
     if (!is.ordered(q))
         stopifnot(!is.factor(q))
+    check_boundary_violations(q, obj$xmin, obj$xmax)
 
     q <- expand_as_numeric(q)
 
