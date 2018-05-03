@@ -109,3 +109,15 @@ test_that("other generics work", {
 
     lapply(fits, test_other_generics)
 })
+
+test_that("behavior for discrete data is consistent", {
+    n <- 1e3
+    x <- ordered(sample(5, n, TRUE), 1:5)
+    fit <- kde1d(x)
+    xx <- ordered(1:5, 1:5)
+    expect_equal(dkde1d(1:5, fit), dkde1d(xx, fit))
+    expect_equal(pkde1d(1:5, fit), pkde1d(xx, fit))
+    expect_true(all(is.na(dkde1d(c(0, 6), fit))))
+    expect_true(all(is.na(pkde1d(c(0, 6), fit))))
+    expect_true(all(rkde1d(n, fit) %in% x))
+})
