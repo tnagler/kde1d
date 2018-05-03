@@ -117,7 +117,7 @@ double select_bw_cpp(const Eigen::VectorXd& x,
     bw *= mult;
 
     if (discrete) {
-        bw = std::max(bw, 0.5);
+        bw = std::max(bw, 0.5 / 5);
     }
 
     return(bw);
