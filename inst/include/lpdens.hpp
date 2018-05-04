@@ -138,7 +138,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
     Eigen::VectorXd kernels(x.size());
     for (size_t k = 0; k < x_ev.size(); k++) {
         // classical (local constant) kernel density estimate
-        xx = x.array() - x_ev(k);
+        xx = (x.array() - x_ev(k)) / bw_;
         kernels = kern_gauss(xx) / bw_;
         f0 = kernels.mean();
         res(k, 0) = f0;
@@ -149,13 +149,12 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
             f1 = xx.cwiseProduct(kernels).mean(); // first order derivative
             b = f1 / f0;
 
-            if (deg_ > 1) {
+            if (deg_ == 2) {
                 // more calculations for local quadratic
                 xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
                 b *= std::pow(bw_, 2);
-                s = 1.0 / (std::pow(bw_, 4) * xx.cwiseProduct(xx2).sum() -
-                    std::pow(b, 2));
-                res(k, 0) *= std::sqrt(s) / bw_;
+                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - std::pow(b, 2));
+                res(k, 0) *= bw_ * std::sqrt(s);
             }
 
             // final estimate
