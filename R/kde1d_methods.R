@@ -37,7 +37,6 @@ dkde1d <- function(x, obj) {
         x <- x[[1]]
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
-    check_boundary_violations(x, obj$xmin, obj$xmax)
 
     # adjust grid to stabilize estimates
     rng <- diff(range(obj$grid_points))
@@ -68,7 +67,6 @@ pkde1d <- function(q, obj) {
         q <- q[[1]]
     if (!is.ordered(q))
         stopifnot(!is.factor(q))
-    check_boundary_violations(q, obj$xmin, obj$xmax)
 
     if (length(obj$jitter_info$i_disc) != 1) {
         p <- pkde1d_cpp(q, obj)

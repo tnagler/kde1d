@@ -74,13 +74,13 @@ test_that("d/p/r/h functions work", {
         expect_that(all(qkde1d(u, fit) >= xmin), equals(TRUE))
         expect_that(all(qkde1d(u, fit) <= xmax), equals(TRUE))
         if (!is.nan(fit$xmin)) {
-            expect_error(dkde1d(xmin - 1, fit))
-            expect_error(pkde1d(xmin - 1, fit))
+            expect_equal(dkde1d(xmin - 1, fit), 0)
+            expect_equal(pkde1d(xmin - 1, fit), 0)
         }
 
         if (!is.nan(fit$xmax)) {
-            expect_error(dkde1d(xmax + 1, fit))
-            expect_error(pkde1d(xmax + 1, fit))
+            expect_equal(dkde1d(xmax + 1, fit), 0)
+            expect_equal(pkde1d(xmax + 1, fit), 1)
         }
     }
 
