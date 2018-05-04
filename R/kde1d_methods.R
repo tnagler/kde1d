@@ -39,8 +39,6 @@ dkde1d <- function(x, obj) {
         stopifnot(!is.factor(x))
     check_boundary_violations(x, obj$xmin, obj$xmax)
 
-    x <- expand_as_numeric(x)
-
     # adjust grid to stabilize estimates
     rng <- diff(range(obj$grid_points))
     if (!is.nan(obj$xmin))

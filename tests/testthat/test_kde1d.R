@@ -85,7 +85,7 @@ test_that("d/p/r/h functions work", {
     }
 
     sims <- lapply(fits, function(x) rkde1d(n, x))
-    mapply(test_dpqr, fits[2], sims[2])
+    mapply(test_dpqr, fits, sims)
 
     sim <- lapply(fits, function(x) rkde1d(n, x, quasi = TRUE))
     mapply(test_dpqr, fits, sims)
