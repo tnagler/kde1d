@@ -37,6 +37,14 @@ dkde1d <- function(x, obj) {
         x <- x[[1]]
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
+
+    # adjust grid to stabilize estimates
+    rng <- diff(range(obj$grid_points))
+    if (!is.nan(obj$xmin))
+        obj$grid_points[1] <- obj$xmin - 0.1 * rng
+    if (!is.nan(obj$xmax))
+        obj$grid_points[length(obj$grid_points)] <- obj$xmax + 0.1 * rng
+
     if (length(obj$jitter_info$i_disc) == 1 & !is.ordered(x))
         x <- ordered(x, obj$jitter_info$levels$x)
 
@@ -153,13 +161,19 @@ plot.kde1d <- function(x, ...) {
         ev <- ordered(x$jitter_info$levels$x,
                       levels = x$jitter_info$levels$x)
         plot_type <- "h"  # for discrete variables, use a histrogram
-        x$values <- dkde1d(ev, x)
-        x$grid_points <- ev
+    } else {
+        # adjust grid if necessary
+        ev <- x$grid_points
+        if (!is.nan(x$xmin))
+            ev[1] <- x$xmin
+        if (!is.nan(x$xmax))
+            ev[length(ev)] <- x$xmax
     }
+    vals <- dkde1d(ev, x)
 
     pars <- list(
-        x = x$grid_points,
-        y = x$values,
+        x = ev,
+        y = vals,
         type = plot_type,
         xlab = "x",
         ylab = "density",

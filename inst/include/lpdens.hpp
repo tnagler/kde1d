@@ -225,7 +225,7 @@ inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
     if (!inverse) {
         if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
             // two boundaries -> probit transform
-            x_new = (x.array() - xmin_ + 5e-3) / (xmax_ - xmin_ + 1e-2);
+            x_new = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
             x_new = stats::qnorm(x_new);
         } else if (!std::isnan(xmin_)) {
             // left boundary -> log transform
@@ -239,8 +239,8 @@ inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
     } else {
         if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
             // two boundaries -> probit transform
-            x_new = stats::pnorm(x).array() + xmin_ - 5e-3;
-            x_new *=  (xmax_ - xmin_ + 1e-2);
+            x_new = stats::pnorm(x).array() + xmin_ - 5e-5;
+            x_new *=  (xmax_ - xmin_ + 1e-4);
         } else if (!std::isnan(xmin_)) {
             // left boundary -> log transform
             x_new = x.array().exp() + xmin_ - 1e-3;
@@ -266,10 +266,10 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
     Eigen::VectorXd corr_term(fhat.size());
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
         // two boundaries -> probit transform
-        corr_term = (x.array() - xmin_ + 5e-3) / (xmax_ - xmin_ + 1e-2);
+        corr_term = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
         corr_term = stats::dnorm(stats::qnorm(corr_term));
-        corr_term /= (xmax_ - xmin_ + 1e-2);
-        corr_term = 1.0 / corr_term.array().max(1e-8);
+        corr_term /= (xmax_ - xmin_ + 1e-4);
+        corr_term = 1.0 / corr_term.array().max(1e-6);
     } else if (!std::isnan(xmin_)) {
         // left boundary -> log transform
         corr_term = 1.0 / (1e-3 + x.array() - xmin_);
@@ -329,6 +329,7 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
 //! @param grid_points the grid points.
 inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
+    double range = grid_points.maxCoeff() - grid_points.minCoeff();
     if (!std::isnan(xmin_))
         grid_points(0) = xmin_;
     if (!std::isnan(xmax_))
