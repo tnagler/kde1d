@@ -130,3 +130,9 @@ test_that("behavior for discrete data is consistent", {
     expect_true(all(is.na(pkde1d(c(0, 6), fit))))
     expect_true(all(rkde1d(n, fit) %in% x))
 })
+
+test_that("estimates for discrete data are reasonable", {
+    x <- ordered(sample(5, 1e5, TRUE), 1:5)
+    fit <- kde1d(x)
+    expect_true(all(abs(dkde1d(1:5, fit) - 0.2) < 0.1))
+})

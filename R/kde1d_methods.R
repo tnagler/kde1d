@@ -48,11 +48,11 @@ dkde1d <- function(x, obj) {
     if (length(obj$jitter_info$i_disc) == 1 & !is.ordered(x))
         x <- ordered(x, obj$jitter_info$levels$x)
 
-    fhat <- dkde1d_cpp(x, obj)
+    fhat <- dkde1d_cpp(expand_as_numeric(x), obj)
 
     if (length(obj$jitter_info$i_disc) == 1) {
         # for discrete variables we can normalize
-        f_all <- dkde1d_cpp(as.ordered(obj$jitter_info$levels$x), obj)
+        f_all <- dkde1d_cpp(seq_along(obj$jitter_info$levels$x) - 1, obj)
         fhat <- fhat / sum(f_all)
     }
 
