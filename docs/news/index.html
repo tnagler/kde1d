@@ -54,7 +54,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.2</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.2.0</span>
       </span>
     </div>
 
@@ -97,9 +97,24 @@
       <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="kde1d-0-2-0" class="section level1">
+<h1 class="page-header">
+<a href="#kde1d-0-2-0" class="anchor"></a>kde1d 0.2.0<small> Unreleased </small>
+</h1>
+<p>NEW FEATURES</p>
+<ul>
+<li>improved stability of density estimates near a boundary (<a href='https://github.com/tnagler/kde1d/issues/21'>#21</a>).</li>
+</ul>
+<p>BUG FIXES</p>
+<ul>
+<li><p>consistent behavior when <code><a href="../reference/dkde1d.html">dkde1d()</a></code> and <code><a href="../reference/dkde1d.html">pkde1d()</a></code> are called with non-<code>ordered</code> input although data are discrete (<a href='https://github.com/tnagler/kde1d/issues/19'>#19</a>).</p></li>
+<li><p>fixed bug in computation of kernel density estimates (<a href='https://github.com/tnagler/kde1d/issues/20'>#20</a>).</p></li>
+<li><p>adapt minimum <code>bw</code> allowed for discrete data to truncated Gaussian kernel (<a href='https://github.com/tnagler/kde1d/issues/20'>#20</a>).</p></li>
+</ul>
+</div>
     <div id="kde1d-0-1-2" class="section level1">
 <h1 class="page-header">
-<a href="#kde1d-0-1-2" class="anchor"></a>kde1d 0.1.2<small> Unreleased </small>
+<a href="#kde1d-0-1-2" class="anchor"></a>kde1d 0.1.2<small> 2018-04-17 </small>
 </h1>
 <p>NEW FEATURES</p>
 <ul>
@@ -125,6 +140,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
+        <li><a href="#kde1d-0-2-0">0.2.0</a></li>
         <li><a href="#kde1d-0-1-2">0.1.2</a></li>
         <li><a href="#kde1d-0-1-0">0.1.0</a></li>
       </ul>
