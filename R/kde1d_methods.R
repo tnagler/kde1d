@@ -38,13 +38,21 @@ dkde1d <- function(x, obj) {
     if (!is.ordered(x))
         stopifnot(!is.factor(x))
 
-    x <- expand_as_numeric(x)
-    fhat <- dkde1d_cpp(x, obj)
+    # adjust grid to stabilize estimates
+    rng <- diff(range(obj$grid_points))
+    if (!is.nan(obj$xmin))
+        obj$grid_points[1] <- obj$xmin - 0.1 * rng
+    if (!is.nan(obj$xmax))
+        obj$grid_points[length(obj$grid_points)] <- obj$xmax + 0.1 * rng
+
+    if (length(obj$jitter_info$i_disc) == 1 & !is.ordered(x))
+        x <- ordered(x, obj$jitter_info$levels$x)
+
+    fhat <- dkde1d_cpp(expand_as_numeric(x), obj)
 
     if (length(obj$jitter_info$i_disc) == 1) {
         # for discrete variables we can normalize
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
-        f_all <- dkde1d_cpp(x_all_num, obj)
+        f_all <- dkde1d_cpp(seq_along(obj$jitter_info$levels$x) - 1, obj)
         fhat <- fhat / sum(f_all)
     }
 
@@ -60,15 +68,14 @@ pkde1d <- function(q, obj) {
     if (!is.ordered(q))
         stopifnot(!is.factor(q))
 
-    q <- expand_as_numeric(q)
-
     if (length(obj$jitter_info$i_disc) != 1) {
         p <- pkde1d_cpp(q, obj)
     } else {
-        # for discrete variables we have to add the missing probability mass
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
-        f_all <- dkde1d(x_all_num, obj)
-        p <- sapply(q, function(y) sum(f_all[x_all_num <= y]))
+        if (!is.ordered(q))
+            q <- ordered(q, obj$jitter_info$levels$x)
+        x_all <- as.ordered(obj$jitter_info$levels$x)
+        p_all <- dkde1d(x_all, obj)
+        p <- sapply(q, function(y) sum(p_all[x_all <= y]))
         p <- pmin(pmax(p, 0), 1)
     }
 
@@ -81,19 +88,17 @@ pkde1d <- function(q, obj) {
 qkde1d <- function(p, obj) {
     stopifnot(all(na.omit(p) > 0.0) & all(na.omit(p) < 1.0))
     if (length(obj$jitter_info$i_disc) != 1) {
+        ## qkde1d_cpp for continuous variables
         q <- qkde1d_cpp(p, obj)
     } else {
         ## for discrete variables compute quantile from the density
-        x_all_num <- expand_as_numeric(as.ordered(obj$jitter_info$levels$x))
+        x_all <- as.ordered(obj$jitter_info$levels$x)
 
         # pdf at all possible values of x
-        dd <- dkde1d(x_all_num, obj)
-        pp <- c(cumsum(dd)) / sum(dd)
+        pp <- pkde1d(x_all, obj)
 
         # generalized inverse
-        q <- x_all_num[vapply(p, function(y) which(y <= pp)[1], integer(1))]
-        q <- ordered(obj$jitter_info$levels$x[q + 1],
-                     levels = obj$jitter_info$levels$x)
+        q <- x_all[vapply(p, function(y) which(y <= pp)[1], integer(1))]
     }
 
     q
@@ -156,13 +161,19 @@ plot.kde1d <- function(x, ...) {
         ev <- ordered(x$jitter_info$levels$x,
                       levels = x$jitter_info$levels$x)
         plot_type <- "h"  # for discrete variables, use a histrogram
-        x$values <- dkde1d(ev, x)
-        x$grid_points <- ev
+    } else {
+        # adjust grid if necessary
+        ev <- x$grid_points
+        if (!is.nan(x$xmin))
+            ev[1] <- x$xmin
+        if (!is.nan(x$xmax))
+            ev[length(ev)] <- x$xmax
     }
+    vals <- dkde1d(ev, x)
 
     pars <- list(
-        x = x$grid_points,
-        y = x$values,
+        x = ev,
+        y = vals,
         type = plot_type,
         xlab = "x",
         ylab = "density",

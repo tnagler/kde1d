@@ -138,7 +138,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
     Eigen::VectorXd kernels(x.size());
     for (size_t k = 0; k < x_ev.size(); k++) {
         // classical (local constant) kernel density estimate
-        xx = x.array() - x_ev(k);
+        xx = (x.array() - x_ev(k)) / bw_;
         kernels = kern_gauss(xx) / bw_;
         f0 = kernels.mean();
         res(k, 0) = f0;
@@ -149,13 +149,12 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
             f1 = xx.cwiseProduct(kernels).mean(); // first order derivative
             b = f1 / f0;
 
-            if (deg_ > 1) {
+            if (deg_ == 2) {
                 // more calculations for local quadratic
                 xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
                 b *= std::pow(bw_, 2);
-                s = 1.0 / (std::pow(bw_, 4) * xx.cwiseProduct(xx2).sum() -
-                    std::pow(b, 2));
-                res(k, 0) *= std::sqrt(s) / bw_;
+                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - std::pow(b, 2));
+                res(k, 0) *= bw_ * std::sqrt(s);
             }
 
             // final estimate
@@ -226,7 +225,7 @@ inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
     if (!inverse) {
         if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
             // two boundaries -> probit transform
-            x_new = (x.array() - xmin_ + 5e-3) / (xmax_ - xmin_ + 1e-2);
+            x_new = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
             x_new = stats::qnorm(x_new);
         } else if (!std::isnan(xmin_)) {
             // left boundary -> log transform
@@ -240,8 +239,8 @@ inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
     } else {
         if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
             // two boundaries -> probit transform
-            x_new = stats::pnorm(x).array() + xmin_ - 5e-3;
-            x_new *=  (xmax_ - xmin_ + 1e-2);
+            x_new = stats::pnorm(x).array() + xmin_ - 5e-5;
+            x_new *=  (xmax_ - xmin_ + 1e-4);
         } else if (!std::isnan(xmin_)) {
             // left boundary -> log transform
             x_new = x.array().exp() + xmin_ - 1e-3;
@@ -267,10 +266,10 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
     Eigen::VectorXd corr_term(fhat.size());
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
         // two boundaries -> probit transform
-        corr_term = (x.array() - xmin_ + 5e-3) / (xmax_ - xmin_ + 1e-2);
+        corr_term = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
         corr_term = stats::dnorm(stats::qnorm(corr_term));
-        corr_term /= (xmax_ - xmin_ + 1e-2);
-        corr_term = 1.0 / corr_term.array().max(1e-4);
+        corr_term /= (xmax_ - xmin_ + 1e-4);
+        corr_term = 1.0 / corr_term.array().max(1e-6);
     } else if (!std::isnan(xmin_)) {
         // left boundary -> log transform
         corr_term = 1.0 / (1e-3 + x.array() - xmin_);
@@ -330,6 +329,7 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
 //! @param grid_points the grid points.
 inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
+    double range = grid_points.maxCoeff() - grid_points.minCoeff();
     if (!std::isnan(xmin_))
         grid_points(0) = xmin_;
     if (!std::isnan(xmax_))

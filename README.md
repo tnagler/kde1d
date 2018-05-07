@@ -37,7 +37,7 @@ devtools::install_github("tnagler/kde1d")
 ``` r
 x <- rnorm(100)                    # simulate data
 fit <- kde1d(x)                    # estimate density
-dkde1d(1000, fit)                  # evaluate density estimate
+dkde1d(0, fit)                     # evaluate density estimate
 summary(fit)                       # information about the estimate
 plot(fit)                          # plot the density estimate
 curve(dnorm(x), add = TRUE,        # add true density
@@ -48,7 +48,7 @@ curve(dnorm(x), add = TRUE,        # add true density
 ``` r
 x <- rgamma(100, shape = 1)        # simulate data
 fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
-dkde1d(1000, fit)                  # evaluate density estimate
+dkde1d(seq(0, 5, by = 1), fit)     # evaluate density estimate
 summary(fit)                       # information about the estimate
 plot(fit)                          # plot the density estimate
 curve(dgamma(x, shape = 1),        # add true density
@@ -61,7 +61,7 @@ curve(dgamma(x, shape = 1),        # add true density
 x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
 x <- ordered(x, levels = 0:5)           # declare as ordered
 fit <- kde1d(x)                         # estimate density
-dkde1d(2, fit)                          # evaluate density estimate
+dkde1d(sort(unique(x)), fit)            # evaluate density estimate
 summary(fit)                            # information about the estimate
 plot(fit)                               # plot the density estimate
 points(ordered(0:5, 0:5),               # add true density

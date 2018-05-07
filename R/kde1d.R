@@ -50,22 +50,20 @@
 #'   Statistical Society, Series B, 53, 683–690.
 #'
 #' @examples
-#' ## For reproducibility
-#' set.seed(0)
 #'
 #' ## unbounded data
-#' x <- rnorm(100)                    # simulate data
+#' x <- rnorm(500)                    # simulate data
 #' fit <- kde1d(x)                    # estimate density
-#' dkde1d(1000, fit)                  # evaluate density estimate
+#' dkde1d(0, fit)                     # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
 #' curve(dnorm(x), add = TRUE,        # add true density
 #'       col = "red")
 #'
 #' ## bounded data, log-linear
-#' x <- rgamma(100, shape = 1)        # simulate data
+#' x <- rgamma(500, shape = 1)        # simulate data
 #' fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
-#' dkde1d(1000, fit)                  # evaluate density estimate
+#' dkde1d(seq(0, 5, by = 1), fit)     # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
 #' curve(dgamma(x, shape = 1),        # add true density
@@ -73,10 +71,10 @@
 #'       from = 1e-3)
 #'
 #' ## discrete data
-#' x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
+#' x <- rbinom(500, size = 5, prob = 0.5)  # simulate data
 #' x <- ordered(x, levels = 0:5)           # declare as ordered
 #' fit <- kde1d(x)                         # estimate density
-#' dkde1d(2, fit)                          # evaluate density estimate
+#' dkde1d(sort(unique(x)), fit)            # evaluate density estimate
 #' summary(fit)                            # information about the estimate
 #' plot(fit)                               # plot the density estimate
 #' points(ordered(0:5, 0:5),               # add true density
@@ -109,49 +107,3 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2) {
     class(fit) <- "kde1d"
     fit
 }
-
-#' check and pre-process arguments passed to kde1d()
-#' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw, deg) {
-    stopifnot(NCOL(x) == 1)
-
-    if (!is.ordered(x) & is.factor(x))
-        stop("Factors not allowed; use kdevine::kdevine() or cctools::cckde().")
-
-    stopifnot(mult > 0)
-
-    if (is.ordered(x) & (!is.nan(xmin) | !is.nan(xmax)))
-        stop("xmin and xmax are not meaningful for x of type ordered.")
-
-    if (!is.nan(xmax) & !is.nan(xmin)) {
-        if (xmin > xmax)
-            stop("xmin is larger than xmax.")
-        if (any(x < xmin) || any(x > xmax))
-            stop("Not all data are contained in the interval [xmin, xmax].")
-    } else if (!is.nan(xmin)) {
-        if (any(x < xmin))
-            stop("Not all data are larger than xmin.")
-    } else if (!is.nan(xmax)) {
-        if (any(x > xmax))
-            stop("Not all data are samller than xmax.")
-    }
-
-    if (!(deg %in% 0:2))
-        stop("deg must be either 0, 1, or 2.")
-}
-
-#' adjusts observations and evaluation points for boundary effects
-#' @importFrom stats qnorm
-#' @noRd
-boundary_transform <- function(x, xmin, xmax) {
-    if (!is.nan(xmin) & !is.nan(xmax)) {  # two boundaries
-        x <- qnorm((x - xmin) / (xmax - xmin + 1e-1))
-    } else if (!is.nan(xmin)) {           # left boundary
-        x <- log(x - xmin + 1e-3)
-    } else if (!is.nan(xmax)) {           # right boundary
-        x <- log(xmax - x + 1e-3)
-    }
-
-    x
-}
-

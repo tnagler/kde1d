@@ -73,6 +73,15 @@ test_that("d/p/r/h functions work", {
         expect_lte(max(pkde1d(sim, fit), 1), 1)
         expect_that(all(qkde1d(u, fit) >= xmin), equals(TRUE))
         expect_that(all(qkde1d(u, fit) <= xmax), equals(TRUE))
+        if (!is.nan(fit$xmin)) {
+            expect_equal(dkde1d(xmin - 1, fit), 0)
+            expect_equal(pkde1d(xmin - 1, fit), 0)
+        }
+
+        if (!is.nan(fit$xmax)) {
+            expect_equal(dkde1d(xmax + 1, fit), 0)
+            expect_equal(pkde1d(xmax + 1, fit), 1)
+        }
     }
 
     sims <- lapply(fits, function(x) rkde1d(n, x))
@@ -108,4 +117,22 @@ test_that("other generics work", {
     }
 
     lapply(fits, test_other_generics)
+})
+
+test_that("behavior for discrete data is consistent", {
+    n <- 1e3
+    x <- ordered(sample(5, n, TRUE), 1:5)
+    fit <- kde1d(x)
+    xx <- ordered(1:5, 1:5)
+    expect_equal(dkde1d(1:5, fit), dkde1d(xx, fit))
+    expect_equal(pkde1d(1:5, fit), pkde1d(xx, fit))
+    expect_true(all(is.na(dkde1d(c(0, 6), fit))))
+    expect_true(all(is.na(pkde1d(c(0, 6), fit))))
+    expect_true(all(rkde1d(n, fit) %in% x))
+})
+
+test_that("estimates for discrete data are reasonable", {
+    x <- ordered(sample(5, 1e5, TRUE), 1:5)
+    fit <- kde1d(x)
+    expect_true(all(abs(dkde1d(1:5, fit) - 0.2) < 0.1))
 })

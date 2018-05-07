@@ -54,7 +54,17 @@ InterpolationGrid1d wrap_to_cpp(const Rcpp::List& R_object)
 Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
                            const Rcpp::List& R_object)
 {
-    return wrap_to_cpp(R_object).interpolate(x);
+    Eigen::VectorXd fhat = wrap_to_cpp(R_object).interpolate(x);
+    double xmin = R_object["xmin"];
+    double xmax = R_object["xmax"];
+    if (!std::isnan(xmin)) {
+        fhat = (x.array() < xmin).select(Eigen::VectorXd::Zero(x.size()), fhat);
+    }
+    if (!std::isnan(xmax)) {
+        fhat = (x.array() > xmax).select(Eigen::VectorXd::Zero(x.size()), fhat);
+    }
+
+    return fhat;
 }
 
 //' computes the cdf of a kernel density estimate by numerical integration.
@@ -117,7 +127,7 @@ double select_bw_cpp(const Eigen::VectorXd& x,
     bw *= mult;
 
     if (discrete) {
-        bw = std::max(bw, 0.5);
+        bw = std::max(bw, 0.5 / 5);
     }
 
     return(bw);
