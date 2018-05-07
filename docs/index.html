@@ -106,7 +106,7 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <a href="#unbounded-data" class="anchor"></a>Unbounded data</h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>)                    <span class="co"># simulate data</span>
 fit &lt;-<span class="st"> </span><span class="kw"><a href="reference/kde1d.html">kde1d</a></span>(x)                    <span class="co"># estimate density</span>
-<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="dv">1000</span>, fit)                  <span class="co"># evaluate density estimate</span>
+<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="dv">0</span>, fit)                     <span class="co"># evaluate density estimate</span>
 <span class="kw">summary</span>(fit)                       <span class="co"># information about the estimate</span>
 <span class="kw">plot</span>(fit)                          <span class="co"># plot the density estimate</span>
 <span class="kw">curve</span>(<span class="kw">dnorm</span>(x), <span class="dt">add =</span> <span class="ot">TRUE</span>,        <span class="co"># add true density</span>
@@ -117,7 +117,7 @@ fit &lt;-<span class="st"> </span><span class="kw"><a href="reference/kde1d.html
 <a href="#bounded-data-log-linear" class="anchor"></a>Bounded data, log-linear</h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">rgamma</span>(<span class="dv">100</span>, <span class="dt">shape =</span> <span class="dv">1</span>)        <span class="co"># simulate data</span>
 fit &lt;-<span class="st"> </span><span class="kw"><a href="reference/kde1d.html">kde1d</a></span>(x, <span class="dt">xmin =</span> <span class="dv">0</span>, <span class="dt">deg =</span> <span class="dv">1</span>) <span class="co"># estimate density</span>
-<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="dv">1000</span>, fit)                  <span class="co"># evaluate density estimate</span>
+<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dt">by =</span> <span class="dv">1</span>), fit)     <span class="co"># evaluate density estimate</span>
 <span class="kw">summary</span>(fit)                       <span class="co"># information about the estimate</span>
 <span class="kw">plot</span>(fit)                          <span class="co"># plot the density estimate</span>
 <span class="kw">curve</span>(<span class="kw">dgamma</span>(x, <span class="dt">shape =</span> <span class="dv">1</span>),        <span class="co"># add true density</span>
@@ -130,7 +130,7 @@ fit &lt;-<span class="st"> </span><span class="kw"><a href="reference/kde1d.html
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">100</span>, <span class="dt">size =</span> <span class="dv">5</span>, <span class="dt">prob =</span> <span class="fl">0.5</span>)  <span class="co"># simulate data</span>
 x &lt;-<span class="st"> </span><span class="kw">ordered</span>(x, <span class="dt">levels =</span> <span class="dv">0</span><span class="op">:</span><span class="dv">5</span>)           <span class="co"># declare as ordered</span>
 fit &lt;-<span class="st"> </span><span class="kw"><a href="reference/kde1d.html">kde1d</a></span>(x)                         <span class="co"># estimate density</span>
-<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="dv">2</span>, fit)                          <span class="co"># evaluate density estimate</span>
+<span class="kw"><a href="reference/dkde1d.html">dkde1d</a></span>(<span class="kw">sort</span>(<span class="kw">unique</span>(x)), fit)            <span class="co"># evaluate density estimate</span>
 <span class="kw">summary</span>(fit)                            <span class="co"># information about the estimate</span>
 <span class="kw">plot</span>(fit)                               <span class="co"># plot the density estimate</span>
 <span class="kw">points</span>(<span class="kw">ordered</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">0</span><span class="op">:</span><span class="dv">5</span>),               <span class="co"># add true density</span>

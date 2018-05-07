@@ -63,7 +63,7 @@
 #' ## bounded data, log-linear
 #' x <- rgamma(500, shape = 1)        # simulate data
 #' fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
-#' dkde1d(seq(0, 1, by = 1), fit)     # evaluate density estimate
+#' dkde1d(seq(0, 5, by = 1), fit)     # evaluate density estimate
 #' summary(fit)                       # information about the estimate
 #' plot(fit)                          # plot the density estimate
 #' curve(dgamma(x, shape = 1),        # add true density
