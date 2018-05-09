@@ -329,7 +329,6 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
 //! @param grid_points the grid points.
 inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
-    double range = grid_points.maxCoeff() - grid_points.minCoeff();
     if (!std::isnan(xmin_))
         grid_points(0) = xmin_;
     if (!std::isnan(xmax_))
