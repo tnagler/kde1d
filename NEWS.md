@@ -1,3 +1,10 @@
+# kde1d 0.2.1
+
+BUG FIXES
+
+  * fix bug in computation of effective degrees of freedom when `deg = 2`.
+
+
 # kde1d 0.2.0
 
 NEW FEATURES

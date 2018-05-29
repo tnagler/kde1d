@@ -199,13 +199,12 @@ inline double LPDens1d::calculate_infl(const size_t &n,
         M(0, 1) = f0 * b;
         M(1, 0) = M(0, 1);
         M(1, 1) = f0 * bw2 + f0 * b2;
-        M(0, 2) = M(2, 2);
-        M(2, 0) = M(2, 2);
         M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
         M(2, 1) = M(1, 2);
-        M(2, 2) = 3.0 / std::pow(s, 2) + 6.0 * b2 / std::pow(s, 3);
         M(2, 2) = 0.25 * f0;
         M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2  + b2 * b2;
+        M(0, 2) = M(2, 2);
+        M(2, 0) = M(2, 2);
     }
 
     double infl = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
@@ -329,7 +328,6 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
 //! @param grid_points the grid points.
 inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
-    double range = grid_points.maxCoeff() - grid_points.minCoeff();
     if (!std::isnan(xmin_))
         grid_points(0) = xmin_;
     if (!std::isnan(xmax_))

@@ -1,7 +1,5 @@
 ## Test environments
-* Debian Linux with clang-4.0-ASAN enabled on rocker/r-devel-ubsan-clang (devel)
-* local OS X install (release)
-* ubuntu 12.04 on travis-ci (release, devel)
+* ubuntu 12.04 on travis-ci (release, devel, oldrel)
 * win-builder (devel)
 
 ## R CMD check results
@@ -10,4 +8,4 @@
 
 ## Reverse dependencies
 
-There are no reverse dependencies.
+rvinecopulib: 0 errors | 0 warnings | 0 notes

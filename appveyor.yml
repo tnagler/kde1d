@@ -13,9 +13,6 @@ init:
 install:
   ps: Bootstrap
 
-cache:
-  - C:\RLibrary
-
 environment:
     R_VERSION: release
 
