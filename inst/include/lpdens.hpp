@@ -10,7 +10,8 @@ class LPDens1d {
 public:
     // constructors
     LPDens1d() {}
-    LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax, size_t p);
+    LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax, size_t p,
+             const Eigen::VectorXd& weights = Eigen::VectorXd());
 
     // getters
     Eigen::VectorXd get_values() const {return grid_.get_values();}
@@ -35,12 +36,14 @@ private:
     // private methods
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
     Eigen::MatrixXd fit_lp(const Eigen::VectorXd& x_ev,
-                           const Eigen::VectorXd& x);
+                           const Eigen::VectorXd& x,
+                           const Eigen::VectorXd& weights);
     double calculate_infl(const size_t& n,
                           const double& f0,
                           const double& b,
                           const double& bw,
-                          const double& s);
+                          const double& s,
+                          const double& weight);
     Eigen::VectorXd boundary_transform(const Eigen::VectorXd& x,
                                        bool inverse = false);
     Eigen::VectorXd boundary_correct(const Eigen::VectorXd& x,
@@ -58,16 +61,21 @@ private:
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
 //! @param p order of the local polynomial.
+//! @param weights vector of weights for each observation (can be empty).
 inline LPDens1d::LPDens1d(Eigen::VectorXd x,
                           double bw,
                           double xmin,
                           double xmax,
-                          size_t deg) :
+                          size_t deg,
+                          const Eigen::VectorXd& weights) :
     bw_(bw),
     xmin_(xmin),
     xmax_(xmax),
     deg_(deg)
 {
+    if (weights.size() > 0 && (weights.size() != x.size()))
+        throw std::runtime_error("x and weights must have the same size");
+    
     // construct equally spaced grid on original domain
     Eigen::VectorXd grid_points = construct_grid_points(x);
 
@@ -76,7 +84,7 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     x = boundary_transform(x);
 
     // fit model and evaluate in transformed domain
-    Eigen::MatrixXd fitted = fit_lp(grid_points, x);
+    Eigen::MatrixXd fitted = fit_lp(grid_points, x, weights);
 
     // back-transform grid to original domain
     grid_points = boundary_transform(grid_points, true);
@@ -123,10 +131,12 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
 //! function on a user-supplied grid.
 //! @param x_ev evaluation points.
 //! @param x observations.
+//! @param weights vector of weights for each observation (can be empty).
 //! @return a two-column matrix containing the density estimate in the first
 //!   and the influence function in the second column.
 inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
-                                        const Eigen::VectorXd& x)
+                                        const Eigen::VectorXd& x,
+                                        const Eigen::VectorXd& weights)
 {
     Eigen::MatrixXd res(x_ev.size(), 2);
     size_t n = x.size();
@@ -140,6 +150,8 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
         // classical (local constant) kernel density estimate
         xx = (x.array() - x_ev(k)) / bw_;
         kernels = kern_gauss(xx) / bw_;
+        if (weights.size() > 0)
+            kernels = kernels.cwiseProduct(weights);
         f0 = kernels.mean();
         res(k, 0) = f0;
 
@@ -168,7 +180,11 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
         }
 
         // influence function estimate
-        res(k, 1) = calculate_infl(n, f0, b, bw_, s);
+        if (weights.size() > 0) {
+            res(k, 1) = calculate_infl(n, f0, b, bw_, s, weights(k));
+        } else {
+            res(k, 1) = calculate_infl(n, f0, b, bw_, s, 1.0);
+        }
     }
 
     return res;
@@ -180,7 +196,8 @@ inline double LPDens1d::calculate_infl(const size_t &n,
                                        const double& f0,
                                        const double& b,
                                        const double& bw,
-                                       const double& s)
+                                       const double& s,
+                                       const double& weight)
 {
     Eigen::MatrixXd M;
     double bw2 = std::pow(bw, 2);
@@ -208,7 +225,7 @@ inline double LPDens1d::calculate_infl(const size_t &n,
     }
 
     double infl = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
-    infl *= M.inverse()(0, 0) / static_cast<double>(n);
+    infl *= M.inverse()(0, 0) * weight / static_cast<double>(n);
     return infl;
 }
 
