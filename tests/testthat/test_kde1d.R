@@ -46,7 +46,8 @@ test_that("returns proper 'kde1d' object", {
     lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
     class_members <- c("grid_points", "values", "bw", "xmin", "xmax", "deg",
-                       "edf", "loglik", "jitter_info", "var_name", "nobs")
+                       "edf", "loglik", "weights", "jitter_info", "var_name",
+                       "nobs")
     lapply(fits, function(x) expect_identical(names(x), class_members))
 })
 

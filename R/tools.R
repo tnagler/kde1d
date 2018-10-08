@@ -15,7 +15,7 @@ check_boundary_violations <- function(x, xmin, xmax) {
 
 #' check and pre-process arguments passed to kde1d()
 #' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw, deg) {
+check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
     stopifnot(NCOL(x) == 1)
 
     if (!is.ordered(x) & is.factor(x))
@@ -34,6 +34,9 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg) {
 
     if (!(deg %in% 0:2))
         stop("deg must be either 0, 1, or 2.")
+
+    if ((length(weights) > 0) && (length(weights) != length(x)))
+        stop("x and weights must have same length.")
 }
 
 #' adjusts observations and evaluation points for boundary effects

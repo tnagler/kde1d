@@ -72,10 +72,12 @@ pkde1d <- function(q, obj) {
         p <- pkde1d_cpp(q, obj)
     } else {
         if (!is.ordered(q))
+            
             q <- ordered(q, obj$jitter_info$levels$x)
         x_all <- as.ordered(obj$jitter_info$levels$x)
         p_all <- dkde1d(x_all, obj)
-        p <- sapply(q, function(y) sum(p_all[x_all <= y]))
+        p_total <- sum(p_all)
+        p <- sapply(q, function(y) sum(p_all[x_all <= y] / p_total))
         p <- pmin(pmax(p, 0), 1)
     }
 
