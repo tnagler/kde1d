@@ -68,6 +68,15 @@ points(ordered(0:5, 0:5),               # add true density
        dbinom(0:5, 5, 0.5), col = "red")
 ```
 
+##### Weighted estimate
+``` r
+x <- rnorm(100)                         # simulate data
+weights <- rexp(100)                    # weights as in Bayesian bootstrap
+fit <- kde1d(x, weights = weights)      # weighted fit
+plot(fit)                               # compare with unweighted fit
+lines(kde1d(x), col = 2)
+```
+
 ### References
 
 Geenens, G. (2014). *Probit transformation for kernel density estimation on

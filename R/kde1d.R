@@ -15,6 +15,7 @@
 #'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
 #'   log-linear, and log-quadratic fitting, respectively.
+#' @param weights optional vector of weights for individual observations.
 #'
 #' @return An object of class `kde1d`.
 #'
@@ -79,6 +80,13 @@
 #' plot(fit)                               # plot the density estimate
 #' points(ordered(0:5, 0:5),               # add true density
 #'        dbinom(0:5, 5, 0.5), col = "red")
+#'
+#' ## weighted estimate
+#' x <- rnorm(100)                         # simulate data
+#' weights <- rexp(100)                    # weights as in Bayesian bootstrap
+#' fit <- kde1d(x, weights = weights)      # weighted fit
+#' plot(fit)                               # compare with unweighted fit
+#' lines(kde1d(x), col = 2)
 #'
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit

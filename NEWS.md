@@ -1,8 +1,8 @@
-# kde1d 0.2.1
+# kde1d 0.3.0.9000
 
-BUG FIXES
+NEW FEATURE
 
-  * fix bug in computation of effective degrees of freedom when `deg = 2`.
+  * allow weights for observations via `kde1d(..., weights = )` (#29).
 
 
 # kde1d 0.2.0
