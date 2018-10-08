@@ -28,7 +28,7 @@ install.packages("kde1d")
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("tnagler/kde1d")
+devtools::install_github("tnagler/kde1d@dev")
 ```
 
 ### Examples
