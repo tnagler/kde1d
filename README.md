@@ -14,7 +14,7 @@ bounded and discrete data.
 - is highly efficient due to spline interpolation and a C++ backend.
 
 For details, see the 
-[API documentation](https://tnagler.github.io/VineCopula/).
+[API documentation](https://tnagler.github.io/kde1d/).
 
 ### How to install
 
