@@ -137,3 +137,7 @@ double select_bw_cpp(const Eigen::VectorXd& x,
     return(bw);
 }
 
+// [[Rcpp::export]]
+Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w) {
+    return stats::quantile(x, a, w);
+}

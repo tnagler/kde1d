@@ -103,7 +103,8 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
         size_t i = 1;
         while (wcum(i) < q(j) * wsum)
             i++;
-        res(j) = x2(i - 1) + (x2(i) - x2(i - 1)) * (q(j) * wsum - wcum(i - 1));
+        res(j) = x2(i - 1) + (x2(i) - x2(i - 1)) *
+            (q(j) - wcum(i - 1) / wsum) / (wcum(i) - wcum(i - 1));
     }
 
     return res;

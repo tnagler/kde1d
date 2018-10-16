@@ -55,3 +55,7 @@ select_bw_cpp <- function(x, bw, mult, discrete, weights) {
     .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete, weights)
 }
 
+quan <- function(x, a, w) {
+    .Call('_kde1d_quan', PACKAGE = 'kde1d', x, a, w)
+}
+
