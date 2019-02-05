@@ -115,6 +115,9 @@ inline double dpik(const Eigen::VectorXd& x,
     q_x(1) = 0.25;
     q_x = stats::quantile(x, q_x, weights);
     double scale = std::min((q_x(0) - q_x(1))/1.349, sd_x);
+    if (scale == 0) {
+        scale = (sd_x > 0) ? sd_x : 1.0;
+    }
 
     // use effective sample size for pilot bandwidths
     double effn = std::pow(weights.sum(), 2) / weights.cwiseAbs2().sum();
