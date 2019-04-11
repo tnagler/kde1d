@@ -1,8 +1,14 @@
-# kde1d 0.3.0.9000
+# kde1d 0.4.0
 
 NEW FEATURE
 
   * allow weights for observations via `kde1d(..., weights = )` (#29).
+
+BUG FIX
+
+  * stabilized bandwidth selection in presence of ties and outliers.
+
+  * keep debug symbols on Linux systems (following a request by Prof. Ripley).
 
 
 # kde1d 0.2.0

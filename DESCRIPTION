@@ -1,7 +1,7 @@
 Package: kde1d
 Type: Package
 Title: Univariate Kernel Density Estimation
-Version: 0.3.0.9000
+Version: 0.4.0
 Authors@R: c(
         person("Thomas", "Nagler",, "mail@tnagler.com", role = c("aut", "cre")),
         person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("aut"))
@@ -26,7 +26,7 @@ Imports:
     qrng,
     stats,
     utils
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: 
     testthat
 URL: https://github.com/tnagler/kde1d
