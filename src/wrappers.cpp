@@ -19,9 +19,10 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          double bw,
                          double xmin,
                          double xmax,
-                         size_t deg)
+                         size_t deg,
+                         const Eigen::VectorXd& weights)
 {
-    LPDens1d fit(x, bw, xmin, xmax, deg);
+    LPDens1d fit(x, bw, xmin, xmax, deg, weights);
     return Rcpp::List::create(
         Rcpp::Named("grid_points") = fit.get_grid_points(),
         Rcpp::Named("values") = fit.get_values(),
@@ -30,7 +31,8 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
         Rcpp::Named("xmax") = xmax,
         Rcpp::Named("deg") = deg,
         Rcpp::Named("edf") = fit.get_edf(),
-        Rcpp::Named("loglik") = fit.get_loglik()
+        Rcpp::Named("loglik") = fit.get_loglik(),
+        Rcpp::Named("weights") = weights
     );
 }
 
@@ -112,16 +114,18 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 //' @param x vector of observations
 //' @param grid_size number of equally-spaced points over which binning is
 //' performed to obtain kernel functional approximation
+//' @param weights vector of weights for each observation (can be empty).
 //' @return the selected bandwidth
 //' @noRd
 // [[Rcpp::export]]
 double select_bw_cpp(const Eigen::VectorXd& x,
                      double bw,
                      double mult,
-                     bool discrete) {
+                     bool discrete,
+                     const Eigen::VectorXd& weights) {
 
     if (std::isnan(bw)) {
-        bw = dpik(x);
+        bw = dpik(x, weights);
     }
 
     bw *= mult;
@@ -131,4 +135,9 @@ double select_bw_cpp(const Eigen::VectorXd& x,
     }
 
     return(bw);
+}
+
+// [[Rcpp::export]]
+Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w) {
+    return stats::quantile(x, a, w);
 }

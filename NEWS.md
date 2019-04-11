@@ -1,8 +1,14 @@
-# kde1d 0.2.1
+# kde1d 0.4.0
 
-BUG FIXES
+NEW FEATURE
 
-  * fix bug in computation of effective degrees of freedom when `deg = 2`.
+  * allow weights for observations via `kde1d(..., weights = )` (#29).
+
+BUG FIX
+
+  * stabilized bandwidth selection in presence of ties and outliers.
+
+  * keep debug symbols on Linux systems (following a request by Prof. Ripley).
 
 
 # kde1d 0.2.0

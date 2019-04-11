@@ -28,7 +28,7 @@ install.packages("kde1d")
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("tnagler/kde1d")
+devtools::install_github("tnagler/kde1d@dev")
 ```
 
 ### Examples
@@ -66,6 +66,15 @@ summary(fit)                            # information about the estimate
 plot(fit)                               # plot the density estimate
 points(ordered(0:5, 0:5),               # add true density
        dbinom(0:5, 5, 0.5), col = "red")
+```
+
+##### Weighted estimate
+``` r
+x <- rnorm(100)                         # simulate data
+weights <- rexp(100)                    # weights as in Bayesian bootstrap
+fit <- kde1d(x, weights = weights)      # weighted fit
+plot(fit)                               # compare with unweighted fit
+lines(kde1d(x), col = 2)
 ```
 
 ### References

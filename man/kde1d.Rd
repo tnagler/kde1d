@@ -4,7 +4,8 @@
 \alias{kde1d}
 \title{Univariate local-polynomial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2)
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
+  weights = numeric(0))
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -24,6 +25,8 @@ latter uses the direct plug-in methodology of Sheather and Jones (1991).}
 
 \item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
 log-linear, and log-quadratic fitting, respectively.}
+
+\item{weights}{optional vector of weights for individual observations.}
 }
 \value{
 An object of class \code{kde1d}.
@@ -69,6 +72,13 @@ summary(fit)                            # information about the estimate
 plot(fit)                               # plot the density estimate
 points(ordered(0:5, 0:5),               # add true density
        dbinom(0:5, 5, 0.5), col = "red")
+
+## weighted estimate
+x <- rnorm(100)                         # simulate data
+weights <- rexp(100)                    # weights as in Bayesian bootstrap
+fit <- kde1d(x, weights = weights)      # weighted fit
+plot(fit)                               # compare with unweighted fit
+lines(kde1d(x), col = 2)
 
 }
 \references{

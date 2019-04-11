@@ -8,27 +8,29 @@ deg <- 0:2
 
 scenarios <- expand.grid(data_types = data_types, deg = deg)
 scenarios <- split(scenarios, seq_len(nrow(scenarios)))
-fits <- lapply(scenarios,
-               function(scenario) {
-                   xmin <- xmax <- NaN
-                   if (scenario$data_type == "unbounded") {
-                       x <- rnorm(n_sim)
-                   } else if (scenario$data_type == "left_boundary") {
-                       x <- rexp(n_sim)
-                       xmin <- 0
-                   }  else if (scenario$data_type == "right_boundary") {
-                       x <- -rexp(n_sim)
-                       xmax <- 0
-                   }  else if (scenario$data_type == "two_boundaries") {
-                       x <- runif(n_sim)
-                       xmin <- 0
-                       xmax <- 1
-                   } else {
-                       x <- ordered(rbinom(n_sim, size = 5, prob = 0.5),
-                                    levels = 0:5)
-                   }
-                   kde1d(x, xmin = xmin, xmax = xmax, deg = scenario$deg)
-               })
+fits <- lapply(
+    scenarios,
+    function(scenario) {
+        xmin <- xmax <- NaN
+        if (scenario$data_type == "unbounded") {
+            x <- rnorm(n_sim)
+        } else if (scenario$data_type == "left_boundary") {
+            x <- rexp(n_sim)
+            xmin <- 0
+        }  else if (scenario$data_type == "right_boundary") {
+            x <- -rexp(n_sim)
+            xmax <- 0
+        }  else if (scenario$data_type == "two_boundaries") {
+            x <- runif(n_sim)
+            xmin <- 0
+            xmax <- 1
+        } else {
+            x <- ordered(rbinom(n_sim, size = 5, prob = 0.5),
+                         levels = 0:5)
+        }
+        kde1d(x, xmin = xmin, xmax = xmax, deg = scenario$deg)
+    }
+)
 
 test_that("detects wrong arguments", {
     x <- rnorm(n_sim)
@@ -37,6 +39,8 @@ test_that("detects wrong arguments", {
     expect_error(kde1d(x, xmin = 10, xmax = -10))
     expect_error(kde1d(x, mult = 0))
     expect_error(kde1d(x, deg = 3))
+    expect_error(kde1d(x, weights = list()))
+    expect_error(kde1d(x, weights = 1:3))
 
     x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
     expect_error(kde1d(x, xmax = 0))
@@ -46,7 +50,8 @@ test_that("returns proper 'kde1d' object", {
     lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
     class_members <- c("grid_points", "values", "bw", "xmin", "xmax", "deg",
-                       "edf", "loglik", "jitter_info", "var_name", "nobs")
+                       "edf", "loglik", "weights", "jitter_info", "var_name",
+                       "nobs")
     lapply(fits, function(x) expect_identical(names(x), class_members))
 })
 
@@ -135,4 +140,17 @@ test_that("estimates for discrete data are reasonable", {
     x <- ordered(sample(5, 1e5, TRUE), 1:5)
     fit <- kde1d(x)
     expect_true(all(abs(dkde1d(1:5, fit) - 0.2) < 0.1))
+})
+
+test_that("works with weights", {
+    n_sim <- 1000
+    x <- rnorm(n_sim)
+
+    fit <- kde1d(x, weights = rep(1, n_sim))
+    fit0 <- kde1d(x)
+    expect_equal(dkde1d(x, fit), dkde1d(x, fit0))
+
+    fit <- kde1d(x, weights = c(rep(1, n_sim / 2), rep(0, n_sim / 2)))
+    fit0 <- kde1d(x[seq_len(n_sim / 2)])
+    expect_equal(dkde1d(x, fit), dkde1d(x, fit0), tolerance = 0.01)
 })

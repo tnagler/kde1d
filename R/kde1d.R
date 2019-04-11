@@ -15,6 +15,7 @@
 #'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
 #'   log-linear, and log-quadratic fitting, respectively.
+#' @param weights optional vector of weights for individual observations.
 #'
 #' @return An object of class `kde1d`.
 #'
@@ -80,28 +81,40 @@
 #' points(ordered(0:5, 0:5),               # add true density
 #'        dbinom(0:5, 5, 0.5), col = "red")
 #'
+#' ## weighted estimate
+#' x <- rnorm(100)                         # simulate data
+#' weights <- rexp(100)                    # weights as in Bayesian bootstrap
+#' fit <- kde1d(x, weights = weights)      # weighted fit
+#' plot(fit)                               # compare with unweighted fit
+#' lines(kde1d(x), col = 2)
+#'
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
+                  weights = numeric(0)) {
     x <- na.omit(x)
     # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw, deg)
+    check_arguments(x, mult, xmin, xmax, bw, deg, weights)
 
     # jittering for discrete variables
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
-    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax), bw, mult,
-                        length(attr(x, "i_disc")) == 1)
+    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax),
+                        bw,
+                        mult,
+                        length(attr(x, "i_disc")) == 1,
+                        weights)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg)
+    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, weights)
 
     # add info
     fit$jitter_info <- attributes(x)
     fit$var_name <- colnames(x)
     fit$nobs <- length(x)
+    fit$weights <- weights
 
     # return as kde1d object
     class(fit) <- "kde1d"

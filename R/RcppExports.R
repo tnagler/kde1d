@@ -13,8 +13,8 @@
 #' @return `An Rcpp::List` containing the fitted density values on a grid and
 #'   additional information.
 #' @noRd
-fit_kde1d_cpp <- function(x, bw, xmin, xmax, deg) {
-    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, bw, xmin, xmax, deg)
+fit_kde1d_cpp <- function(x, bw, xmin, xmax, deg, weights) {
+    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, bw, xmin, xmax, deg, weights)
 }
 
 #' computes the pdf of a kernel density estimate by interpolation.
@@ -48,9 +48,14 @@ qkde1d_cpp <- function(x, R_object) {
 #' @param x vector of observations
 #' @param grid_size number of equally-spaced points over which binning is
 #' performed to obtain kernel functional approximation
+#' @param weights vector of weights for each observation (can be empty).
 #' @return the selected bandwidth
 #' @noRd
-select_bw_cpp <- function(x, bw, mult, discrete) {
-    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete)
+select_bw_cpp <- function(x, bw, mult, discrete, weights) {
+    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete, weights)
+}
+
+quan <- function(x, a, w) {
+    .Call('_kde1d_quan', PACKAGE = 'kde1d', x, a, w)
 }
 
