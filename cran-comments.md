@@ -1,3 +1,5 @@
+Update following a request by Prof. Ripley to remove unconditional stripping of debug symbols.
+
 ## Test environments
 * ubuntu 12.04 on travis-ci (release, devel, oldrel)
 * win-builder (devel)
@@ -6,6 +8,9 @@
 
 0 errors | 0 warnings | 0 notes
 
-## Reverse dependencies
+## revdepcheck results
 
-rvinecopulib: 0 errors | 0 warnings | 0 notes
+We checked 2 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
+
+ * We saw 0 new problems
+ * We failed to check 0 packages
