@@ -98,6 +98,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
     check_arguments(x, mult, xmin, xmax, bw, deg, weights)
 
     # jittering for discrete variables
+    attr(x, "i_disc") <- NULL  # in case variables have already been jittered
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
