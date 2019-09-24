@@ -77,6 +77,8 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
                                 const Eigen::VectorXd& q,
                                 const Eigen::VectorXd& w)
 {
+    if (w.size() == 0)
+        return quantile(x, q);
     if (w.size() != x.size())
         throw std::runtime_error("x and w must have the same size");
     double n = static_cast<double>(x.size());
