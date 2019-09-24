@@ -331,14 +331,14 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
         lowr_ext = Eigen::VectorXd(2);
         double step = inner_grid[1] - inner_grid[0];
         lowr_ext[1] = inner_grid[0] - step;
-        lowr_ext[0] = lowr_ext[1] - std::max(0.15 * range, step);
+        lowr_ext[0] = lowr_ext[1] - std::max(0.4 * range, step);
     }
     if (std::isnan(xmax_)) {
         // no right boundary -> add a few points to the right
         uppr_ext = Eigen::VectorXd(2);
         double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
         uppr_ext[0] = inner_grid[grid_size - 1] + step;
-        uppr_ext[1] = uppr_ext[0] + std::max(0.15 * range, step);
+        uppr_ext[1] = uppr_ext[0] + std::max(0.4 * range, step);
     }
 
     grid_points << lowr_ext, inner_grid, uppr_ext;
