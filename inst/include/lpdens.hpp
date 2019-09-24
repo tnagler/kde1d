@@ -78,7 +78,7 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     if (weights.size() > 0 && (weights.size() != x.size()))
         throw std::runtime_error("x and weights must have the same size");
 
-    // construct equally spaced grid on original domain
+    // construct grid on original domain
     Eigen::VectorXd grid_points = construct_grid_points(x, weights);
 
     // transform in case of boundary correction
@@ -325,15 +325,17 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
 
     // extend grid where there's no boundary
     double range = inner_grid.maxCoeff() - inner_grid.minCoeff();
-    Eigen::VectorXd lowr_ext(2), uppr_ext(2);
+    Eigen::VectorXd lowr_ext, uppr_ext;
     if (std::isnan(xmin_)) {
         // no left boundary -> add a few points to the left
+        lowr_ext = Eigen::VectorXd(2);
         double step = inner_grid[1] - inner_grid[0];
         lowr_ext[1] = inner_grid[0] - step;
         lowr_ext[0] = lowr_ext[1] - std::max(0.15 * range, step);
     }
     if (std::isnan(xmax_)) {
         // no right boundary -> add a few points to the right
+        uppr_ext = Eigen::VectorXd(2);
         double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
         uppr_ext[0] = inner_grid[grid_size - 1] + step;
         uppr_ext[1] = uppr_ext[0] + std::max(0.15 * range, step);
@@ -363,7 +365,7 @@ inline Eigen::VectorXd LPDens1d::without_boundary_ext(
 {
     size_t grid_start = 0;
     size_t grid_size = grid_points.size();
-    // (grid extension has length 3)
+    // (grid extension has length 2)
     if (std::isnan(xmin_)) {
         grid_start += 1;
         grid_size -= 2;
