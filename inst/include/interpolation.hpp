@@ -235,7 +235,7 @@ inline double InterpolationGrid1d::interp_on_grid(const double& x,
                                                   const Eigen::VectorXd& grid)
 {
     Eigen::VectorXd a = find_coefs(vals, grid);
-    double xev = fmax((x - grid(1)), 0) / (grid(2) - grid(1));
+    double xev = std::fmax((x - grid(1)), 0) / (grid(2) - grid(1));
     return cubic_poly(xev, a);
 }
 
@@ -282,8 +282,8 @@ inline double InterpolationGrid1d::int_on_grid(const double& upr,
 
             // don't integrate over full cell if upr is in interior
             uprnew = (upr - grid(k)) / (grid(k + 1) - grid(k));
-            newint = cubic_integral(0.0, fmin(1.0, uprnew), tmpa);
-            tmpint += newint * (grid(k + 1) - grid(k));
+            newint = cubic_integral(0.0, std::fmin(1.0, uprnew), tmpa);
+            tmpint += std::fmax(newint, 0.0) * (grid(k + 1) - grid(k));
         }
     }
 
