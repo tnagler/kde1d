@@ -49,7 +49,7 @@ inline Eigen::MatrixXd qnorm(const Eigen::MatrixXd& x)
 inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
                                 const Eigen::VectorXd& q)
 {
-    double n = static_cast<double>(x.size());
+    double n = static_cast<double>(x.size() - 1);
     size_t m = q.size();
     Eigen::VectorXd res(m);
 
@@ -60,8 +60,10 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
     // linear interpolation (quantile of type 7 in R)
     for (size_t i = 0; i < m; ++i) {
         size_t k = std::floor(n * q(i));
-        double p = (static_cast<double>(k) - 1.0) / (n - 1.0);
-        res(i) = x2[k - 1] + (x2[k] - x2[k - 1]) * (q(i) - p) * (n - 1);
+        double p = static_cast<double>(k) / n;
+        res(i) = x2[k];
+        if (k < n)
+            res(i) += (x2[k + 1] - x2[k]) * (q(i) - p) * n;
     }
     return res;
 }
