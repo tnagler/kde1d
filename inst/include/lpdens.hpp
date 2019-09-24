@@ -75,7 +75,7 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
 {
     if (weights.size() > 0 && (weights.size() != x.size()))
         throw std::runtime_error("x and weights must have the same size");
-    
+
     // construct equally spaced grid on original domain
     Eigen::VectorXd grid_points = construct_grid_points(x);
 
@@ -335,7 +335,7 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
     // concatenate
     grid_points <<
         lowr_ext,
-        Eigen::VectorXd::LinSpaced(grid_size, x_min, x_max),
+        stats::quantile(x, Eigen::VectorXd::LinSpaced(grid_size, 0, 1)),
         uppr_ext;
 
     return grid_points;
