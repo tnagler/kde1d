@@ -4,6 +4,7 @@
 #include "stats.hpp"
 #include "tools.hpp"
 #include <functional>
+#include <cmath>
 
 //! Local-polynomial density estimation in 1-d.
 class LPDens1d {
@@ -315,29 +316,27 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
     // determine "inner" grid by sample quantiles
     // (need to leave room for boundary extensions)
     if (std::isnan(xmin_))
-        grid_size -= 3;
+        grid_size -= 2;
     if (std::isnan(xmax_))
-        grid_size -= 3;
+        grid_size -= 2;
     inner_grid = stats::quantile(x,
                                  Eigen::VectorXd::LinSpaced(grid_size, 0, 1),
                                  weights);
 
-    double x_min = inner_grid.minCoeff();
-    double x_max = inner_grid.maxCoeff();
-    double range = x_max - x_min;
-
-    Eigen::VectorXd lowr_ext, uppr_ext;
+    // extend grid where there's no boundary
+    double range = inner_grid.maxCoeff() - inner_grid.minCoeff();
+    Eigen::VectorXd lowr_ext(2), uppr_ext(2);
     if (std::isnan(xmin_)) {
         // no left boundary -> add a few points to the left
-        lowr_ext = Eigen::VectorXd::LinSpaced(3,
-                                              x_min - 0.3 * range,
-                                              x_min - 0.05 * range);
+        double step = inner_grid[1] - inner_grid[0];
+        lowr_ext[1] = inner_grid[0] - step;
+        lowr_ext[0] = lowr_ext[1] - std::max(0.15 * range, step);
     }
     if (std::isnan(xmax_)) {
         // no right boundary -> add a few points to the right
-        uppr_ext = Eigen::VectorXd::LinSpaced(3,
-                                              x_max + 0.05 * range,
-                                              x_max + 0.3 * range);
+        double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
+        uppr_ext[0] = inner_grid[grid_size - 1] + step;
+        uppr_ext[1] = uppr_ext[0] + std::max(0.15 * range, step);
     }
 
     grid_points << lowr_ext, inner_grid, uppr_ext;
@@ -366,11 +365,11 @@ inline Eigen::VectorXd LPDens1d::without_boundary_ext(
     size_t grid_size = grid_points.size();
     // (grid extension has length 3)
     if (std::isnan(xmin_)) {
-        grid_start += 2;
-        grid_size -= 3;
+        grid_start += 1;
+        grid_size -= 2;
     }
     if (std::isnan(xmax_))
-        grid_size -= 3;
+        grid_size -= 2;
 
     return grid_points.segment(grid_start, grid_size);
 }

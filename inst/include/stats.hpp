@@ -105,7 +105,7 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
     double wsum = w.sum() - w(ind[n - 1]);;
     for (size_t j = 0; j < m; ++j) {
         size_t i = 1;
-        while (wcum(i) < q(j) * wsum)
+        while ((wcum(i) < q(j) * wsum) & (i < n))
             i++;
         res(j) = x2(i - 1) + (x2(i) - x2(i - 1)) *
             (q(j) - wcum(i - 1) / wsum) / (wcum(i) - wcum(i - 1));
