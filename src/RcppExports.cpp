@@ -7,13 +7,13 @@
 using namespace Rcpp;
 
 // fit_kde1d_cpp
-Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, const Eigen::VectorXd& bw, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
 RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type bw(bwSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
     Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
@@ -59,13 +59,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // select_bw_cpp
-double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult, bool discrete, const Eigen::VectorXd& weights);
+Eigen::VectorXd select_bw_cpp(const Eigen::VectorXd& x, Eigen::VectorXd bw, double mult, bool discrete, const Eigen::VectorXd& weights);
 RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP discreteSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type bw(bwSEXP);
     Rcpp::traits::input_parameter< double >::type mult(multSEXP);
     Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);

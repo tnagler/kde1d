@@ -91,8 +91,8 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
-                  weights = numeric(0)) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
+                  deg = 2, weights = numeric(0)) {
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw, deg, weights)
@@ -102,6 +102,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
+    if (length(bw) == 1)
+        bw <- c(bw, NA)
     bw <- select_bw_cpp(boundary_transform(x, xmin, xmax),
                         bw,
                         mult,

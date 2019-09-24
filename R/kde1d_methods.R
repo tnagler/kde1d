@@ -72,7 +72,7 @@ pkde1d <- function(q, obj) {
         p <- pkde1d_cpp(q, obj)
     } else {
         if (!is.ordered(q))
-            
+
             q <- ordered(q, obj$jitter_info$levels$x)
         x_all <- as.ordered(obj$jitter_info$levels$x)
         p_all <- dkde1d(x_all, obj)
@@ -236,13 +236,13 @@ print.kde1d <- function(x, ...) {
 #' @method summary kde1d
 #' @export
 summary.kde1d <- function(object, ...) {
-
-    df <- rep(NA, 4)
-    names(df) <- c("nobs", "bw", "loglik", "d.f.")
+    df <- rep(NA, 5)
+    names(df) <- c("nobs", "bw", "nn", "loglik", "d.f.")
     df[1] <- object$nobs
     df[2] <- object$bw
-    df[3] <- object$loglik
-    df[4] <- object$edf
+    df[3] <- object$nn
+    df[4] <- object$loglik
+    df[5] <- object$edf
 
     print(object)
     cat(strrep("-", 65), "\n", sep = "")

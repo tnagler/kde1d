@@ -20,7 +20,7 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
     stopifnot(length(mult) == 1)
     stopifnot(length(xmin) == 1)
     stopifnot(length(xmax) == 1)
-    stopifnot(length(bw) == 1)
+    stopifnot(length(bw) %in% 1:2)
     stopifnot(length(deg) == 1)
 
     stopifnot(is.numeric(mult))
@@ -28,13 +28,11 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
     stopifnot(is.numeric(xmin))
     stopifnot(is.numeric(xmax))
     stopifnot(is.numeric(xmax))
-    stopifnot(is.na(bw) | is.numeric(bw))
+    stopifnot(all(is.na(bw) | is.numeric(bw)))
     stopifnot(is.numeric(deg))
 
     if (!is.ordered(x) & is.factor(x))
         stop("Factors not allowed; use kdevine::kdevine() or cctools::cckde().")
-
-    stopifnot(mult > 0)
 
     if (is.ordered(x) & (!is.nan(xmin) | !is.nan(xmax)))
         stop("xmin and xmax are not meaningful for x of type ordered.")
