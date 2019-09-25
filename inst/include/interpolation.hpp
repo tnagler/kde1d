@@ -125,7 +125,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
         tmpvals(1) = this->values_(i);
         tmpvals(2) = this->values_(i + 1);
         tmpvals(3) = this->values_(i3);
-        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
+        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 0.0);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);
@@ -197,11 +197,11 @@ inline Eigen::VectorXd
         double dt2 = grid(3) - grid(2);
 
         /* check for repeated points (important for boundaries) */
-        if (dt1 < 1e-4)
+        if (dt1 <= 0)
             dt1 = 1.0;
-        if (dt0 < 1e-4)
+        if (dt0 <= 0)
             dt0 = dt1;
-        if (dt2 < 1e-4)
+        if (dt2 <= 0)
             dt2 = dt1;
 
         // compute tangents when parameterized in (t1,t2)
