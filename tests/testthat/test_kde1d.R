@@ -148,7 +148,7 @@ test_that("works with weights", {
 
     fit <- kde1d(x, weights = rep(1, n_sim))
     fit0 <- kde1d(x)
-    expect_equal(dkde1d(x, fit), dkde1d(x, fit0))
+    expect_equal(dkde1d(x, fit), dkde1d(x, fit0), tolerance = 0.01)
 
     fit <- kde1d(x, weights = c(rep(1, n_sim / 2), rep(0, n_sim / 2)))
     fit0 <- kde1d(x[seq_len(n_sim / 2)])

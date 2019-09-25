@@ -125,7 +125,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
         tmpvals(1) = this->values_(i);
         tmpvals(2) = this->values_(i + 1);
         tmpvals(3) = this->values_(i3);
-        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 1e-12);
+        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 0.0);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);
@@ -197,11 +197,11 @@ inline Eigen::VectorXd
         double dt2 = grid(3) - grid(2);
 
         /* check for repeated points (important for boundaries) */
-        if (dt1 < 1e-4)
+        if (dt1 <= 0)
             dt1 = 1.0;
-        if (dt0 < 1e-4)
+        if (dt0 <= 0)
             dt0 = dt1;
-        if (dt2 < 1e-4)
+        if (dt2 <= 0)
             dt2 = dt1;
 
         // compute tangents when parameterized in (t1,t2)
@@ -235,7 +235,7 @@ inline double InterpolationGrid1d::interp_on_grid(const double& x,
                                                   const Eigen::VectorXd& grid)
 {
     Eigen::VectorXd a = find_coefs(vals, grid);
-    double xev = fmax((x - grid(1)), 0) / (grid(2) - grid(1));
+    double xev = std::fmax((x - grid(1)), 0) / (grid(2) - grid(1));
     return cubic_poly(xev, a);
 }
 
@@ -282,8 +282,8 @@ inline double InterpolationGrid1d::int_on_grid(const double& upr,
 
             // don't integrate over full cell if upr is in interior
             uprnew = (upr - grid(k)) / (grid(k + 1) - grid(k));
-            newint = cubic_integral(0.0, fmin(1.0, uprnew), tmpa);
-            tmpint += newint * (grid(k + 1) - grid(k));
+            newint = cubic_integral(0.0, std::fmin(1.0, uprnew), tmpa);
+            tmpint += std::fmax(newint, 0.0) * (grid(k + 1) - grid(k));
         }
     }
 

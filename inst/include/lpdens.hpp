@@ -4,6 +4,7 @@
 #include "stats.hpp"
 #include "tools.hpp"
 #include <functional>
+#include <cmath>
 
 //! Local-polynomial density estimation in 1-d.
 class LPDens1d {
@@ -48,7 +49,8 @@ private:
                                        bool inverse = false);
     Eigen::VectorXd boundary_correct(const Eigen::VectorXd& x,
                                      const Eigen::VectorXd& fhat);
-    Eigen::VectorXd construct_grid_points(const Eigen::VectorXd& x);
+    Eigen::VectorXd construct_grid_points(const Eigen::VectorXd& x,
+                                          const Eigen::VectorXd& weights);
     Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid_points);
     Eigen::VectorXd without_boundary_ext(const Eigen::VectorXd& grid_points);
 };
@@ -75,9 +77,9 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
 {
     if (weights.size() > 0 && (weights.size() != x.size()))
         throw std::runtime_error("x and weights must have the same size");
-    
-    // construct equally spaced grid on original domain
-    Eigen::VectorXd grid_points = construct_grid_points(x);
+
+    // construct grid on original domain
+    Eigen::VectorXd grid_points = construct_grid_points(x, weights);
 
     // transform in case of boundary correction
     grid_points = boundary_transform(grid_points);
@@ -303,41 +305,43 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
 //! constructs a grid that is later used for interpolation.
 //! @param x vector of observations.
 //! @return a grid of size 50.
-inline Eigen::VectorXd LPDens1d::construct_grid_points(const Eigen::VectorXd& x)
+inline Eigen::VectorXd LPDens1d::construct_grid_points(
+        const Eigen::VectorXd& x,
+        const Eigen::VectorXd& weights)
 {
-    double x_min = x.minCoeff();
-    double x_max = x.maxCoeff();
-    double range = x_max - x_min;
-
+    // set up grid
     size_t grid_size = 50;
-    Eigen::VectorXd lowr_ext, uppr_ext, grid_points(grid_size);
+    Eigen::VectorXd grid_points(grid_size), inner_grid;
 
-    // no left boundary -> add a few points to the left
+    // determine "inner" grid by sample quantiles
+    // (need to leave room for boundary extensions)
+    if (std::isnan(xmin_))
+        grid_size -= 2;
+    if (std::isnan(xmax_))
+        grid_size -= 2;
+    inner_grid = stats::quantile(x,
+                                 Eigen::VectorXd::LinSpaced(grid_size, 0, 1),
+                                 weights);
+
+    // extend grid where there's no boundary
+    double range = inner_grid.maxCoeff() - inner_grid.minCoeff();
+    Eigen::VectorXd lowr_ext, uppr_ext;
     if (std::isnan(xmin_)) {
-        lowr_ext = Eigen::VectorXd::LinSpaced(5,
-                                              x_min - 0.5 * range,
-                                              x_min - 0.05 * range);
-        grid_size -= 5;
-    } else {
-        lowr_ext = Eigen::VectorXd();
+        // no left boundary -> add a few points to the left
+        lowr_ext = Eigen::VectorXd(2);
+        double step = inner_grid[1] - inner_grid[0];
+        lowr_ext[1] = inner_grid[0] - step;
+        lowr_ext[0] = lowr_ext[1] - std::max(0.4 * range, step);
     }
-
-    // no right boundary -> add a few points to the right
     if (std::isnan(xmax_)) {
-        uppr_ext = Eigen::VectorXd::LinSpaced(5,
-                                              x_max + 0.05 * range,
-                                              x_max + 0.5 * range);
-        grid_size -= 5;
-    } else {
-        uppr_ext = Eigen::VectorXd();
+        // no right boundary -> add a few points to the right
+        uppr_ext = Eigen::VectorXd(2);
+        double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
+        uppr_ext[0] = inner_grid[grid_size - 1] + step;
+        uppr_ext[1] = uppr_ext[0] + std::max(0.4 * range, step);
     }
 
-    // concatenate
-    grid_points <<
-        lowr_ext,
-        Eigen::VectorXd::LinSpaced(grid_size, x_min, x_max),
-        uppr_ext;
-
+    grid_points << lowr_ext, inner_grid, uppr_ext;
     return grid_points;
 }
 
@@ -361,13 +365,13 @@ inline Eigen::VectorXd LPDens1d::without_boundary_ext(
 {
     size_t grid_start = 0;
     size_t grid_size = grid_points.size();
-    // (grid extension has length 5)
+    // (grid extension has length 2)
     if (std::isnan(xmin_)) {
-        grid_start += 4;
-        grid_size -= 5;
+        grid_start += 1;
+        grid_size -= 2;
     }
     if (std::isnan(xmax_))
-        grid_size -= 5;
+        grid_size -= 2;
 
     return grid_points.segment(grid_start, grid_size);
 }
