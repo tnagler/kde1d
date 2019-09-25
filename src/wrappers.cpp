@@ -16,17 +16,19 @@
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
-                         const Eigen::VectorXd& bw,
+                         double bw,
+                         double nn,
                          double xmin,
                          double xmax,
                          size_t deg,
                          const Eigen::VectorXd& weights)
 {
-    LPDens1d fit(x, bw, xmin, xmax, deg, weights);
+    LPDens1d fit(x, bw, nn, xmin, xmax, deg, weights);
     return Rcpp::List::create(
         Rcpp::Named("grid_points") = fit.get_grid_points(),
         Rcpp::Named("values") = fit.get_values(),
         Rcpp::Named("bw") = bw,
+        Rcpp::Named("nn") = nn,
         Rcpp::Named("xmin") = xmin,
         Rcpp::Named("xmax") = xmax,
         Rcpp::Named("deg") = deg,
@@ -118,22 +120,14 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 //' @return the selected bandwidth
 //' @noRd
 // [[Rcpp::export]]
-Eigen::VectorXd select_bw_cpp(const Eigen::VectorXd& x,
-                              Eigen::VectorXd bw,
-                              double mult,
-                              bool discrete,
-                              const Eigen::VectorXd& weights) {
-    if (std::isnan(bw[0])) {
-        bw[0] = dpik(x, weights);
+double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult,
+                     bool discrete, const Eigen::VectorXd& weights) {
+    if (std::isnan(bw)) {
+        bw = dpik(x, weights);
     }
-    bw[0] *= mult;
-
-    if (std::isnan(bw[1])) {
-        bw[1] = 0.3;
-    }
-
+    bw *= mult;
     if (discrete) {
-        bw[0] = std::max(bw[0], 0.5 / 5);
+        bw = std::max(bw, 0.5 / 5);
     }
 
     return bw;

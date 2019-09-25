@@ -15,12 +15,13 @@ check_boundary_violations <- function(x, xmin, xmax) {
 
 #' check and pre-process arguments passed to kde1d()
 #' @noRd
-check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
+check_arguments <- function(x, mult, xmin, xmax, bw, nn, deg, weights) {
     stopifnot(NCOL(x) == 1)
     stopifnot(length(mult) == 1)
     stopifnot(length(xmin) == 1)
     stopifnot(length(xmax) == 1)
-    stopifnot(length(bw) %in% 1:2)
+    stopifnot(length(bw) == 1)
+    stopifnot(length(nn) == 1)
     stopifnot(length(deg) == 1)
 
     stopifnot(is.numeric(mult))
@@ -28,7 +29,8 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
     stopifnot(is.numeric(xmin))
     stopifnot(is.numeric(xmax))
     stopifnot(is.numeric(xmax))
-    stopifnot(all(is.na(bw) | is.numeric(bw)))
+    stopifnot(is.na(bw) | (is.numeric(bw) & (bw > 0)))
+    stopifnot(is.numeric(nn) & (nn >= 0) & (nn <= 1))
     stopifnot(is.numeric(deg))
 
     if (!is.ordered(x) & is.factor(x))

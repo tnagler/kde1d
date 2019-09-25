@@ -13,6 +13,10 @@
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
+#' @param nn nearest-neighbor component of the bandwidth; a number
+#'    between 0 and 1. If positive, it modifies the bandwidth locally
+#'    such that at least `nn * length(x)` observations are used for each point
+#'    estimate. `nn = 0` is advisable for `deg < 2` and unbounded data.
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
 #'   log-linear, and log-quadratic fitting, respectively.
 #' @param weights optional vector of weights for individual observations.
@@ -91,19 +95,17 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = 0,
                   deg = 2, weights = numeric(0)) {
     x <- na.omit(x)
     # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw, deg, weights)
+    check_arguments(x, mult, xmin, xmax, bw, nn, deg, weights)
 
     # jittering for discrete variables
     attr(x, "i_disc") <- NULL  # in case variables have already been jittered
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
-    if (length(bw) == 1)
-        bw <- c(bw, NA)
     bw <- select_bw_cpp(boundary_transform(x, xmin, xmax),
                         bw,
                         mult,
@@ -111,7 +113,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
                         weights)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, weights)
+    fit <- fit_kde1d_cpp(x, bw, nn, xmin, xmax, deg, weights)
 
     # add info
     fit$jitter_info <- attributes(x)

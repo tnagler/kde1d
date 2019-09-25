@@ -38,6 +38,8 @@ test_that("detects wrong arguments", {
     expect_error(kde1d(x, xmax = 0))
     expect_error(kde1d(x, xmin = 10, xmax = -10))
     expect_error(kde1d(x, mult = 0))
+    expect_error(kde1d(x, bw = -1))
+    expect_error(kde1d(x, nn = 2))
     expect_error(kde1d(x, deg = 3))
     expect_error(kde1d(x, weights = list()))
     expect_error(kde1d(x, weights = 1:3))
@@ -49,7 +51,7 @@ test_that("detects wrong arguments", {
 test_that("returns proper 'kde1d' object", {
     lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
-    class_members <- c("grid_points", "values", "bw", "xmin", "xmax", "deg",
+    class_members <- c("grid_points", "values", "bw", "nn", "xmin", "xmax", "deg",
                        "edf", "loglik", "weights", "jitter_info", "var_name",
                        "nobs")
     lapply(fits, function(x) expect_identical(names(x), class_members))
@@ -116,7 +118,7 @@ test_that("other generics work", {
         expect_output(print(fit))
         expect_output(s <- summary(fit))
         expect_is(s, "numeric")
-        expect_equal(length(s), 4)
+        expect_equal(length(s), 5)
         expect_silent(s <- logLik(fit))
         expect_is(s, "numeric")
     }

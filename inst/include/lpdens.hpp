@@ -11,7 +11,7 @@ class LPDens1d {
 public:
     // constructors
     LPDens1d() {}
-    LPDens1d(Eigen::VectorXd x, const Eigen::VectorXd& bw,
+    LPDens1d(Eigen::VectorXd x, double bw, double nn,
              double xmin, double xmax, size_t p,
              const Eigen::VectorXd& weights = Eigen::VectorXd());
 
@@ -20,8 +20,9 @@ public:
     Eigen::VectorXd get_grid_points() const {return grid_.get_grid_points();}
     double local_bw(const double& x_ev,
                     const Eigen::VectorXd& x,
-                    const Eigen::VectorXd& bw);
-    Eigen::VectorXd get_bw() const {return bw_;}
+                    const double& bw,
+                    const double& nn);
+    double get_bw() const {return bw_;}
     double get_p() const {return deg_;}
     double get_xmin() const {return xmin_;}
     double get_xmax() const {return xmax_;}
@@ -31,7 +32,8 @@ public:
 private:
     // data members
     InterpolationGrid1d grid_;
-    Eigen::VectorXd bw_;
+    double bw_;
+    double nn_;
     double xmin_;
     double xmax_;
     size_t deg_;
@@ -70,12 +72,14 @@ private:
 //! @param p order of the local polynomial.
 //! @param weights vector of weights for each observation (can be empty).
 inline LPDens1d::LPDens1d(Eigen::VectorXd x,
-                          const Eigen::VectorXd& bw,
+                          double bw,
+                          double nn,
                           double xmin,
                           double xmax,
                           size_t deg,
                           const Eigen::VectorXd& weights) :
     bw_(bw),
+    nn_(nn),
     xmin_(xmin),
     xmax_(xmax),
     deg_(deg)
@@ -141,9 +145,10 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
 //! @param bw the bandwidth parameter(s).
 inline double LPDens1d::local_bw(const double& x_ev,
                                  const Eigen::VectorXd& x,
-                                 const Eigen::VectorXd& bw)
+                                 const double& bw,
+                                 const double& nn)
 {
-    if (bw[1] > 0) {
+    if (nn > 0.0) {
         // calculate distances from observations to evaluation point
         Eigen::VectorXd dists = (x.array() - x_ev).abs();
 
@@ -155,11 +160,11 @@ inline double LPDens1d::local_bw(const double& x_ev,
         );
 
         // calculate index of neighbor such that alpha * n observations are used
-        size_t k = std::lround(bw[1] * static_cast<double>(x.size()));
+        size_t k = std::lround(nn * static_cast<double>(x.size()));
 
-        return std::max(dists(k), bw[0]);
+        return std::max(dists(k), bw);
     } else {
-        return bw[0];
+        return bw;
     }
 }
 
@@ -182,7 +187,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
     Eigen::VectorXd xx2(x.size());
     Eigen::VectorXd kernels(x.size());
     for (size_t k = 0; k < x_ev.size(); k++) {
-        double bw = local_bw(x_ev(k), x, bw_);
+        double bw = local_bw(x_ev(k), x, bw_, nn_);
         double s = bw;
         // classical (local constant) kernel density estimate
         xx = (x.array() - x_ev(k)) / bw;
