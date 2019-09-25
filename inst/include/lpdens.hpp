@@ -64,7 +64,7 @@ private:
 //! constructor for fitting the density estimate.
 //! @param x vector of observations
 //! @param bw positive bandwidth parameter (fixed component).
-//! @param alpha nearest neighbor component (between 0 and 1)
+//! @param nn nearest neighbor component (between 0 and 1)
 //! @param xmin lower bound for the support of the density, `NaN` means no
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
@@ -142,7 +142,8 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
 //! nearest-neighbor component is specified.
 //! @param x_ev the evaluation point.
 //! @param x the data.
-//! @param bw the bandwidth parameter(s).
+//! @param bw the fixed bandwidth component.
+//! @param nn the nearest-neighbor bandwidth component.
 inline double LPDens1d::local_bw(const double& x_ev,
                                  const Eigen::VectorXd& x,
                                  const double& bw,
