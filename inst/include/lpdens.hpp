@@ -153,16 +153,11 @@ inline double LPDens1d::local_bw(const double& x_ev,
         // calculate distances from observations to evaluation point
         Eigen::VectorXd dists = (x.array() - x_ev).abs();
 
-        // sort in ascending order
-        std::sort(
-            dists.data(),
-            dists.data() + dists.size(),
-            std::less_equal<double>()
-        );
-
         // calculate index of neighbor such that alpha * n observations are used
         size_t k = std::lround(nn * static_cast<double>(x.size()));
-
+        std::nth_element(dists.data(),
+                         dists.data() + k,
+                         dists.data() + dists.size());
         return std::max(dists(k), bw);
     } else {
         return bw;
