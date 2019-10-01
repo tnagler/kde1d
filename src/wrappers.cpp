@@ -68,7 +68,11 @@ Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
         fhat = (x.array() > xmax).select(Eigen::VectorXd::Zero(x.size()), fhat);
     }
 
-    return fhat;
+    auto trunc = [] (const double& p) {
+      return std::max(p, 0.0);
+    };
+
+    return tools::unaryExpr_or_nan(fhat, trunc);
 }
 
 //' computes the cdf of a kernel density estimate by numerical integration.

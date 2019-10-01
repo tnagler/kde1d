@@ -12,8 +12,7 @@ class InterpolationGrid1d
 {
 public:
     InterpolationGrid1d()
-    {
-    }
+    {}
 
     InterpolationGrid1d(const Eigen::VectorXd& grid_points,
                         const Eigen::VectorXd& values,
@@ -125,7 +124,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
         tmpvals(1) = this->values_(i);
         tmpvals(2) = this->values_(i + 1);
         tmpvals(3) = this->values_(i3);
-        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 0.0);
+        return this->interp_on_grid(xx, tmpvals, tmpgrid);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);

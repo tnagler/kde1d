@@ -4,8 +4,8 @@
 \alias{kde1d}
 \title{Univariate local-polynomial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
-  weights = numeric(0))
+kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = 0,
+  deg = 2, weights = numeric(0))
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -22,6 +22,11 @@ data); \code{NaN} means no boundary.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
 latter uses the direct plug-in methodology of Sheather and Jones (1991).}
+
+\item{nn}{nearest-neighbor component of the bandwidth; a number
+between 0 and 1. If positive, it modifies the bandwidth locally
+such that at least \code{nn * length(x)} observations are used for each point
+estimate. \code{nn = 0} is advisable for \code{deg < 2} and unbounded data.}
 
 \item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
 log-linear, and log-quadratic fitting, respectively.}
