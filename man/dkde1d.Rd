@@ -50,14 +50,13 @@ The length of the result is determined by \code{n} for \code{\link[=rkde1d]{rkde
 is the length of the numerical argument for the other functions.
 }
 \examples{
-set.seed(0)              # for reproducibility
-x <- rnorm(100)          # simulate some data
-fit <- kde1d(x)          # estimate density
-dkde1d(0, fit)           # evaluate density estimate (close to dnorm(0))
-pkde1d(0, fit)           # evaluate corresponding cdf (close to pnorm(0))
-qkde1d(0.5, fit)         # quantile function (close to qnorm(0))
-hist(rkde1d(100, fit))   # simulate
-
+set.seed(0) # for reproducibility
+x <- rnorm(100) # simulate some data
+fit <- kde1d(x) # estimate density
+dkde1d(0, fit) # evaluate density estimate (close to dnorm(0))
+pkde1d(0, fit) # evaluate corresponding cdf (close to pnorm(0))
+qkde1d(0.5, fit) # quantile function (close to qnorm(0))
+hist(rkde1d(100, fit)) # simulate
 }
 \seealso{
 \code{\link[=kde1d]{kde1d()}}
