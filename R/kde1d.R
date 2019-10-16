@@ -96,6 +96,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw, deg, weights)
+    w_norm <- weights / mean(weights)
 
     # jittering for discrete variables
     attr(x, "i_disc") <- NULL  # in case variables have already been jittered
@@ -106,10 +107,10 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
                         bw,
                         mult,
                         length(attr(x, "i_disc")) == 1,
-                        weights)
+                        w_norm)
 
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, weights)
+    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, w_norm)
 
     # add info
     fit$jitter_info <- attributes(x)
