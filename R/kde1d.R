@@ -111,6 +111,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = 0,
                         mult,
                         length(attr(x, "i_disc")) == 1,
                         weights)
+    nn <- select_nn_cpp(boundary_transform(x, xmin, xmax),
+                        bw, nn, mult, weights)
 
     # fit model
     fit <- fit_kde1d_cpp(x, bw, nn, xmin, xmax, deg, weights)

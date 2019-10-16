@@ -55,6 +55,16 @@ select_bw_cpp <- function(x, bw, mult, discrete, weights) {
     .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete, weights)
 }
 
+#' @param x vector of observations
+#' @param grid_size number of equally-spaced points over which binning is
+#' performed to obtain kernel functional approximation
+#' @param weights vector of weights for each observation (can be empty).
+#' @return the selected bandwidth
+#' @noRd
+select_nn_cpp <- function(x, bw, nn, mult, weights) {
+    .Call('_kde1d_select_nn_cpp', PACKAGE = 'kde1d', x, bw, nn, mult, weights)
+}
+
 quan <- function(x, a, w) {
     .Call('_kde1d_quan', PACKAGE = 'kde1d', x, a, w)
 }

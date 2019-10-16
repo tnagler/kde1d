@@ -30,7 +30,7 @@ check_arguments <- function(x, mult, xmin, xmax, bw, nn, deg, weights) {
     stopifnot(is.numeric(xmax))
     stopifnot(is.numeric(xmax))
     stopifnot(is.na(bw) | (is.numeric(bw) & (bw > 0)))
-    stopifnot(is.numeric(nn) & (nn >= 0) & (nn <= 1))
+    stopifnot(is.na(nn) | (is.numeric(nn) & (nn >= 0) & (nn <= 1)))
     stopifnot(is.numeric(deg))
 
     if (!is.ordered(x) & is.factor(x))
@@ -67,3 +67,17 @@ boundary_transform <- function(x, xmin, xmax) {
     x
 }
 
+#' adjusts observations and evaluation points for boundary effects
+#' @importFrom stats optim
+#' @noRd
+select_nn <- function(x, bw, xmin, xmax, deg, weights) {
+    crit <- function(nn) {
+        e <- try(fit <- fit_kde1d_cpp(x, bw, nn, xmin, xmax, deg, weights))
+        if (inherits(2, "try-error"))
+            return(Inf)
+        -2 * fit$loglik + 2 * fit$edf
+    }
+    opt <- optim(0.5, crit, lower = 0, upper = 1, method = "Brent",
+                 control = list(ndeps = 1e-2, reltol = 1e-2, maxit = 10))
+    opt$par
+}

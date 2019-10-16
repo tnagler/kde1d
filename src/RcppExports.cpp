@@ -74,6 +74,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// select_nn_cpp
+double select_nn_cpp(const Eigen::VectorXd& x, double bw, double nn, double mult, const Eigen::VectorXd& weights);
+RcppExport SEXP _kde1d_select_nn_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP nnSEXP, SEXP multSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< double >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(select_nn_cpp(x, bw, nn, mult, weights));
+    return rcpp_result_gen;
+END_RCPP
+}
 // quan
 Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w);
 RcppExport SEXP _kde1d_quan(SEXP xSEXP, SEXP aSEXP, SEXP wSEXP) {
@@ -94,6 +109,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
     {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 5},
+    {"_kde1d_select_nn_cpp", (DL_FUNC) &_kde1d_select_nn_cpp, 5},
     {"_kde1d_quan", (DL_FUNC) &_kde1d_quan, 3},
     {NULL, NULL, 0}
 };

@@ -33,15 +33,16 @@ inline Eigen::VectorXd linbin(const Eigen::VectorXd& x,
     return gcnts;
 }
 
-// Binned Kernel Functional Estimate
+
+//! Binned derivative estimate
 //! @param x vector of observations
 //! @param drv order of derivative in the density functional
 //! @param h kernel bandwidth
 //! @param a minimum value of x at which to compute the estimate
 //! @param b maximum value of x at which to compute the estimate
-//! @return the estimated functional
-double bkfe(const Eigen::VectorXd& x,
-            size_t drv, double h, double a, double b)
+//! @return estimated derivative evaluated at the grid points
+Eigen::VectorXd bkdrv(const Eigen::VectorXd& x,
+                      size_t drv, double h, double a, double b)
 {
     size_t m = x.size();
     double delta = (b - a) / (static_cast<double>(m) - 1.0);
@@ -61,28 +62,60 @@ double bkfe(const Eigen::VectorXd& x,
     }
 
     tmp_dbl = std::pow(h, static_cast<double>(drv + 1));
-    arg = stats::dnorm(arg) / tmp_dbl;
+    arg = stats::dnorm(arg) / (tmp_dbl * x.sum());
     arg = arg.cwiseProduct(hmnew);
 
     tmp_dbl = static_cast<double>(m + L + 1);
-    tmp_dbl = std::pow(2, std::ceil((std::log(tmp_dbl)/std::log(2))));
+    tmp_dbl = std::pow(2, std::ceil(std::log(tmp_dbl) / std::log(2)));
     size_t P = static_cast<size_t>(tmp_dbl);
 
     Eigen::VectorXd arg2 = Eigen::VectorXd::Zero(P);
-    arg2.block(0, 0, L + 1, 1) = arg;
-    arg2.block(P - L, 0, L, 1) = arg.block(1, 0, L, 1).colwise().reverse();
+    arg2.head(L + 1) = arg;
+    arg2.tail(L) = arg.tail(L).reverse();
 
     Eigen::VectorXd x2 = Eigen::VectorXd::Zero(P);
-    x2.block(0, 0, m, 1) = x;
+    x2.head(m) = x;
 
     Eigen::FFT<double> fft;
     Eigen::VectorXcd tmp1 = fft.fwd(arg2);
     Eigen::VectorXcd tmp2 = fft.fwd(x2);
     tmp1 = tmp1.cwiseProduct(tmp2);
     tmp2 = fft.inv(tmp1);
-    Eigen::VectorXd x3 = tmp2.real().block(0, 0, m, 1);
-    return(x.cwiseProduct(x3).sum()/std::pow(x.sum(), 2));
+    return tmp2.head(m).real();
 }
+
+// Binned Kernel Functional Estimate
+//! @param x vector of observations
+//! @param drv order of derivative in the density functional
+//! @param h kernel bandwidth
+//! @param a minimum value of x at which to compute the estimate
+//! @param b maximum value of x at which to compute the estimate
+//! @return the estimated functional
+double bkfe(const Eigen::VectorXd& x,
+            size_t drv, double h, double a, double b)
+{
+    Eigen::VectorXd est = bkdrv(x, drv, h, a, b);
+    return x.cwiseProduct(est).sum() / x.sum();
+}
+
+
+//! Binned Kernel Functional Estimate for nearest neighbor bandwidths
+//! @param x vector of observations
+//! @param h kernel bandwidth
+//! @param a minimum value of x at which to compute the estimate
+//! @param b maximum value of x at which to compute the estimate
+//! @return the estimated functional
+double bkfe_nn(const Eigen::VectorXd& x, double h, double a, double b)
+{
+    Eigen::VectorXd drv2 = bkdrv(x, 2, h, a, b).cwiseAbs2();
+    Eigen::VectorXd pdf3 = bkdrv(x, 0, h, a, b).array().pow(3);
+    Eigen::VectorXd arg = drv2.array() / pdf3.array();
+    arg.unaryExpr([] (const double& xx) {
+        return std::isnan(xx) ? 0.0 : xx;
+    });
+    return x.cwiseProduct(arg).sum() / x.sum();
+}
+
 
 // Bandwidth for Kernel Density Estimation
 //! @param x vector of observations
@@ -90,9 +123,9 @@ double bkfe(const Eigen::VectorXd& x,
 //! @param grid_size number of equally-spaced points over which binning is
 //! performed to obtain kernel functional approximation
 //! @return the selected bandwidth
-inline double dpik(const Eigen::VectorXd& x, 
+inline double dpik(const Eigen::VectorXd& x,
                    Eigen::VectorXd weights = Eigen::VectorXd(),
-                   size_t grid_size = 401) 
+                   size_t grid_size = 401)
 {
     if (weights.size() > 0 && (weights.size() != x.size()))
         throw std::runtime_error("x and weights must have the same size");
@@ -139,5 +172,59 @@ inline double dpik(const Eigen::VectorXd& x,
         bw = 4.0 * 1.06 * scale * std::pow(1.0 / effn, 1.0 / 5.0);
     }
 
-    return(bw);
+    return bw ;
+}
+
+//! Bandwidth for Nearest Neighbor Kernel Density Estimation
+//! @param x vector of observations
+//! @param weights vector of weights for each observation (can be empty).
+//! @param grid_size number of equally-spaced points over which binning is
+//! performed to obtain kernel functional approximation
+//! @return the selected bandwidth
+inline double dpik_nn(const Eigen::VectorXd& x,
+                      double bw,
+                      Eigen::VectorXd weights = Eigen::VectorXd(),
+                      size_t grid_size = 401)
+{
+    if (weights.size() > 0 && (weights.size() != x.size()))
+        throw std::runtime_error("x and weights must have the same size");
+
+    if (weights.size() == 0) {
+        weights = Eigen::VectorXd::Constant(x.size(), 1.0);
+    } else {
+        weights = weights * x.size() / weights.sum();
+    }
+
+    double n = static_cast<double>(x.size());
+    double a = x.minCoeff();
+    double b = x.maxCoeff();
+
+    double m_x = x.cwiseProduct(weights).mean();
+    Eigen::VectorXd sx = (x - Eigen::VectorXd::Constant(x.size(), m_x));
+    double sd_x = std::sqrt(sx.cwiseAbs2().cwiseProduct(weights).sum()/(n - 1));
+    Eigen::VectorXd q_x(2);
+    q_x(0) = 0.75;
+    q_x(1) = 0.25;
+    q_x = stats::quantile(x, q_x, weights);
+    double scale = std::min((q_x(0) - q_x(1))/1.349, sd_x);
+    if (scale == 0) {
+        scale = (sd_x > 0) ? sd_x : 1.0;
+    }
+
+    sx /= scale;
+    double sa = (a - m_x) / scale;
+    double sb = (b - m_x) / scale;
+    auto x2 = linbin(sx, sa, sb, grid_size, weights);
+
+    double nn = 0.0;
+    try {
+        double effn = std::pow(weights.sum(), 2) / weights.cwiseAbs2().sum();
+        double bfun = bkfe_nn(x2, bw * std::pow(effn, 1 / 5.0 - 1 / 7.0), a, b);
+        double vfun = bkfe(x2, 0, bw, a, b);
+
+        double del0 = 1.0 / std::pow(4.0 * M_PI, 1.0 / 10.0);
+        nn = scale * del0 * std::pow(vfun / (bfun * effn), 1.0 / 5.0);
+    } catch (...) {}
+
+    return std::min(nn, 1.0);
 }

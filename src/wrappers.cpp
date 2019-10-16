@@ -137,6 +137,24 @@ double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult,
     return bw;
 }
 
+//  Bandwidth for Kernel Density Estimation
+//' @param x vector of observations
+//' @param grid_size number of equally-spaced points over which binning is
+//' performed to obtain kernel functional approximation
+//' @param weights vector of weights for each observation (can be empty).
+//' @return the selected bandwidth
+//' @noRd
+// [[Rcpp::export]]
+double select_nn_cpp(const Eigen::VectorXd& x, double bw, double nn,
+                     double mult, const Eigen::VectorXd& weights) {
+    if (std::isnan(nn)) {
+        nn = dpik_nn(x, bw, weights);
+    }
+
+    return nn;
+}
+
+
 // [[Rcpp::export]]
 Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w) {
     if (w.size() > 0)

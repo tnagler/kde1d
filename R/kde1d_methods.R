@@ -165,7 +165,7 @@ plot.kde1d <- function(x, ...) {
         plot_type <- "h"  # for discrete variables, use a histrogram
     } else {
         # adjust grid if necessary
-        ev <- x$grid_points
+        ev <- seq(min(x$grid_points), max(x$grid_points), l = 50)
         if (!is.nan(x$xmin))
             ev[1] <- x$xmin
         if (!is.nan(x$xmax))
