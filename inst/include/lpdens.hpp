@@ -33,6 +33,7 @@ private:
     size_t deg_;
     double loglik_;
     double edf_;
+    static constexpr double K0_ = 0.3989425;
 
     // private methods
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
@@ -124,7 +125,7 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
         if (std::fabs(xx) > 5.0)
             return 0.0;
         // otherwise calculate normal pdf (orrect for truncation)
-        return  stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0) / 0.999999426;
+        return stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0) / 0.999999426;
     };
     return x.unaryExpr(f);
 }
@@ -145,6 +146,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
 
     double f0, f1, b;
     double s = bw_;
+    double w0 = 1.0;
     Eigen::VectorXd xx(x.size());
     Eigen::VectorXd xx2(x.size());
     Eigen::VectorXd kernels(x.size());
@@ -156,6 +158,21 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
             kernels = kernels.cwiseProduct(weights);
         f0 = kernels.mean();
         res(k, 0) = f0;
+
+        // Before continuing with higher-order polynomials, check
+        // (local constant) influence. If it is close to one, there is only one
+        // observation contributing to the estimate and it is evaluated on this
+        // observation. To avoid numerical issues in this case, we just use the
+        // local constant estimate.
+        if (weights.size()) {
+            // find weight corresponding to observation closest to x_ev(k)
+            w0 = weights(tools::find_min_index(xx.array().abs()));
+        }
+        double infl0 = K0_ * w0 / (n * bw_) / f0;
+        if (infl0 > 0.95) {
+            res(k, 1) = infl0;
+            continue;
+        }
 
         if (deg_ > 0) {
             // calculate b for local linear
@@ -182,11 +199,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
         }
 
         // influence function estimate
-        if (weights.size() > 0) {
-            res(k, 1) = calculate_infl(n, f0, b, bw_, s, weights(k));
-        } else {
-            res(k, 1) = calculate_infl(n, f0, b, bw_, s, 1.0);
-        }
+        res(k, 1) = calculate_infl(n, f0, b, bw_, s, w0);
     }
 
     return res;
@@ -226,9 +239,7 @@ inline double LPDens1d::calculate_infl(const size_t &n,
         M(2, 0) = M(2, 2);
     }
 
-    double infl = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
-    infl *= M.inverse()(0, 0) * weight / static_cast<double>(n);
-    return infl;
+    return K0_ * weight / (n * bw) * M.inverse()(0, 0);
 }
 
 
