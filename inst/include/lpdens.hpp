@@ -161,16 +161,15 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
 
         // Before continuing with higher-order polynomials, check
         // (local constant) influence. If it is close to one, there is only one
-        // observation contributing to the estimate and it is evaluated on this
-        // observation. To avoid numerical issues in this case, we just use the
+        // observation contributing to the estimate and it is evaluated close to
+        // it. To avoid numerical issues in this case, we just use the
         // local constant estimate.
         if (weights.size()) {
             // find weight corresponding to observation closest to x_ev(k)
             w0 = weights(tools::find_min_index(xx.array().abs()));
         }
-        double infl0 = K0_ * w0 / (n * bw_) / f0;
-        if (infl0 > 0.95) {
-            res(k, 1) = infl0;
+        res(k, 1) = K0_ * w0 / (n * bw_) / f0;
+        if (res(k, 1) > 0.95) {
             continue;
         }
 
@@ -184,22 +183,22 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
                 // more calculations for local quadratic
                 xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
                 b *= std::pow(bw_, 2);
-                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - std::pow(b, 2));
+                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - b*b);
                 res(k, 0) *= bw_ * std::sqrt(s);
             }
 
             // final estimate
             res(k, 0) *= std::exp(-0.5 * std::pow(b, 2) * s);
-            if ((boost::math::isnan)(res(k)) |
-                (boost::math::isinf)(res(k))) {
+            res(k, 1) = calculate_infl(n, f0, b, bw_, s, w0);
+
+            if (std::isnan(res(k)) | std::isinf(res(k))) {
                 // inverse operation might go wrong due to rounding when
                 // true value is equal or close to zero
                 res(k, 0) = 0.0;
+                res(k, 1) = 0.0;
             }
         }
 
-        // influence function estimate
-        res(k, 1) = calculate_infl(n, f0, b, bw_, s, w0);
     }
 
     return res;
