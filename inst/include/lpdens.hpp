@@ -33,6 +33,7 @@ private:
     size_t deg_;
     double loglik_;
     double edf_;
+    static constexpr double K0_ = 0.3989425;
 
     // private methods
     Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
@@ -124,7 +125,7 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
         if (std::fabs(xx) > 5.0)
             return 0.0;
         // otherwise calculate normal pdf (orrect for truncation)
-        return  stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0) / 0.999999426;
+        return stats::dnorm(Eigen::VectorXd::Constant(1, xx))(0) / 0.999999426;
     };
     return x.unaryExpr(f);
 }
@@ -145,6 +146,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
 
     double f0, f1, b;
     double s = bw_;
+    double w0 = 1.0;
     Eigen::VectorXd xx(x.size());
     Eigen::VectorXd xx2(x.size());
     Eigen::VectorXd kernels(x.size());
@@ -157,6 +159,20 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
         f0 = kernels.mean();
         res(k, 0) = f0;
 
+        // Before continuing with higher-order polynomials, check
+        // (local constant) influence. If it is close to one, there is only one
+        // observation contributing to the estimate and it is evaluated close to
+        // it. To avoid numerical issues in this case, we just use the
+        // local constant estimate.
+        if (weights.size()) {
+            // find weight corresponding to observation closest to x_ev(k)
+            w0 = weights(tools::find_min_index(xx.array().abs()));
+        }
+        res(k, 1) = K0_ * w0 / (n * bw_) / f0;
+        if (res(k, 1) > 0.95) {
+            continue;
+        }
+
         if (deg_ > 0) {
             // calculate b for local linear
             xx /= bw_;
@@ -167,26 +183,22 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
                 // more calculations for local quadratic
                 xx2 = xx.cwiseProduct(kernels) / (f0 * static_cast<double>(n));
                 b *= std::pow(bw_, 2);
-                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - std::pow(b, 2));
+                s = 1.0 / (std::pow(bw_, 4) * xx.transpose() * xx2 - b*b);
                 res(k, 0) *= bw_ * std::sqrt(s);
             }
 
             // final estimate
             res(k, 0) *= std::exp(-0.5 * std::pow(b, 2) * s);
-            if ((boost::math::isnan)(res(k)) |
-                (boost::math::isinf)(res(k))) {
+            res(k, 1) = calculate_infl(n, f0, b, bw_, s, w0);
+
+            if (std::isnan(res(k)) | std::isinf(res(k))) {
                 // inverse operation might go wrong due to rounding when
                 // true value is equal or close to zero
                 res(k, 0) = 0.0;
+                res(k, 1) = 0.0;
             }
         }
 
-        // influence function estimate
-        if (weights.size() > 0) {
-            res(k, 1) = calculate_infl(n, f0, b, bw_, s, weights(k));
-        } else {
-            res(k, 1) = calculate_infl(n, f0, b, bw_, s, 1.0);
-        }
     }
 
     return res;
@@ -226,9 +238,7 @@ inline double LPDens1d::calculate_infl(const size_t &n,
         M(2, 0) = M(2, 2);
     }
 
-    double infl = kern_gauss(Eigen::VectorXd::Zero(1))(0) / bw;
-    infl *= M.inverse()(0, 0) * weight / static_cast<double>(n);
-    return infl;
+    return K0_ * weight / (n * bw) * M.inverse()(0, 0);
 }
 
 
@@ -310,35 +320,43 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
         const Eigen::VectorXd& weights)
 {
     // set up grid
-    size_t grid_size = 50;
-    Eigen::VectorXd grid_points(grid_size), inner_grid;
+    size_t grid_size = 52;
+    Eigen::VectorXd grid_points(grid_size);
 
     // determine "inner" grid by sample quantiles
     // (need to leave room for boundary extensions)
     if (std::isnan(xmin_))
-        grid_size -= 2;
+        grid_size -= 3;
     if (std::isnan(xmax_))
-        grid_size -= 2;
-    inner_grid = stats::quantile(x,
-                                 Eigen::VectorXd::LinSpaced(grid_size, 0, 1),
-                                 weights);
+        grid_size -= 3;
+
+    // hybrid grid: quantiles and two equally spaced points between them
+    auto qgrid = stats::quantile(
+        x, Eigen::VectorXd::LinSpaced((grid_size - 1)/3 + 1, 0, 1), weights);
+    Eigen::VectorXd inner_grid(grid_size);
+    for (unsigned i = 0; i < qgrid.size() - 1; i++) {
+        inner_grid.segment(i * 3, 4) =
+            Eigen::VectorXd::LinSpaced(4, qgrid(i), qgrid(i + 1));
+    }
 
     // extend grid where there's no boundary
     double range = inner_grid.maxCoeff() - inner_grid.minCoeff();
     Eigen::VectorXd lowr_ext, uppr_ext;
     if (std::isnan(xmin_)) {
         // no left boundary -> add a few points to the left
-        lowr_ext = Eigen::VectorXd(2);
+        lowr_ext = Eigen::VectorXd(3);
         double step = inner_grid[1] - inner_grid[0];
-        lowr_ext[1] = inner_grid[0] - step;
-        lowr_ext[0] = lowr_ext[1] - std::max(0.4 * range, step);
+        lowr_ext[2] = inner_grid[0] - step;
+        lowr_ext[1] = inner_grid[0] - 2 * step;
+        lowr_ext[0] = lowr_ext[1] - std::max(0.25 * range, step);
     }
     if (std::isnan(xmax_)) {
         // no right boundary -> add a few points to the right
-        uppr_ext = Eigen::VectorXd(2);
+        uppr_ext = Eigen::VectorXd(3);
         double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
         uppr_ext[0] = inner_grid[grid_size - 1] + step;
-        uppr_ext[1] = uppr_ext[0] + std::max(0.4 * range, step);
+        uppr_ext[1] = inner_grid[grid_size - 1] + 2 * step;
+        uppr_ext[2] = uppr_ext[1] + std::max(0.25 * range, step);
     }
 
     grid_points << lowr_ext, inner_grid, uppr_ext;

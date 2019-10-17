@@ -50,4 +50,11 @@ inline Eigen::VectorXd invert_f(const Eigen::VectorXd &x,
     return x_tmp;
 }
 
+//! finds the index, where the minimum in a vector occurs.
+//! @param x the vector.
+inline size_t find_min_index(const Eigen::VectorXd& x)
+{
+    return std::min_element(x.data(), x.data() + x.size()) - x.data();
+}
+
 }
