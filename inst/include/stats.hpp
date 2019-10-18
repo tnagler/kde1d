@@ -3,6 +3,7 @@
 #define BOOST_MATH_PROMOTE_DOUBLE_POLICY false
 #include <Eigen/Dense>
 #include <boost/math/distributions.hpp>
+#include <boost/math/special_functions/hermite.hpp>
 #include <algorithm>
 #include <vector>
 
@@ -17,6 +18,25 @@ inline Eigen::MatrixXd dnorm(const Eigen::MatrixXd& x)
     boost::math::normal dist;
     return x.unaryExpr([&dist](const double& y) {
         return boost::math::pdf(dist, y);
+    });
+};
+
+//! standard normal density
+//! @param x evaluation points.
+//! @param drv order of the derivative
+//! @return matrix of pdf values.
+inline Eigen::MatrixXd dnorm_drv(const Eigen::MatrixXd& x, unsigned drv)
+{
+    boost::math::normal dist;
+    double rt2 = std::sqrt(2);
+    return x.unaryExpr([&dist, &drv, &rt2](const double& y) {
+        double res = boost::math::pdf(dist, y);
+        // boost implementes phsyicist's hermite poly; rescale to probabilist's.
+        res *= boost::math::hermite(drv, y / rt2);
+        res *= std::pow(0.5, drv * 0.5);
+        if (drv % 2)
+            res = -res;
+        return res;
     });
 };
 

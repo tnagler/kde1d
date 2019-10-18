@@ -127,7 +127,8 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult,
                      bool discrete, const Eigen::VectorXd& weights) {
     if (std::isnan(bw)) {
-        bw = dpik(x, weights);
+        BinnedKDE bkde(x, bw, weights);
+        bw = bkde.dpik(0);
     }
     bw *= mult;
     if (discrete) {

@@ -149,12 +149,12 @@ inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
 //! @param x evaluation point.
 //! @param a polynomial coefficients
 inline double
-    InterpolationGrid1d::cubic_poly(const double& x, const Eigen::VectorXd& a)
-    {
-        double x2 = x * x;
-        double x3 = x2 * x;
-        return a(0) + a(1) * x + a(2) * x2 + a(3) * x3;
-    }
+InterpolationGrid1d::cubic_poly(const double& x, const Eigen::VectorXd& a)
+{
+    double x2 = x * x;
+    double x3 = x2 * x;
+    return a(0) + a(1) * x + a(2) * x2 + a(3) * x3;
+}
 
 //! Indefinite integral of a cubic polynomial
 //!
@@ -186,43 +186,43 @@ inline double InterpolationGrid1d::cubic_integral(const double& lower,
 //! @param vals length 4 vector of function values.
 //! @param grid length 4 vector of grid points.
 inline Eigen::VectorXd
-    InterpolationGrid1d::find_coefs(const Eigen::VectorXd& vals,
-                                    const Eigen::VectorXd& grid)
-    {
-        Eigen::VectorXd a(4);
+InterpolationGrid1d::find_coefs(const Eigen::VectorXd& vals,
+                                const Eigen::VectorXd& grid)
+{
+    Eigen::VectorXd a(4);
 
-        double dt0 = grid(1) - grid(0);
-        double dt1 = grid(2) - grid(1);
-        double dt2 = grid(3) - grid(2);
+    double dt0 = grid(1) - grid(0);
+    double dt1 = grid(2) - grid(1);
+    double dt2 = grid(3) - grid(2);
 
-        /* check for repeated points (important for boundaries) */
-        if (dt1 <= 0)
-            dt1 = 1.0;
-        if (dt0 <= 0)
-            dt0 = dt1;
-        if (dt2 <= 0)
-            dt2 = dt1;
+    /* check for repeated points (important for boundaries) */
+    if (dt1 <= 0)
+        dt1 = 1.0;
+    if (dt0 <= 0)
+        dt0 = dt1;
+    if (dt2 <= 0)
+        dt2 = dt1;
 
-        // compute tangents when parameterized in (t1,t2)
-        double dx1 = (vals(1) - vals(0)) / dt0;
-        dx1 -= (vals(2) - vals(0)) / (dt0 + dt1);
-        dx1 += (vals(2) - vals(1)) / dt1;
-        double dx2 = (vals(2) - vals(1)) / dt1;
-        dx2 -= (vals(3) - vals(1)) / (dt1 + dt2);
-        dx2 += (vals(3) - vals(2)) / dt2;
+    // compute tangents when parameterized in (t1,t2)
+    double dx1 = (vals(1) - vals(0)) / dt0;
+    dx1 -= (vals(2) - vals(0)) / (dt0 + dt1);
+    dx1 += (vals(2) - vals(1)) / dt1;
+    double dx2 = (vals(2) - vals(1)) / dt1;
+    dx2 -= (vals(3) - vals(1)) / (dt1 + dt2);
+    dx2 += (vals(3) - vals(2)) / dt2;
 
-        // rescale tangents for parametrization in (0,1)
-        dx1 *= dt1;
-        dx2 *= dt1;
+    // rescale tangents for parametrization in (0,1)
+    dx1 *= dt1;
+    dx2 *= dt1;
 
-        // compute coefficents
-        a(0) = vals(1);
-        a(1) = dx1;
-        a(2) = -3 * vals(1) + 3 * vals(2) - 2 * dx1 - dx2;
-        a(3) = 2 * vals(1) - 2 * vals(2) + dx1 + dx2;
+    // compute coefficents
+    a(0) = vals(1);
+    a(1) = dx1;
+    a(2) = -3 * vals(1) + 3 * vals(2) - 2 * dx1 - dx2;
+    a(3) = 2 * vals(1) - 2 * vals(2) + dx1 + dx2;
 
-        return a;
-    }
+    return a;
+}
 
 //! Interpolate on 4 points
 //!
