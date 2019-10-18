@@ -127,7 +127,8 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 Rcpp::List select_bw_nn_cpp(const Eigen::VectorXd& x,
                                  double bw, double nn,
                                  double mult, bool discrete,
-                                 const Eigen::VectorXd& weights, size_t deg) {
+                                 const Eigen::VectorXd& weights, size_t deg)
+{
 
     if (std::isnan(bw) | std::isnan(nn)) {
         PluginBandwidthSelector selector(x, weights);
@@ -149,9 +150,11 @@ Rcpp::List select_bw_nn_cpp(const Eigen::VectorXd& x,
 }
 
 
-// [[Rcpp::export]]
-Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w) {
-    if (w.size() > 0)
-        return stats::quantile(x, a, w);
-    return stats::quantile(x, a);
-}
+// // [[Rcpp::export]]
+// Eigen::VectorXd quan(const Eigen::VectorXd& x,
+//                      const Eigen::VectorXd& a,
+//                      const Eigen::VectorXd& w) {
+//     if (w.size() > 0)
+//         return stats::quantile(x, a, w);
+//     return stats::quantile(x, a);
+// }

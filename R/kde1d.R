@@ -12,13 +12,17 @@
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
-#'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
-#' @param nn nearest-neighbor component of the bandwidth; a number
-#'    between 0 and 1. If positive, it modifies the bandwidth locally
-#'    such that at least `nn * length(x)` observations are used for each point
-#'    estimate. `nn = 0` is advisable for `deg < 2` and unbounded data.
-#' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
-#'   log-linear, and log-quadratic fitting, respectively.
+#'   latter uses the plug-in methodology of Sheather and Jones (1991) with
+#'   appropriate modifications for `deg > 0`.
+#' @param nn nearest-neighbor component of the bandwidth; a number between 0 and
+#'   1 or `NA`. If positive, the distancce `d_k` to the `k = nn * length(n)`th
+#'   nearest neighbor of an evaluation point `x` is computed. The final
+#'   bandwidth used is `(bw * d_k)^(1/2)`. If `NA`, the nearest neighbor
+#'   component is selected using the plug-in methodology of Sheather and Jones
+#'   (1991) with appropriate modifications for nearest neighbor bandwidths.
+#'
+#' @param deg degree of the polynomial; either `0`, `1`, or `2` for
+#'   log-constant, log-linear, and log-quadratic fitting, respectively.
 #' @param weights optional vector of weights for individual observations.
 #'
 #' @return An object of class `kde1d`.
@@ -32,27 +36,27 @@
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
 #'
-#' @references
-#'   Geenens, G. (2014). *Probit transformation for kernel density estimation on
-#'   the unit interval*. Journal of the American Statistical Association,
-#'   109:505, 346-358, [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
+#' @references Geenens, G. (2014). *Probit transformation for kernel density
+#' estimation on the unit interval*. Journal of the American Statistical
+#' Association, 109:505, 346-358,
+#' [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
 #'
-#'   Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
-#'   density estimation for positive random variables.* Journal of Computational
-#'   and Graphical Statistics, to appear,
-#'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+#' Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel density
+#' estimation for positive random variables.* Journal of Computational and
+#' Graphical Statistics, to appear,
+#' [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
 #'
-#'   Nagler, T. (2018a). *A generic approach to nonparametric function
-#'   estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
-#'   [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+#' Nagler, T. (2018a). *A generic approach to nonparametric function estimation
+#' with mixed data.* Statistics & Probability Letters, 137:326–330,
+#' [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
 #'
-#'   Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
-#'   estimator.* Mathematical Methods of Statistics, in press,
-#'   [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
+#' Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
+#' estimator.* Mathematical Methods of Statistics, in press,
+#' [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
 #'
-#'   Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
-#'   selection method for kernel density estimation. Journal of the Royal
-#'   Statistical Society, Series B, 53, 683–690.
+#' Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
+#' selection method for kernel density estimation. Journal of the Royal
+#' Statistical Society, Series B, 53, 683–690.
 #'
 #' @examples
 #'
@@ -95,7 +99,7 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = 0,
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = NA,
                   deg = 2, weights = numeric(0)) {
     x <- na.omit(x)
     # sanity checks

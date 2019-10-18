@@ -5,6 +5,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+//! Bandwidth selection for local-likelihood density estimation.
+//! Methodology is similar to Sheather and Jones(1991), but asymptotic
+//! bias/variance expressions are adapted for higher-order polynomials and
+//! nearest neighbor bandwidths.
 class PluginBandwidthSelector {
 public:
     PluginBandwidthSelector(const Eigen::VectorXd& x,
@@ -34,6 +38,8 @@ private:
 };
 
 
+//! @param x vector of observations.
+//! @param weigths optional vector of weights for each observation.
 PluginBandwidthSelector::PluginBandwidthSelector(const Eigen::VectorXd& x,
                                                  const Eigen::VectorXd& weights)
     : lower_(x.minCoeff())
@@ -52,10 +58,9 @@ PluginBandwidthSelector::PluginBandwidthSelector(const Eigen::VectorXd& x,
     scale_ = scale_est(x);
 }
 
-// Obtains bin counts for univariate data via the linear binning strategy.
+//! Computes bin counts for univariate data via the linear binning strategy.
 //! @param x vector of observations
 //! @param weights vector of weights for each observation.
-//! @return bin counts
 inline Eigen::VectorXd PluginBandwidthSelector::linbin(const Eigen::VectorXd& x,
                                          const Eigen::VectorXd& weights)
 {
@@ -76,6 +81,8 @@ inline Eigen::VectorXd PluginBandwidthSelector::linbin(const Eigen::VectorXd& x,
     return gcnts;
 }
 
+//! Scale estimate (minimum of standard deviation and robust equivalent)
+//! @param x vector of observations.
 double PluginBandwidthSelector::scale_est(const Eigen::VectorXd& x)
 {
     double m_x = x.cwiseProduct(weights_).mean();
@@ -94,9 +101,8 @@ double PluginBandwidthSelector::scale_est(const Eigen::VectorXd& x)
 
 
 //! Binned kernel density derivative estimate
-//! @param x vector of bin counts
-//! @param drv order of derivative
-//! @return estimated derivative evaluated at the grid points
+//! @param drv order of derivative.
+//! @return estimated derivative evaluated at the bin centers.
 Eigen::VectorXd PluginBandwidthSelector::kde_drv(size_t drv)
 {
     double delta = (upper_ - lower_) / (num_bins_ - 1.0);
@@ -130,6 +136,7 @@ Eigen::VectorXd PluginBandwidthSelector::kde_drv(size_t drv)
 
 //! optimal bandwidths for kernel functionals (see Wand and Jones' book, 3.5)
 //! only works for even drv
+//! @param drv order of the derivative in the kernel functional.
 void PluginBandwidthSelector::set_bw_for_bkfe(size_t drv)
 {
     if (drv % 2 != 0) {
@@ -156,7 +163,7 @@ void PluginBandwidthSelector::set_bw_for_bkfe(size_t drv)
 }
 
 
-// Binned Kernel Functional Estimate
+//! Binned Kernel Functional Estimate
 //! @param x vector of bin counts
 //! @param drv order of derivative in the density functional
 //! @param h kernel bandwidth
@@ -168,11 +175,12 @@ double PluginBandwidthSelector::bkfe(size_t drv)
     return bin_counts_.cwiseProduct(kde_drv(drv)).sum() / bin_counts_.sum();
 }
 
-// integrated squared bias without bw and n terms
+//! computes the integrated squared bias (without bw and n terms).
+//! Bias expressions can be found in Geenens (JASA, 2014)
+//! @param deg degree of the local polynomial.
 double PluginBandwidthSelector::ll_ibias2(size_t deg)
 {
     Eigen::VectorXd arg;
-    // bias expressions from Geenens (JASA, 2014)
     if (deg == 0) {
         set_bw_for_bkfe(4);
         arg = 0.25 * kde_drv(4);
@@ -198,7 +206,9 @@ double PluginBandwidthSelector::ll_ibias2(size_t deg)
     return bin_counts_.cwiseProduct(arg).sum() / bin_counts_.sum();
 }
 
-// integrated squared bias without bw and n terms
+//! computes the integrated squared bias (without bw and n terms).
+//! Bias expressions from Geenens (JASA, 2014) modified for nn-type estimators.
+//! @param deg degree of the local polynomial.
 double PluginBandwidthSelector::ll_ibias2_nn(size_t deg)
 {
     // Follows from
@@ -237,16 +247,20 @@ double PluginBandwidthSelector::ll_ibias2_nn(size_t deg)
     return bin_counts_.cwiseProduct(arg).sum() / bin_counts_.sum();
 }
 
-// integrated variance without bw and n terms
+//! computes the integrated squared variance (without bw and n terms).
+//! Variance expressions can be found in Geenens (JASA, 2014)
+//! @param deg degree of the local polynomial.
 double PluginBandwidthSelector::ll_ivar(size_t deg)
 {
-    // variance expressions from Geenens (JASA, 2014)
     if (deg > 2)
         throw std::runtime_error("deg must be one of {0, 1, 2}.");
     return (deg < 2 ? 1.0 : 27.0 / 16.0) * 0.5 / std::sqrt(M_PI);
 }
 
-// integrated variance for nn without bw and n terms
+//! computes the integrated squared variance (without bw and n terms).
+//! Variance expressions from Geenens (JASA, 2014) modified for nn-type
+//! estimators.
+//! @param deg degree of the local polynomial.
 double PluginBandwidthSelector::ll_ivar_nn(size_t deg)
 {
     // variance expressions from Geenens (JASA, 2014)
@@ -256,12 +270,8 @@ double PluginBandwidthSelector::ll_ivar_nn(size_t deg)
     return (deg < 2 ? 1.0 : 27.0 / 16.0) * bkfe(0) / std::sqrt(M_PI);
 }
 
-// Bandwidth for Kernel Density Estimation
-//! @param x vector of observations
-//! @param weights vector of weights for each observation (can be empty).
-//! @param grid_size number of equally-spaced points over which binning is
-//! performed to obtain kernel functional approximation
-//! @return the selected bandwidth
+//! Selects the bandwidth for kernel density estimation.
+//! @param deg degree of the local polynomial.
 inline double PluginBandwidthSelector::select_bw(size_t deg)
 {
     // effective sample size
@@ -279,24 +289,20 @@ inline double PluginBandwidthSelector::select_bw(size_t deg)
     return bw;
 }
 
-//! Bandwidth for Nearest Neighbor Kernel Density Estimation
-//! @param x vector of observations
-//! @param weights vector of weights for each observation (can be empty).
-//! @param grid_size number of equally-spaced points over which binning is
-//! performed to obtain kernel functional approximation
-//! @return the selected bandwidth
+//! Selects the bandwidth for nearest-neighbor kernel density estimation.
+//! @param deg degree of the local polynomial.
 inline double PluginBandwidthSelector::select_nn(size_t deg)
 {
     // effective sample size
     double n = std::pow(weights_.sum(), 2) / weights_.cwiseAbs2().sum();
-    double nn = 0.5;
+    double nn = 0.0;
     int nnpow = (deg < 2 ? 4 : 8);
-    // try {
+    try {
         double ibias2 = ll_ibias2_nn(deg);
         double ivar   = ll_ivar_nn(deg);
         nn = std::pow(ivar / (nnpow * n * ibias2), 1.0 / (nnpow + 1));
-    // } catch (...) {
-    // }
+    } catch (...) {
+    }
 
     return std::min(nn, 1.0);
 }
