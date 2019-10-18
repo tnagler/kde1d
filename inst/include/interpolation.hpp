@@ -236,7 +236,12 @@ inline double InterpolationGrid1d::interp_on_grid(const double& x,
 {
     Eigen::VectorXd a = find_coefs(vals, grid);
     double xev = std::fmax((x - grid(1)), 0) / (grid(2) - grid(1));
-    return cubic_poly(xev, a);
+    double res = cubic_poly(xev, a);
+    if (res < 0) {
+        // switch to linear interpolation if result is negative
+        res = xev * vals(2) + (1 - xev) * vals(1);
+    }
+    return res;
 }
 
 
