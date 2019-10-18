@@ -124,35 +124,28 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 //' @return the selected bandwidth
 //' @noRd
 // [[Rcpp::export]]
-double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult,
-                     bool discrete, const Eigen::VectorXd& weights) {
-    if (std::isnan(bw)) {
-        BinnedKDE bkde(x, bw, weights);
-        bw = bkde.dpik(0);
+Rcpp::List select_bw_nn_cpp(const Eigen::VectorXd& x,
+                                 double bw, double nn,
+                                 double mult, bool discrete,
+                                 const Eigen::VectorXd& weights, size_t deg) {
+
+    if (std::isnan(bw) | std::isnan(nn)) {
+        PluginBandwidthSelector selector(x, weights);
+        if (std::isnan(bw))
+            bw = selector.select_bw(deg);
+        if (std::isnan(nn))
+            nn = selector.select_nn(deg);
     }
+
     bw *= mult;
     if (discrete) {
         bw = std::max(bw, 0.5 / 5);
     }
 
-    return bw;
-}
-
-//  Bandwidth for Kernel Density Estimation
-//' @param x vector of observations
-//' @param grid_size number of equally-spaced points over which binning is
-//' performed to obtain kernel functional approximation
-//' @param weights vector of weights for each observation (can be empty).
-//' @return the selected bandwidth
-//' @noRd
-// [[Rcpp::export]]
-double select_nn_cpp(const Eigen::VectorXd& x, double bw, double nn,
-                     double mult, const Eigen::VectorXd& weights) {
-    if (std::isnan(nn)) {
-        nn = dpik_nn(x, bw, weights);
-    }
-
-    return nn;
+    return Rcpp::List::create(
+        Rcpp::Named("bw") = bw,
+        Rcpp::Named("nn") = nn
+    );
 }
 
 

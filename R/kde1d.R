@@ -106,16 +106,15 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, nn = 0,
     x <- cctools::cont_conv(x)
 
     # bandwidth selection
-    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax),
-                        bw,
-                        mult,
-                        length(attr(x, "i_disc")) == 1,
-                        weights)
-    nn <- select_nn_cpp(boundary_transform(x, xmin, xmax),
-                        bw, nn, mult, weights)
-
+    sel <- select_bw_nn_cpp(boundary_transform(x, xmin, xmax),
+                            bw,
+                            nn,
+                            mult,
+                            length(attr(x, "i_disc")) == 1,
+                            weights,
+                            deg)
     # fit model
-    fit <- fit_kde1d_cpp(x, bw, nn, xmin, xmax, deg, weights)
+    fit <- fit_kde1d_cpp(x, sel$bw, sel$nn, xmin, xmax, deg, weights)
 
     # add info
     fit$jitter_info <- attributes(x)

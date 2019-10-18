@@ -5,42 +5,39 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-class BinnedKDE {
+class PluginBandwidthSelector {
 public:
-    BinnedKDE(const Eigen::VectorXd& x,
-              double bw,
-              const Eigen::VectorXd& weights = Eigen::VectorXd(),
-              size_t num_bins = 401);
-
-    void set_bw(double bw) { bw_ = bw; }
-    Eigen::VectorXd kde_drv(size_t drv);
-    double bkfe(size_t drv);
-    double dpik(size_t deg);
+    PluginBandwidthSelector(const Eigen::VectorXd& x,
+                            const Eigen::VectorXd& weights = Eigen::VectorXd());
+    double select_bw(size_t deg);
+    double select_nn(size_t deg);
 
 private:
     Eigen::VectorXd linbin(const Eigen::VectorXd& x,
                            const Eigen::VectorXd& weights);
     double scale_est(const Eigen::VectorXd& x);
-    double select_bw_for_bkfe(size_t drv);
+    Eigen::VectorXd kde_drv(size_t drv);
+    void set_bw_for_bkfe(size_t drv);
+    double bkfe(size_t drv);
+    double ll_ibias2(size_t deg);
+    double ll_ibias2_nn(size_t deg);
+    double ll_ivar(size_t deg);
+    double ll_ivar_nn(size_t deg);
 
+    size_t num_bins_{ 401 };
+    double bw_ { NAN };
     double lower_;
     double upper_;
-    size_t num_bins_;
-    double bw_;
     Eigen::VectorXd weights_;
     Eigen::VectorXd bin_counts_;
     double scale_;
 };
 
 
-BinnedKDE::BinnedKDE(const Eigen::VectorXd& x,
-                     double bw,
-                     const Eigen::VectorXd& weights,
-                     size_t num_bins)
+PluginBandwidthSelector::PluginBandwidthSelector(const Eigen::VectorXd& x,
+                                                 const Eigen::VectorXd& weights)
     : lower_(x.minCoeff())
     , upper_(x.maxCoeff())
-    , num_bins_(num_bins)
-    , bw_(bw)
     , weights_(weights)
 {
     if (weights.size() > 0 && (weights.size() != x.size()))
@@ -59,7 +56,7 @@ BinnedKDE::BinnedKDE(const Eigen::VectorXd& x,
 //! @param x vector of observations
 //! @param weights vector of weights for each observation.
 //! @return bin counts
-inline Eigen::VectorXd BinnedKDE::linbin(const Eigen::VectorXd& x,
+inline Eigen::VectorXd PluginBandwidthSelector::linbin(const Eigen::VectorXd& x,
                                          const Eigen::VectorXd& weights)
 {
     Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins_);
@@ -79,7 +76,7 @@ inline Eigen::VectorXd BinnedKDE::linbin(const Eigen::VectorXd& x,
     return gcnts;
 }
 
-double BinnedKDE::scale_est(const Eigen::VectorXd& x)
+double PluginBandwidthSelector::scale_est(const Eigen::VectorXd& x)
 {
     double m_x = x.cwiseProduct(weights_).mean();
     Eigen::VectorXd sx = (x - Eigen::VectorXd::Constant(x.size(), m_x));
@@ -100,7 +97,7 @@ double BinnedKDE::scale_est(const Eigen::VectorXd& x)
 //! @param x vector of bin counts
 //! @param drv order of derivative
 //! @return estimated derivative evaluated at the grid points
-Eigen::VectorXd BinnedKDE::kde_drv(size_t drv)
+Eigen::VectorXd PluginBandwidthSelector::kde_drv(size_t drv)
 {
     double delta = (upper_ - lower_) / (num_bins_ - 1.0);
     double tau = 4.0 + drv;
@@ -133,12 +130,11 @@ Eigen::VectorXd BinnedKDE::kde_drv(size_t drv)
 
 //! optimal bandwidths for kernel functionals (see Wand and Jones' book, 3.5)
 //! only works for even drv
-double BinnedKDE::select_bw_for_bkfe(size_t drv)
+void PluginBandwidthSelector::set_bw_for_bkfe(size_t drv)
 {
     if (drv % 2 != 0) {
         throw std::runtime_error("only even drv allowed.");
     }
-    double bw_old = bw_;
 
     // effective sample size
     double n = std::pow(weights_.sum(), 2) / weights_.cwiseAbs2().sum();
@@ -156,8 +152,7 @@ double BinnedKDE::select_bw_for_bkfe(size_t drv)
     psi = bkfe(drv + 2);
     Kr = stats::dnorm_drv(Eigen::VectorXd::Zero(1), r - 2)(0);
 
-    bw_ = bw_old;
-    return std::pow(-2 * Kr / (psi * n), 1.0 / (r + 1));
+    bw_ = std::pow(-2 * Kr / (psi * n), 1.0 / (r + 1));
 }
 
 
@@ -168,28 +163,98 @@ double BinnedKDE::select_bw_for_bkfe(size_t drv)
 //! @param a minimum value of x at which to compute the estimate
 //! @param b maximum value of x at which to compute the estimate
 //! @return the estimated functional
-double BinnedKDE::bkfe(size_t drv)
+double PluginBandwidthSelector::bkfe(size_t drv)
 {
     return bin_counts_.cwiseProduct(kde_drv(drv)).sum() / bin_counts_.sum();
 }
 
-//! Binned Kernel Functional Estimate for nearest neighbor bandwidths
-//! @param x vector of observations
-//! @param h kernel bandwidth
-//! @param a minimum value of x at which to compute the estimate
-//! @param b maximum value of x at which to compute the estimate
-//! @return the estimated functional
-double bkfe_nn(const Eigen::VectorXd& x, double h, double a, double b)
+// integrated squared bias without bw and n terms
+double PluginBandwidthSelector::ll_ibias2(size_t deg)
 {
-    // Eigen::VectorXd drv2 = bkdrv(x, 2, h, a, b).cwiseAbs2();
-    // Eigen::VectorXd pdf3 = bkdrv(x, 0, h, a, b).array().pow(3);
-    // Eigen::VectorXd arg = drv2.array() / pdf3.array();
-    // arg = arg.unaryExpr([] (const double& xx) {
-    //     return std::isnan(xx) ? 0.0 : xx;
-    // });
-    return 1.0;// x.cwiseProduct(arg).sum() / x.sum();
+    Eigen::VectorXd arg;
+    // bias expressions from Geenens (JASA, 2014)
+    if (deg == 0) {
+        set_bw_for_bkfe(4);
+        arg = 0.25 * kde_drv(4);
+    } else if (deg == 1) {
+        set_bw_for_bkfe(4);
+        Eigen::VectorXd f0 = kde_drv(0);
+        Eigen::VectorXd f1 = kde_drv(1);
+        Eigen::VectorXd f2 = kde_drv(2);
+        arg = (0.5 * f2 + f1.cwiseAbs2().cwiseQuotient(f0))
+            .cwiseAbs2().cwiseQuotient(f0);
+    } else if (deg == 2) {
+        set_bw_for_bkfe(8);
+        Eigen::VectorXd f0 = kde_drv(0);
+        Eigen::VectorXd f1 = kde_drv(1);
+        Eigen::VectorXd f2 = kde_drv(2);
+        Eigen::VectorXd f4 = kde_drv(4);
+        arg = f4 - 3 * f2.cwiseAbs2().cwiseQuotient(f0) +
+            2 * (f1.array().pow(4) / f0.array().pow(3)).matrix();
+        arg = (0.125 * arg).cwiseAbs2().cwiseQuotient(f0);
+    } else {
+        throw std::runtime_error("deg must be one of {0, 1, 2}.");
+    }
+    return bin_counts_.cwiseProduct(arg).sum() / bin_counts_.sum();
 }
 
+// integrated squared bias without bw and n terms
+double PluginBandwidthSelector::ll_ibias2_nn(size_t deg)
+{
+    // Follows from
+    //      d_k(x) ~ (k / n) / (2 f(x)),
+    // where d_k(x) is the distance to the k-nearest neighbor and (k / n) the
+    // nearest neighbor fraction.
+    Eigen::VectorXd arg;
+    if (deg == 0) {
+        set_bw_for_bkfe(4);
+        Eigen::VectorXd f0 = kde_drv(0);
+        Eigen::VectorXd f2 = kde_drv(2);
+        arg = (0.5 * 0.25 * f2.cwiseQuotient(f0.cwiseAbs2()))
+            .cwiseAbs2().cwiseQuotient(f0);
+    } else if (deg == 1) {
+        set_bw_for_bkfe(4);
+        Eigen::VectorXd f0 = kde_drv(0);
+        Eigen::VectorXd f1 = kde_drv(1);
+        Eigen::VectorXd f2 = kde_drv(2);
+        arg = (0.5 * 0.25 * f2 + f1.cwiseAbs2().cwiseQuotient(f0))
+            .cwiseQuotient(f0.cwiseAbs2())
+            .cwiseAbs2().cwiseQuotient(f0);
+    } else if (deg == 2) {
+        set_bw_for_bkfe(8);
+        Eigen::VectorXd f0 = kde_drv(0);
+        Eigen::VectorXd f1 = kde_drv(1);
+        Eigen::VectorXd f2 = kde_drv(2);
+        Eigen::VectorXd f4 = kde_drv(4);
+        arg = f4 - 3 * f2.cwiseAbs2().cwiseQuotient(f0) +
+            2 * (f1.array().pow(4) / f0.array().pow(3)).matrix();
+        arg = (0.125 * 0.25 * arg).
+            cwiseQuotient(f0.cwiseAbs2()).
+            cwiseAbs2().cwiseQuotient(f0);
+    } else {
+        throw std::runtime_error("deg must be one of {0, 1, 2}.");
+    }
+    return bin_counts_.cwiseProduct(arg).sum() / bin_counts_.sum();
+}
+
+// integrated variance without bw and n terms
+double PluginBandwidthSelector::ll_ivar(size_t deg)
+{
+    // variance expressions from Geenens (JASA, 2014)
+    if (deg > 2)
+        throw std::runtime_error("deg must be one of {0, 1, 2}.");
+    return (deg < 2 ? 1.0 : 27.0 / 16.0) * 0.5 / std::sqrt(M_PI);
+}
+
+// integrated variance for nn without bw and n terms
+double PluginBandwidthSelector::ll_ivar_nn(size_t deg)
+{
+    // variance expressions from Geenens (JASA, 2014)
+    if (deg > 2)
+        throw std::runtime_error("deg must be one of {0, 1, 2}.");
+    set_bw_for_bkfe(0);
+    return (deg < 2 ? 1.0 : 27.0 / 16.0) * bkfe(0) / std::sqrt(M_PI);
+}
 
 // Bandwidth for Kernel Density Estimation
 //! @param x vector of observations
@@ -197,22 +262,20 @@ double bkfe_nn(const Eigen::VectorXd& x, double h, double a, double b)
 //! @param grid_size number of equally-spaced points over which binning is
 //! performed to obtain kernel functional approximation
 //! @return the selected bandwidth
-inline double BinnedKDE::dpik(size_t deg)
+inline double PluginBandwidthSelector::select_bw(size_t deg)
 {
     // effective sample size
     double n = std::pow(weights_.sum(), 2) / weights_.cwiseAbs2().sum();
-    double bw = 1.0;
-    double old_bw = bw_;
+    double bw;
+    int bwpow = (deg < 2 ? 4 : 8);
     try {
-        bw_ = select_bw_for_bkfe(4);
-        double psi = bkfe(4);
-        double del0 = 1.0 / std::pow(4.0 * M_PI, 1.0 / 10.0);
-        bw = del0 * std::pow(1.0 / (psi * n), 1.0 / 5.0);
+        double ibias2 = ll_ibias2(deg);
+        double ivar   = ll_ivar(deg);
+        bw = std::pow(ivar / (bwpow * n * ibias2), 1.0 / (bwpow + 1));
     } catch (...) {
-        bw = 4.0 * 1.06 * scale_ * std::pow(1.0 / n, 1.0 / 5.0);
+        bw = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bwpow + 1));
     }
 
-    bw_ = old_bw;
     return bw;
 }
 
@@ -222,50 +285,18 @@ inline double BinnedKDE::dpik(size_t deg)
 //! @param grid_size number of equally-spaced points over which binning is
 //! performed to obtain kernel functional approximation
 //! @return the selected bandwidth
-inline double dpik_nn(const Eigen::VectorXd& x,
-                      double bw,
-                      Eigen::VectorXd weights = Eigen::VectorXd(),
-                      size_t grid_size = 401)
+inline double PluginBandwidthSelector::select_nn(size_t deg)
 {
-    // if (weights.size() > 0 && (weights.size() != x.size()))
-    //     throw std::runtime_error("x and weights must have the same size");
-    //
-    // if (weights.size() == 0) {
-    //     weights = Eigen::VectorXd::Constant(x.size(), 1.0);
-    // } else {
-    //     weights = weights * x.size() / weights.sum();
-    // }
-    //
-    // double n = static_cast<double>(x.size());
-    // double a = x.minCoeff();
-    // double b = x.maxCoeff();
-    //
-    // double m_x = x.cwiseProduct(weights).mean();
-    // Eigen::VectorXd sx = (x - Eigen::VectorXd::Constant(x.size(), m_x));
-    // double sd_x = std::sqrt(sx.cwiseAbs2().cwiseProduct(weights).sum()/(n - 1));
-    // Eigen::VectorXd q_x(2);
-    // q_x(0) = 0.75;
-    // q_x(1) = 0.25;
-    // q_x = stats::quantile(x, q_x, weights);
-    // double scale = std::min((q_x(0) - q_x(1))/1.349, sd_x);
-    // if (scale == 0) {
-    //     scale = (sd_x > 0) ? sd_x : 1.0;
-    // }
-    //
-    // sx /= scale;
-    // double sa = (a - m_x) / scale;
-    // double sb = (b - m_x) / scale;
-    // auto x2 = linbin(sx, sa, sb, grid_size, weights);
-    //
-    // double nn = 0.0;
+    // effective sample size
+    double n = std::pow(weights_.sum(), 2) / weights_.cwiseAbs2().sum();
+    double nn = 0.5;
+    int nnpow = (deg < 2 ? 4 : 8);
     // try {
-    //     double effn = std::pow(weights.sum(), 2) / weights.cwiseAbs2().sum();
-    //     double bfun = bkfe_nn(x2, bw * std::pow(effn, 1 / 5.0 - 1 / 7.0), a, b);
-    //     double vfun = bkfe(x2, 0, bw, a, b);
-    //
-    //     double del0 = 1.0 / std::pow(4.0 * M_PI, 1.0 / 10.0);
-    //     nn = scale * del0 * std::pow(vfun / (bfun * effn), 1.0 / 5.0);
-    // } catch (...) {}
+        double ibias2 = ll_ibias2_nn(deg);
+        double ivar   = ll_ivar_nn(deg);
+        nn = std::pow(ivar / (nnpow * n * ibias2), 1.0 / (nnpow + 1));
+    // } catch (...) {
+    // }
 
-    return 0.0; //std::min(nn, 1.0);
+    return std::min(nn, 1.0);
 }

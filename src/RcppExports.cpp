@@ -59,24 +59,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// select_bw_cpp
-double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult, bool discrete, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP discreteSEXP, SEXP weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
-    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(select_bw_cpp(x, bw, mult, discrete, weights));
-    return rcpp_result_gen;
-END_RCPP
-}
-// select_nn_cpp
-double select_nn_cpp(const Eigen::VectorXd& x, double bw, double nn, double mult, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_select_nn_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP nnSEXP, SEXP multSEXP, SEXP weightsSEXP) {
+// select_bw_nn_cpp
+Rcpp::List select_bw_nn_cpp(const Eigen::VectorXd& x, double bw, double nn, double mult, bool discrete, const Eigen::VectorXd& weights, size_t deg);
+RcppExport SEXP _kde1d_select_bw_nn_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP nnSEXP, SEXP multSEXP, SEXP discreteSEXP, SEXP weightsSEXP, SEXP degSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -84,8 +69,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
     Rcpp::traits::input_parameter< double >::type nn(nnSEXP);
     Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(select_nn_cpp(x, bw, nn, mult, weights));
+    Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
+    rcpp_result_gen = Rcpp::wrap(select_bw_nn_cpp(x, bw, nn, mult, discrete, weights, deg));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -108,8 +95,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
-    {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 5},
-    {"_kde1d_select_nn_cpp", (DL_FUNC) &_kde1d_select_nn_cpp, 5},
+    {"_kde1d_select_bw_nn_cpp", (DL_FUNC) &_kde1d_select_bw_nn_cpp, 7},
     {"_kde1d_quan", (DL_FUNC) &_kde1d_quan, 3},
     {NULL, NULL, 0}
 };
