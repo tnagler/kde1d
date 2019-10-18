@@ -158,7 +158,7 @@ inline double LPDens1d::local_bw(const double& x_ev,
         std::nth_element(dists.data(),
                          dists.data() + k,
                          dists.data() + dists.size());
-        return std::max(dists(k), bw);
+        return std::sqrt(dists(k) * bw);
     } else {
         return bw;
     }
