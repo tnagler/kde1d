@@ -28,13 +28,11 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
     stopifnot(is.numeric(xmin))
     stopifnot(is.numeric(xmax))
     stopifnot(is.numeric(xmax))
-    stopifnot(is.na(bw) | is.numeric(bw))
+    stopifnot(is.na(bw) | (is.numeric(bw) & (bw > 0)))
     stopifnot(is.numeric(deg))
 
     if (!is.ordered(x) & is.factor(x))
         stop("Factors not allowed; use kdevine::kdevine() or cctools::cckde().")
-
-    stopifnot(mult > 0)
 
     if (is.ordered(x) & (!is.nan(xmin) | !is.nan(xmax)))
         stop("xmin and xmax are not meaningful for x of type ordered.")
@@ -66,4 +64,3 @@ boundary_transform <- function(x, xmin, xmax) {
 
     x
 }
-

@@ -72,7 +72,7 @@ pkde1d <- function(q, obj) {
         p <- pkde1d_cpp(q, obj)
     } else {
         if (!is.ordered(q))
-            
+
             q <- ordered(q, obj$jitter_info$levels$x)
         x_all <- as.ordered(obj$jitter_info$levels$x)
         p_all <- dkde1d(x_all, obj)
@@ -165,7 +165,7 @@ plot.kde1d <- function(x, ...) {
         plot_type <- "h"  # for discrete variables, use a histrogram
     } else {
         # adjust grid if necessary
-        ev <- x$grid_points
+        ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
         if (!is.nan(x$xmin))
             ev[1] <- x$xmin
         if (!is.nan(x$xmax))
@@ -194,7 +194,14 @@ plot.kde1d <- function(x, ...) {
 lines.kde1d <- function(x, ...) {
     if (length(x$jitter_info$i_disc) == 1)
         stop("lines does not work for discrete estimates.")
-    pars <- list(x = x$grid_points, y = x$values)
+    ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
+    if (!is.nan(x$xmin))
+        ev[1] <- x$xmin
+    if (!is.nan(x$xmax))
+        ev[length(ev)] <- x$xmax
+    vals <- dkde1d(ev, x)
+
+    pars <- list(x = ev, y = vals)
     do.call(lines, modifyList(pars, list(...)))
 }
 
@@ -236,7 +243,6 @@ print.kde1d <- function(x, ...) {
 #' @method summary kde1d
 #' @export
 summary.kde1d <- function(object, ...) {
-
     df <- rep(NA, 4)
     names(df) <- c("nobs", "bw", "loglik", "d.f.")
     df[1] <- object$nobs

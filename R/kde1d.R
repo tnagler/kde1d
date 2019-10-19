@@ -12,9 +12,11 @@
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
-#'   latter uses the direct plug-in methodology of Sheather and Jones (1991).
-#' @param deg degree of the polynomial; either `0`, `1`, or `2` for log-constant,
-#'   log-linear, and log-quadratic fitting, respectively.
+#'   latter uses the plug-in methodology of Sheather and Jones (1991) with
+#'   appropriate modifications for `deg > 0`.
+#'
+#' @param deg degree of the polynomial; either `0`, `1`, or `2` for
+#'   log-constant, log-linear, and log-quadratic fitting, respectively.
 #' @param weights optional vector of weights for individual observations.
 #'
 #' @return An object of class `kde1d`.
@@ -28,27 +30,27 @@
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
 #'
-#' @references
-#'   Geenens, G. (2014). *Probit transformation for kernel density estimation on
-#'   the unit interval*. Journal of the American Statistical Association,
-#'   109:505, 346-358, [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
+#' @references Geenens, G. (2014). *Probit transformation for kernel density
+#' estimation on the unit interval*. Journal of the American Statistical
+#' Association, 109:505, 346-358,
+#' [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
 #'
-#'   Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
-#'   density estimation for positive random variables.* Journal of Computational
-#'   and Graphical Statistics, to appear,
-#'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+#' Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel density
+#' estimation for positive random variables.* Journal of Computational and
+#' Graphical Statistics, to appear,
+#' [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
 #'
-#'   Nagler, T. (2018a). *A generic approach to nonparametric function
-#'   estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
-#'   [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
+#' Nagler, T. (2018a). *A generic approach to nonparametric function estimation
+#' with mixed data.* Statistics & Probability Letters, 137:326–330,
+#' [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
 #'
-#'   Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
-#'   estimator.* Mathematical Methods of Statistics, in press,
-#'   [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
+#' Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
+#' estimator.* Mathematical Methods of Statistics, in press,
+#' [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
 #'
-#'   Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
-#'   selection method for kernel density estimation. Journal of the Royal
-#'   Statistical Society, Series B, 53, 683–690.
+#' Sheather, S. J. and Jones, M. C. (1991). A reliable data-based bandwidth
+#' selection method for kernel density estimation. Journal of the Royal
+#' Statistical Society, Series B, 53, 683–690.
 #'
 #' @examples
 #'
@@ -91,8 +93,8 @@
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
-                  weights = numeric(0)) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
+                  deg = 2, weights = numeric(0)) {
     x <- na.omit(x)
     # sanity checks
     check_arguments(x, mult, xmin, xmax, bw, deg, weights)
@@ -107,7 +109,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
                         bw,
                         mult,
                         length(attr(x, "i_disc")) == 1,
-                        w_norm)
+                        w_norm,
+                        deg)
 
     # fit model
     fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, w_norm)

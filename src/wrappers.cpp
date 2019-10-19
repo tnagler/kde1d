@@ -66,7 +66,11 @@ Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
         fhat = (x.array() > xmax).select(Eigen::VectorXd::Zero(x.size()), fhat);
     }
 
-    return fhat;
+    auto trunc = [] (const double& p) {
+      return std::max(p, 0.0);
+    };
+
+    return tools::unaryExpr_or_nan(fhat, trunc);
 }
 
 //' computes the cdf of a kernel density estimate by numerical integration.
@@ -112,34 +116,37 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations
-//' @param grid_size number of equally-spaced points over which binning is
-//' performed to obtain kernel functional approximation
+//' @param bw bandwidth parameter, NA for automatic selection.
+//' @param mult bandwidth multiplier.
+//' @param discrete whether a jittered estimate is computed.
 //' @param weights vector of weights for each observation (can be empty).
+//' @param deg polynomial degree.
 //' @return the selected bandwidth
 //' @noRd
 // [[Rcpp::export]]
 double select_bw_cpp(const Eigen::VectorXd& x,
-                     double bw,
-                     double mult,
-                     bool discrete,
-                     const Eigen::VectorXd& weights) {
-
+                     double bw, double mult, bool discrete,
+                     const Eigen::VectorXd& weights, size_t deg)
+{
     if (std::isnan(bw)) {
-        bw = dpik(x, weights);
+        PluginBandwidthSelector selector(x, weights);
+        bw = selector.select_bw(deg);
     }
 
     bw *= mult;
-
     if (discrete) {
         bw = std::max(bw, 0.5 / 5);
     }
 
-    return(bw);
+    return bw;
 }
 
-// [[Rcpp::export]]
-Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w) {
-    if (w.size() > 0)
-        return stats::quantile(x, a, w);
-    return stats::quantile(x, a);
-}
+
+// // [[Rcpp::export]]
+// Eigen::VectorXd quan(const Eigen::VectorXd& x,
+//                      const Eigen::VectorXd& a,
+//                      const Eigen::VectorXd& w) {
+//     if (w.size() > 0)
+//         return stats::quantile(x, a, w);
+//     return stats::quantile(x, a);
+// }

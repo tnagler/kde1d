@@ -21,10 +21,11 @@ data); \code{NaN} means no boundary.}
 \eqn{bw*mult}.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
-latter uses the direct plug-in methodology of Sheather and Jones (1991).}
+latter uses the plug-in methodology of Sheather and Jones (1991) with
+appropriate modifications for \code{deg > 0}.}
 
-\item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
-log-linear, and log-quadratic fitting, respectively.}
+\item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for
+log-constant, log-linear, and log-quadratic fitting, respectively.}
 
 \item{weights}{optional vector of weights for individual observations.}
 }
@@ -82,17 +83,18 @@ lines(kde1d(x), col = 2)
 
 }
 \references{
-Geenens, G. (2014). \emph{Probit transformation for kernel density estimation on
-the unit interval}. Journal of the American Statistical Association,
-109:505, 346-358, \href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
+Geenens, G. (2014). \emph{Probit transformation for kernel density
+estimation on the unit interval}. Journal of the American Statistical
+Association, 109:505, 346-358,
+\href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
 
-Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel
-density estimation for positive random variables.} Journal of Computational
-and Graphical Statistics, to appear,
+Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel density
+estimation for positive random variables.} Journal of Computational and
+Graphical Statistics, to appear,
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
 
-Nagler, T. (2018a). \emph{A generic approach to nonparametric function
-estimation with mixed data.} Statistics & Probability Letters, 137:326–330,
+Nagler, T. (2018a). \emph{A generic approach to nonparametric function estimation
+with mixed data.} Statistics & Probability Letters, 137:326–330,
 \href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
 
 Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density
