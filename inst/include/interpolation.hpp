@@ -187,8 +187,8 @@ inline double InterpolationGrid1d::cubic_integral(const double& lower,
 //! @param vals length 4 vector of function values.
 //! @param grid length 4 vector of grid points.
 inline Eigen::VectorXd
-    InterpolationGrid1d::find_coefs(const Eigen::VectorXd& vals,
-                                    const Eigen::VectorXd& grid)
+InterpolationGrid1d::find_coefs(const Eigen::VectorXd& vals,
+                                const Eigen::VectorXd& grid)
     {
         Eigen::VectorXd a(4);
 
@@ -216,11 +216,15 @@ inline Eigen::VectorXd
         dx1 *= dt1;
         dx2 *= dt1;
 
+        // ensure positivity (Schmidt and Hess, DOI:10.1007/bf01934097)
+        dx1 = std::max(dx1, -3 * vals(1));
+        dx2 = std::min(dx2, 3 * vals(2));
+
         // compute coefficents
         a(0) = vals(1);
         a(1) = dx1;
-        a(2) = -3 * vals(1) + 3 * vals(2) - 2 * dx1 - dx2;
-        a(3) = 2 * vals(1) - 2 * vals(2) + dx1 + dx2;
+        a(2) = -3 * (vals(1) - vals(2)) - 2 * dx1 - dx2;
+        a(3) = 2 * (vals(1) - vals(2)) + dx1 + dx2;
 
         return a;
     }
@@ -238,7 +242,7 @@ inline double InterpolationGrid1d::interp_on_grid(const double& x,
     double xev = std::fmax((x - grid(1)), 0) / (grid(2) - grid(1));
     double res = cubic_poly(xev, a);
     if (res < 0) {
-        // switch to linear interpolation if result is negative
+        // switch to linear interpolation if negative due to rounding error
         res = xev * vals(2) + (1 - xev) * vals(1);
     }
     return res;
