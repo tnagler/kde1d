@@ -319,24 +319,14 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
         const Eigen::VectorXd& x,
         const Eigen::VectorXd& weights)
 {
-    // set up grid
-    size_t grid_size = 52;
-    Eigen::VectorXd grid_points(grid_size);
-
-    // determine "inner" grid by sample quantiles
-    // (need to leave room for boundary extensions)
-    if (std::isnan(xmin_))
-        grid_size -= 3;
-    if (std::isnan(xmax_))
-        grid_size -= 3;
-
     // hybrid grid: quantiles and two equally spaced points between them
     auto qgrid = stats::quantile(
-        x, Eigen::VectorXd::LinSpaced((grid_size - 1)/3 + 1, 0, 1), weights);
+        x, Eigen::VectorXd::LinSpaced(14, 0, 1), weights);
+    size_t grid_size = 53;
     Eigen::VectorXd inner_grid(grid_size);
     for (unsigned i = 0; i < qgrid.size() - 1; i++) {
-        inner_grid.segment(i * 3, 4) =
-            Eigen::VectorXd::LinSpaced(4, qgrid(i), qgrid(i + 1));
+        inner_grid.segment(i * 4, 5) =
+            Eigen::VectorXd::LinSpaced(5, qgrid(i), qgrid(i + 1));
     }
 
     // extend grid where there's no boundary
@@ -344,21 +334,18 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
     Eigen::VectorXd lowr_ext, uppr_ext;
     if (std::isnan(xmin_)) {
         // no left boundary -> add a few points to the left
-        lowr_ext = Eigen::VectorXd(3);
-        double step = inner_grid[1] - inner_grid[0];
-        lowr_ext[2] = inner_grid[0] - step;
-        lowr_ext[1] = inner_grid[0] - 2 * step;
-        lowr_ext[0] = lowr_ext[1] - std::max(0.25 * range, step);
+        lowr_ext = Eigen::VectorXd(2);
+        lowr_ext[1] = inner_grid[0] - 1 * bw_;
+        lowr_ext[0] = inner_grid[0] - 2 * bw_;
     }
     if (std::isnan(xmax_)) {
         // no right boundary -> add a few points to the right
-        uppr_ext = Eigen::VectorXd(3);
-        double step = inner_grid[grid_size - 1] - inner_grid[grid_size - 2];
-        uppr_ext[0] = inner_grid[grid_size - 1] + step;
-        uppr_ext[1] = inner_grid[grid_size - 1] + 2 * step;
-        uppr_ext[2] = uppr_ext[1] + std::max(0.25 * range, step);
+        uppr_ext = Eigen::VectorXd(2);
+        uppr_ext[0] = inner_grid[grid_size - 1] + 1 * bw_;
+        uppr_ext[1] = inner_grid[grid_size - 1] + 2 * bw_;
     }
 
+    Eigen::VectorXd grid_points(grid_size + uppr_ext.size() + lowr_ext.size());
     grid_points << lowr_ext, inner_grid, uppr_ext;
     return grid_points;
 }
