@@ -38,6 +38,7 @@ test_that("detects wrong arguments", {
     expect_error(kde1d(x, xmax = 0))
     expect_error(kde1d(x, xmin = 10, xmax = -10))
     expect_error(kde1d(x, mult = 0))
+    expect_error(kde1d(x, bw = -1))
     expect_error(kde1d(x, deg = 3))
     expect_error(kde1d(x, weights = list()))
     expect_error(kde1d(x, weights = 1:3))

@@ -123,7 +123,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
         tmpvals(1) = this->values_(i);
         tmpvals(2) = this->values_(i + 1);
         tmpvals(3) = this->values_(i3);
-        return std::fmax(this->interp_on_grid(xx, tmpvals, tmpgrid), 0.0);
+        return this->interp_on_grid(xx, tmpvals, tmpgrid);
     };
 
     return tools::unaryExpr_or_nan(x, interpolate_one);
@@ -148,12 +148,12 @@ inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
 //! @param x evaluation point.
 //! @param a polynomial coefficients
 inline double
-    InterpolationGrid1d::cubic_poly(const double& x, const Eigen::VectorXd& a)
-    {
-        double x2 = x * x;
-        double x3 = x2 * x;
-        return a(0) + a(1) * x + a(2) * x2 + a(3) * x3;
-    }
+InterpolationGrid1d::cubic_poly(const double& x, const Eigen::VectorXd& a)
+{
+    double x2 = x * x;
+    double x3 = x2 * x;
+    return a(0) + a(1) * x + a(2) * x2 + a(3) * x3;
+}
 
 //! Indefinite integral of a cubic polynomial
 //!

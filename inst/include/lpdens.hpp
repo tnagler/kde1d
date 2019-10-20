@@ -11,7 +11,8 @@ class LPDens1d {
 public:
     // constructors
     LPDens1d() {}
-    LPDens1d(Eigen::VectorXd x, double bw, double xmin, double xmax, size_t p,
+    LPDens1d(Eigen::VectorXd x, double bw,
+             double xmin, double xmax, size_t p,
              const Eigen::VectorXd& weights = Eigen::VectorXd());
 
     // getters
@@ -58,7 +59,7 @@ private:
 
 //! constructor for fitting the density estimate.
 //! @param x vector of observations
-//! @param bw positive bandwidth parameter
+//! @param bw positive bandwidth parameter (fixed component).
 //! @param xmin lower bound for the support of the density, `NaN` means no
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
@@ -107,13 +108,13 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     values = grid_.get_values();
 
     // calculate log-likelihood of final estimate
-    loglik_ = grid_.interpolate(x).array().log().sum();
+    loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
 
     // calculate effective degrees of freedom
     InterpolationGrid1d infl_grid(without_boundary_ext(grid_points),
                                   without_boundary_ext(fitted.col(1)),
                                   0);
-    edf_ = infl_grid.interpolate(x).sum();
+    edf_ = infl_grid.interpolate(x).cwiseMin(1.5).cwiseMax(-0.5).sum();
 }
 
 //! Gaussian kernel (truncated at +/- 5).
@@ -151,6 +152,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
     Eigen::VectorXd xx2(x.size());
     Eigen::VectorXd kernels(x.size());
     for (size_t k = 0; k < x_ev.size(); k++) {
+        double s = bw_;
         // classical (local constant) kernel density estimate
         xx = (x.array() - x_ev(k)) / bw_;
         kernels = kern_gauss(xx) / bw_;
@@ -380,3 +382,4 @@ inline Eigen::VectorXd LPDens1d::without_boundary_ext(
 
     return grid_points.segment(grid_start, grid_size);
 }
+
