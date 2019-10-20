@@ -78,7 +78,7 @@ inline InterpolationGrid1d::InterpolationGrid1d(const Eigen::VectorXd& grid_poin
 //! renormalizes the estimate to integrate to one
 //!
 //! @param times how many times the normalization routine should run.
-void InterpolationGrid1d::normalize(int times)
+inline void InterpolationGrid1d::normalize(int times)
 {
     double x_max = grid_points_(grid_points_.size() - 1);
     double int_max;
