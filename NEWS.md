@@ -1,3 +1,17 @@
+# kde1d 0.5.0
+
+NEW FEATURE
+
+  * optimal plug-in bandwidth selection for all polynomial degrees (#38).
+
+BUG FIXES
+
+  * allow already jittered input to be treated as continuous.
+
+  * improvements to numerical stability, inter- and extrapolation (#32, #35, 
+  #37).
+
+
 # kde1d 0.4.0
 
 NEW FEATURE
