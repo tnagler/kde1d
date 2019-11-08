@@ -40,7 +40,7 @@ test_that("detects wrong arguments", {
     expect_error(kde1d(x, mult = 0))
     expect_error(kde1d(x, bw = -1))
     expect_error(kde1d(x, deg = 3))
-    expect_error(kde1d(x, weights = list()))
+    expect_error(supressWarnings(kde1d(x, weights = list())))
     expect_error(kde1d(x, weights = 1:3))
 
     x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
