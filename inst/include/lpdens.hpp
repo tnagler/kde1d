@@ -111,10 +111,13 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
     loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
 
     // calculate effective degrees of freedom
+    double n = x.size();
     InterpolationGrid1d infl_grid(without_boundary_ext(grid_points),
-                                  without_boundary_ext(fitted.col(1)),
+                                  without_boundary_ext(fitted.col(1)
+                                                           .cwiseMin(2.0)
+                                                           .cwiseMax(0)),
                                   0);
-    edf_ = infl_grid.interpolate(x).cwiseMin(1.5).cwiseMax(-0.5).sum();
+    edf_ = infl_grid.interpolate(x).sum();
 }
 
 //! Gaussian kernel (truncated at +/- 5).

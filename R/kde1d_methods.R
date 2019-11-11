@@ -72,9 +72,8 @@ pkde1d <- function(q, obj) {
         p <- pkde1d_cpp(q, obj)
     } else {
         if (!is.ordered(q))
-
             q <- ordered(q, obj$jitter_info$levels$x)
-        x_all <- as.ordered(obj$jitter_info$levels$x)
+        x_all <- ordered(obj$jitter_info$levels$x, obj$jitter_info$levels$x)
         p_all <- dkde1d(x_all, obj)
         p_total <- sum(p_all)
         p <- sapply(q, function(y) sum(p_all[x_all <= y] / p_total))
@@ -94,7 +93,7 @@ qkde1d <- function(p, obj) {
         q <- qkde1d_cpp(p, obj)
     } else {
         ## for discrete variables compute quantile from the density
-        x_all <- as.ordered(obj$jitter_info$levels$x)
+        x_all <- ordered(obj$jitter_info$levels$x, obj$jitter_info$levels$x)
 
         # pdf at all possible values of x
         pp <- pkde1d(x_all, obj)
