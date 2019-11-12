@@ -118,29 +118,3 @@ Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
   return q;
 }
 
-//  Bandwidth for Kernel Density Estimation
-//' @param x vector of observations
-//' @param bw bandwidth parameter, NA for automatic selection.
-//' @param mult bandwidth multiplier.
-//' @param discrete whether a jittered estimate is computed.
-//' @param weights vector of weights for each observation (can be empty).
-//' @param deg polynomial degree.
-//' @return the selected bandwidth
-//' @noRd
-// [[Rcpp::export]]
-double select_bw_cpp(const Eigen::VectorXd& x,
-                     double bw, double mult, bool discrete,
-                     const Eigen::VectorXd& weights, size_t deg)
-{
-  if (std::isnan(bw)) {
-    bw::PluginBandwidthSelector selector(x, weights);
-    bw = selector.select_bw(deg);
-  }
-
-  bw *= mult;
-  if (discrete) {
-    bw = std::max(bw, 0.5 / 5);
-  }
-
-  return bw;
-}

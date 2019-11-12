@@ -90,17 +90,25 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::runtime_error("x and weights must have the same size");
 
+  // preprocessing for nans and jittering
+  Eigen::VectorXd xx = x;
+  Eigen::VectorXd w = weights;
+  tools::remove_nans(xx, w);
+  if (is_discrete)
+    xx = stats::equi_jitter(xx);
+
   // construct grid on original domain
-  Eigen::VectorXd grid_points = construct_grid_points(x, weights);
+  Eigen::VectorXd grid_points = construct_grid_points(xx, w);
 
   // transform in case of boundary correction
   grid_points = boundary_transform(grid_points);
-  Eigen::VectorXd xx = boundary_transform(x);
+  xx = boundary_transform(xx);
 
-  bw_ = select_bw(xx, bw_, mult, deg, is_discrete_, weights);
+  // bandwidth selection
+  bw_ = select_bw(xx, bw_, mult, deg, is_discrete_, w);
 
   // fit model and evaluate in transformed domain
-  Eigen::MatrixXd fitted = fit_lp(grid_points, xx, weights);
+  Eigen::MatrixXd fitted = fit_lp(grid_points, xx, w);
 
   // back-transform grid to original domain
   grid_points = boundary_transform(grid_points, true);

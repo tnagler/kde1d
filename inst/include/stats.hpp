@@ -139,6 +139,64 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
   return res;
 }
 
+// conditionally equidistant jittering; equivalent to the R implementation:
+//   tab <- table(x)
+//   noise <- unname(unlist(lapply(tab, function(l) -0.5 + 1:l / (l + 1))))
+//   s <- sort(x, index.return = TRUE)
+//   return((s$x + noise)[rank(x, ties.method = "first", na.last = "keep")])
+inline Eigen::VectorXd equi_jitter(const Eigen::VectorXd& x)
+{
+  size_t n = x.size();
+
+  // first compute the corresponding permutation that sorts x (required later)
+  Eigen::VectorXi perm(n);
+  for (size_t i = 0; i < x.size(); ++i)
+    perm(i) = i;
+  std::stable_sort(
+    perm.data(),
+    perm.data() + n,
+    [&](const size_t& a, const size_t& b) { return (x[a] < x[b]); }
+  );
+
+  // actually sort x
+  Eigen::VectorXd srt(n);
+  for (size_t i = 0; i < n; ++i)
+    srt(i) = x(perm(i));
+
+  // compute contingency table
+  Eigen::MatrixXd tab(n + 1, 2);
+  size_t lev = 0;
+  size_t cnt = 1;
+  for (size_t k = 1; k < n; ++k) {
+    if (srt(k - 1) != srt(k)) {
+      tab(lev, 0) = srt(k - 1);
+      tab(lev++, 1) = cnt;
+      cnt = 1;
+    } else {
+      cnt++;
+      if (k == n - 1)
+        tab(lev++, 1) = cnt;
+    }
+  }
+  tab.conservativeResize(lev, 2);
+
+  // add deterministic, conditionally uniorm noise
+  Eigen::VectorXd noise(n);
+  size_t i = 0;
+  for (size_t k = 0; k < tab.rows(); ++k) {
+    for (size_t cnt = 1; cnt <= tab(k, 1); ++cnt)
+      noise(i++) = -0.5 + cnt / (tab(k, 1) + 1.0);
+    cnt = 1;
+  }
+  Eigen::VectorXd jtr = srt + noise;
+
+  // invert the permutation to return jittered x in original order
+  for (size_t i = 0; i < perm.size(); ++i)
+    srt(perm(i)) = jtr(i);
+
+  return srt;
+}
+
 } // end kde1d::stats
 
 } // end kde1d

@@ -98,32 +98,20 @@
 #' lines(kde1d(x), col = 2)
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
-                  deg = 2, weights = numeric(0)) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
+                  weights = numeric(0)) {
   x <- na.omit(x)
   # sanity checks
   check_arguments(x, mult, xmin, xmax, bw, deg, weights)
   w_norm <- weights / mean(weights)
 
-  # equidistant jittering for discrete variables
-  x_jtr <- equi_jitter(x)
-
-  # bandwidth selection
-  bw <- select_bw_cpp(
-    boundary_transform(na.omit(x_jtr), xmin, xmax),
-    bw,
-    mult,
-    is.ordered(x),
-    w_norm,
-    deg
-  )
-
   # fit model
-  fit <- fit_kde1d_cpp(na.omit(x_jtr), bw, xmin, xmax, deg, w_norm)
+  fit <- fit_kde1d_cpp(
+    as.numeric(x), bw, mult, xmin, xmax, deg, is.ordered(x), w_norm)
 
   # add info
   fit$var_name <- as.character(match.call()[2])
-  fit$nobs <- length(x)
+  fit$nobs <- sum(!is.na(x))
   fit$weights <- weights
   fit$x <- x
 

@@ -58,6 +58,36 @@ inline size_t find_min_index(const Eigen::VectorXd& x)
   return std::min_element(x.data(), x.data() + x.size()) - x.data();
 }
 
+//! remove rows of a matrix which contain nan values or have zero weight
+//! @param x the matrix.
+//! @param a vector of weights that is either empty or whose size is equal to
+//!   the number of columns of x.
+inline void remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
+{
+  if ((weights.size() > 0) & (weights.size() != x.rows()))
+    throw std::runtime_error("sizes of x and weights don't match.");
+
+  // if an entry is nan or weight is zero, move it to the end
+  size_t last = x.size() - 1;
+  for (size_t i = 0; i < last + 1; i++) {
+    bool is_nan = std::isnan(x(i));
+    if (weights.size() > 0) {
+      is_nan = is_nan | std::isnan(weights(i));
+      is_nan = is_nan | (weights(i) == 0.0);
+    }
+    if (is_nan) {
+      if (weights.size() > 0)
+        std::swap(weights(i), weights(last));
+      std::swap(x(i--), x(last--));
+    }
+  }
+
+  // remove nan rows
+  x.conservativeResize(last + 1);
+  if (weights.size() > 0)
+    weights.conservativeResize(last + 1);
+}
+
 } // end kde1d tools
 
 } // end kde1d
