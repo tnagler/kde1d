@@ -14,9 +14,18 @@ class Kde1d {
 public:
   // constructors
   Kde1d() {}
-  Kde1d(const Eigen::VectorXd& x, double bw, double mult,
-        double xmin, double xmax, size_t deg, bool is_discrete,
+  Kde1d(const Eigen::VectorXd& x,
+        bool is_discrete = false,
+        double bw = NAN,
+        double mult = 1.0,
+        double xmin = NAN,
+        double xmax = NAN,
+        size_t deg = 2,
         const Eigen::VectorXd& weights = Eigen::VectorXd());
+  Kde1d(const interp::InterpolationGrid1d& grid,
+        bool is_discrete = false,
+        double xmin = NAN,
+        double xmax = NAN);
 
   // statistical functions
   Eigen::VectorXd pdf(const Eigen::VectorXd& x) const;
@@ -38,13 +47,13 @@ public:
 private:
   // data members
   interp::InterpolationGrid1d grid_;
-  double bw_;
   double xmin_;
   double xmax_;
-  size_t deg_;
   bool is_discrete_;
-  double loglik_;
-  double edf_;
+  double bw_{NAN};
+  size_t deg_{2};
+  double loglik_{NAN};
+  double edf_{NAN};
   static constexpr double K0_ = 0.3989425;
 
   // private methods
@@ -78,21 +87,22 @@ private:
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
-//! @param p order of the local polynomial.
+//! @param deg order of the local polynomial.
+//! @param is_discrete flag indicating whether the model is discrete.
 //! @param weights vector of weights for each observation (can be empty).
 inline Kde1d::Kde1d(const Eigen::VectorXd& x,
+                    bool is_discrete,
                     double bw,
                     double mult,
                     double xmin,
                     double xmax,
                     size_t deg,
-                    bool is_discrete,
                     const Eigen::VectorXd& weights)
-  : bw_(bw)
-  , xmin_(xmin)
+  : xmin_(xmin)
   , xmax_(xmax)
-  , deg_(deg)
   , is_discrete_(is_discrete)
+  , bw_(bw)
+  , deg_(deg)
 {
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::runtime_error("x and weights must have the same size");
@@ -144,6 +154,24 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
       without_boundary_ext(fitted.col(1).cwiseMin(2.0).cwiseMax(0)), 0);
   edf_ = infl_grid.interpolate(x).sum();
 }
+
+
+//! construct model from an already fit interpolation grid.
+//! @param grid the interpolation grid.
+//! @param xmin lower bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param xmax upper bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param is_discrete flag indicating whether the model is discrete.
+inline Kde1d::Kde1d(const interp::InterpolationGrid1d& grid,
+                    bool is_discrete,
+                    double xmin,
+                    double xmax)
+  : grid_(grid)
+  , xmin_(xmin)
+  , xmax_(xmax)
+  , is_discrete_(is_discrete)
+{}
 
 //! computes the pdf of the kernel density estimate by interpolation.
 //! @param x vector of evaluation points.
