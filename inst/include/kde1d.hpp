@@ -6,12 +6,13 @@
 #include <functional>
 #include <cmath>
 
+
 //! Local-polynomial density estimation in 1-d.
-class LPDens1d {
+class Kde1d {
 public:
   // constructors
-  LPDens1d() {}
-  LPDens1d(Eigen::VectorXd x, double bw,
+  Kde1d() {}
+  Kde1d(Eigen::VectorXd x, double bw,
            double xmin, double xmax, size_t p,
            const Eigen::VectorXd& weights = Eigen::VectorXd());
 
@@ -66,7 +67,7 @@ private:
 //!   boundary.
 //! @param p order of the local polynomial.
 //! @param weights vector of weights for each observation (can be empty).
-inline LPDens1d::LPDens1d(Eigen::VectorXd x,
+inline Kde1d::Kde1d(Eigen::VectorXd x,
                           double bw,
                           double xmin,
                           double xmax,
@@ -122,7 +123,7 @@ inline LPDens1d::LPDens1d(Eigen::VectorXd x,
 
 //! Gaussian kernel (truncated at +/- 5).
 //! @param x vector of evaluation points.
-inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
+inline Eigen::VectorXd Kde1d::kern_gauss(const Eigen::VectorXd& x)
 {
   auto f = [] (double xx) {
     // truncate at +/- 5
@@ -141,7 +142,7 @@ inline Eigen::VectorXd LPDens1d::kern_gauss(const Eigen::VectorXd& x)
 //! @param weights vector of weights for each observation (can be empty).
 //! @return a two-column matrix containing the density estimate in the first
 //!   and the influence function in the second column.
-inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
+inline Eigen::MatrixXd Kde1d::fit_lp(const Eigen::VectorXd& x_ev,
                                         const Eigen::VectorXd& x,
                                         const Eigen::VectorXd& weights)
 {
@@ -211,7 +212,7 @@ inline Eigen::MatrixXd LPDens1d::fit_lp(const Eigen::VectorXd& x_ev,
 
 //! calculate influence for data point for density estimate based on
 //! quantities pre-computed in `fit_lp()`.
-inline double LPDens1d::calculate_infl(const size_t &n,
+inline double Kde1d::calculate_infl(const size_t &n,
                                        const double& f0,
                                        const double& b,
                                        const double& bw,
@@ -251,7 +252,7 @@ inline double LPDens1d::calculate_infl(const size_t &n,
 //! @param x evaluation points.
 //! @param inverse whether the inverse transformation should be applied.
 //! @return the transformed evaluation points.
-inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
+inline Eigen::VectorXd Kde1d::boundary_transform(const Eigen::VectorXd& x,
                                                     bool inverse)
 {
   Eigen::VectorXd x_new = x;
@@ -293,7 +294,7 @@ inline Eigen::VectorXd LPDens1d::boundary_transform(const Eigen::VectorXd& x,
 //! @param x evaluation points (in original domain).
 //! @param fhat the density estimate evaluated in the transformed domain.
 //! @return corrected density estimates at `x`.
-inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
+inline Eigen::VectorXd Kde1d::boundary_correct(const Eigen::VectorXd& x,
                                                   const Eigen::VectorXd& fhat)
 {
   Eigen::VectorXd corr_term(fhat.size());
@@ -320,7 +321,7 @@ inline Eigen::VectorXd LPDens1d::boundary_correct(const Eigen::VectorXd& x,
 //! constructs a grid that is later used for interpolation.
 //! @param x vector of observations.
 //! @return a grid of size 50.
-inline Eigen::VectorXd LPDens1d::construct_grid_points(
+inline Eigen::VectorXd Kde1d::construct_grid_points(
     const Eigen::VectorXd& x,
     const Eigen::VectorXd& weights)
 {
@@ -357,7 +358,7 @@ inline Eigen::VectorXd LPDens1d::construct_grid_points(
 
 //! moves the boundary points of the grid to xmin/xmax (if non-NaN).
 //! @param grid_points the grid points.
-inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
+inline Eigen::VectorXd Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
   if (!std::isnan(xmin_))
     grid_points(0) = xmin_;
@@ -370,8 +371,8 @@ inline Eigen::VectorXd LPDens1d::finalize_grid(Eigen::VectorXd& grid_points)
 //! removes the boundary extension from the grid_points (see
 //! `construct_grid_points`).
 //! @param grid_points the grid points.
-inline Eigen::VectorXd LPDens1d::without_boundary_ext(
-    const Eigen::VectorXd& grid_points)
+inline Eigen::VectorXd Kde1d::without_boundary_ext(
+  const Eigen::VectorXd& grid_points)
 {
   size_t grid_start = 0;
   size_t grid_size = grid_points.size();

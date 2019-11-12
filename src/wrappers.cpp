@@ -1,6 +1,6 @@
 #include <RcppEigen.h>
 #include "dpik.hpp"
-#include "lpdens.hpp"
+#include "kde1d.hpp"
 
 //' fits a kernel density estimate and calculates the effective degrees of
 //' freedom.
