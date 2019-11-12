@@ -55,73 +55,79 @@
 #' @examples
 #'
 #' ## unbounded data
-#' x <- rnorm(500)                    # simulate data
-#' fit <- kde1d(x)                    # estimate density
-#' dkde1d(0, fit)                     # evaluate density estimate
-#' summary(fit)                       # information about the estimate
-#' plot(fit)                          # plot the density estimate
-#' curve(dnorm(x), add = TRUE,        # add true density
-#'       col = "red")
+#' x <- rnorm(500) # simulate data
+#' fit <- kde1d(x) # estimate density
+#' dkde1d(0, fit) # evaluate density estimate
+#' summary(fit) # information about the estimate
+#' plot(fit) # plot the density estimate
+#' curve(dnorm(x),
+#'   add = TRUE, # add true density
+#'   col = "red"
+#' )
 #'
 #' ## bounded data, log-linear
-#' x <- rgamma(500, shape = 1)        # simulate data
+#' x <- rgamma(500, shape = 1) # simulate data
 #' fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
-#' dkde1d(seq(0, 5, by = 1), fit)     # evaluate density estimate
-#' summary(fit)                       # information about the estimate
-#' plot(fit)                          # plot the density estimate
-#' curve(dgamma(x, shape = 1),        # add true density
-#'       add = TRUE, col = "red",
-#'       from = 1e-3)
+#' dkde1d(seq(0, 5, by = 1), fit) # evaluate density estimate
+#' summary(fit) # information about the estimate
+#' plot(fit) # plot the density estimate
+#' curve(dgamma(x, shape = 1), # add true density
+#'   add = TRUE, col = "red",
+#'   from = 1e-3
+#' )
 #'
 #' ## discrete data
-#' x <- rbinom(500, size = 5, prob = 0.5)  # simulate data
-#' x <- ordered(x, levels = 0:5)           # declare as ordered
-#' fit <- kde1d(x)                         # estimate density
-#' dkde1d(sort(unique(x)), fit)            # evaluate density estimate
-#' summary(fit)                            # information about the estimate
-#' plot(fit)                               # plot the density estimate
-#' points(ordered(0:5, 0:5),               # add true density
-#'        dbinom(0:5, 5, 0.5), col = "red")
+#' x <- rbinom(500, size = 5, prob = 0.5) # simulate data
+#' x <- ordered(x, levels = 0:5) # declare as ordered
+#' fit <- kde1d(x) # estimate density
+#' dkde1d(sort(unique(x)), fit) # evaluate density estimate
+#' summary(fit) # information about the estimate
+#' plot(fit) # plot the density estimate
+#' points(ordered(0:5, 0:5), # add true density
+#'   dbinom(0:5, 5, 0.5),
+#'   col = "red"
+#' )
 #'
 #' ## weighted estimate
-#' x <- rnorm(100)                         # simulate data
-#' weights <- rexp(100)                    # weights as in Bayesian bootstrap
-#' fit <- kde1d(x, weights = weights)      # weighted fit
-#' plot(fit)                               # compare with unweighted fit
+#' x <- rnorm(100) # simulate data
+#' weights <- rexp(100) # weights as in Bayesian bootstrap
+#' fit <- kde1d(x, weights = weights) # weighted fit
+#' plot(fit) # compare with unweighted fit
 #' lines(kde1d(x), col = 2)
-#'
 #' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
 kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
                   deg = 2, weights = numeric(0)) {
-    x <- na.omit(x)
-    # sanity checks
-    check_arguments(x, mult, xmin, xmax, bw, deg, weights)
-    w_norm <- weights / mean(weights)
+  x <- na.omit(x)
+  # sanity checks
+  check_arguments(x, mult, xmin, xmax, bw, deg, weights)
+  w_norm <- weights / mean(weights)
 
-    # jittering for discrete variables
-    attr(x, "i_disc") <- NULL  # in case variables have already been jittered
-    x <- cctools::cont_conv(x)
+  # jittering for discrete variables
+  attr(x, "i_disc") <- NULL # in case variables have already been jittered
+  x <- cctools::cont_conv(x)
 
-    # bandwidth selection
-    bw <- select_bw_cpp(boundary_transform(x, xmin, xmax),
-                        bw,
-                        mult,
-                        length(attr(x, "i_disc")) == 1,
-                        w_norm,
-                        deg)
+  # bandwidth selection
+  bw <- select_bw_cpp(
+    boundary_transform(x, xmin, xmax),
+    bw,
+    mult,
+    length(attr(x, "i_disc")) == 1,
+    w_norm,
+    deg
+  )
 
-    # fit model
-    fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, w_norm)
+  # fit model
+  fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, w_norm)
 
-    # add info
-    fit$jitter_info <- attributes(x)
-    fit$var_name <- colnames(x)
-    fit$nobs <- length(x)
-    fit$weights <- weights
+  # add info
+  fit$jitter_info <- attributes(x)
+  fit$var_name <- colnames(x)
+  fit$nobs <- length(x)
+  fit$weights <- weights
 
-    # return as kde1d object
-    class(fit) <- "kde1d"
-    fit
+  # return as kde1d object
+  class(fit) <- "kde1d"
+  fit
 }
