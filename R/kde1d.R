@@ -25,7 +25,9 @@
 #'   finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
 #'   log-transform is used if there is only one boundary (see, Geenens and Wang,
 #'   2018); a probit transform is used if there are two (see, Geenens, 2014).
+#'
 #'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
+#'   A specific form of deterministic jittering is used, see [equi_jitter()].
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
@@ -94,7 +96,6 @@
 #' fit <- kde1d(x, weights = weights) # weighted fit
 #' plot(fit) # compare with unweighted fit
 #' lines(kde1d(x), col = 2)
-#' @importFrom cctools cont_conv
 #' @importFrom stats na.omit
 #' @export
 kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
@@ -104,28 +105,27 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,
   check_arguments(x, mult, xmin, xmax, bw, deg, weights)
   w_norm <- weights / mean(weights)
 
-  # jittering for discrete variables
-  attr(x, "i_disc") <- NULL # in case variables have already been jittered
-  x <- cctools::cont_conv(x)
+  # equidistant jittering for discrete variables
+  x_jtr <- equi_jitter(x)
 
   # bandwidth selection
   bw <- select_bw_cpp(
-    boundary_transform(x, xmin, xmax),
+    boundary_transform(na.omit(x_jtr), xmin, xmax),
     bw,
     mult,
-    length(attr(x, "i_disc")) == 1,
+    is.ordered(x),
     w_norm,
     deg
   )
 
   # fit model
-  fit <- fit_kde1d_cpp(x, bw, xmin, xmax, deg, w_norm)
+  fit <- fit_kde1d_cpp(na.omit(x_jtr), bw, xmin, xmax, deg, w_norm)
 
   # add info
-  fit$jitter_info <- attributes(x)
-  fit$var_name <- colnames(x)
+  fit$var_name <- as.character(match.call()[2])
   fit$nobs <- length(x)
   fit$weights <- weights
+  fit$x <- x
 
   # return as kde1d object
   class(fit) <- "kde1d"
