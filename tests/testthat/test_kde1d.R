@@ -55,8 +55,7 @@ test_that("returns proper 'kde1d' object", {
 
   class_members <- c(
     "grid_points", "values", "bw", "xmin", "xmax", "deg",
-    "edf", "loglik", "weights", "jitter_info", "var_name",
-    "nobs"
+    "edf", "loglik", "weights", "var_name", "nobs", "x"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
 })
@@ -66,9 +65,9 @@ test_that("d/p/r/h functions work", {
   u <- runif(n)
   test_dpqr <- function(fit, sim) {
     sim <- data.frame(sim)
-    is_jittered <- length(fit$jitter_info$i_disc) == 1
+    is_jittered <- is.ordered(fit$x)
     if (is.nan(fit$xmax)) {
-      xmax <- ifelse(is_jittered, fit$jitter_info$nu, Inf)
+      xmax <- ifelse(is_jittered, 5, Inf)
     } else {
       xmax <- fit$xmax
     }
@@ -105,7 +104,7 @@ test_that("d/p/r/h functions work", {
 test_that("plot functions work", {
   test_plot <- function(fit) {
     expect_silent(plot(fit))
-    if (length(fit$jitter_info$i_disc) == 1) {
+    if (is.ordered(fit$x)) {
       expect_error(lines(fit))
     } else {
       expect_silent(lines(fit))
