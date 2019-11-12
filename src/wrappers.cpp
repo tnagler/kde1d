@@ -19,12 +19,14 @@ using namespace kde1d;
 // [[Rcpp::export]]
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          double bw,
+                         double mult,
                          double xmin,
                          double xmax,
                          size_t deg,
+                         bool is_discrete,
                          const Eigen::VectorXd& weights)
 {
-  Kde1d fit(x, bw, xmin, xmax, deg, weights);
+  Kde1d fit(x, bw, mult, xmin, xmax, deg, is_discrete, weights);
   return Rcpp::List::create(
     Rcpp::Named("grid_points") = fit.get_grid_points(),
     Rcpp::Named("values") = fit.get_values(),

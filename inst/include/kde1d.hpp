@@ -3,6 +3,7 @@
 #include "interpolation.hpp"
 #include "stats.hpp"
 #include "tools.hpp"
+#include "dpik.hpp"
 #include <functional>
 #include <cmath>
 
@@ -13,9 +14,9 @@ class Kde1d {
 public:
   // constructors
   Kde1d() {}
-  Kde1d(Eigen::VectorXd x, double bw,
-           double xmin, double xmax, size_t p,
-           const Eigen::VectorXd& weights = Eigen::VectorXd());
+  Kde1d(const Eigen::VectorXd& x, double bw, double mult,
+        double xmin, double xmax, size_t deg, bool is_discrete,
+        const Eigen::VectorXd& weights = Eigen::VectorXd());
 
   // getters
   Eigen::VectorXd get_values() const {return grid_.get_values();}
@@ -34,6 +35,7 @@ private:
   double xmin_;
   double xmax_;
   size_t deg_;
+  bool is_discrete_;
   double loglik_;
   double edf_;
   static constexpr double K0_ = 0.3989425;
@@ -57,6 +59,9 @@ private:
                                         const Eigen::VectorXd& weights);
   Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid_points);
   Eigen::VectorXd without_boundary_ext(const Eigen::VectorXd& grid_points);
+  double select_bw(const Eigen::VectorXd& x,
+                   double bw, double mult, size_t deg, bool is_discrete,
+                   const Eigen::VectorXd& weights) const;
 };
 
 //! constructor for fitting the density estimate.
@@ -68,16 +73,19 @@ private:
 //!   boundary.
 //! @param p order of the local polynomial.
 //! @param weights vector of weights for each observation (can be empty).
-inline Kde1d::Kde1d(Eigen::VectorXd x,
-                          double bw,
-                          double xmin,
-                          double xmax,
-                          size_t deg,
-                          const Eigen::VectorXd& weights) :
-  bw_(bw),
-  xmin_(xmin),
-  xmax_(xmax),
-  deg_(deg)
+inline Kde1d::Kde1d(const Eigen::VectorXd& x,
+                    double bw,
+                    double mult,
+                    double xmin,
+                    double xmax,
+                    size_t deg,
+                    bool is_discrete,
+                    const Eigen::VectorXd& weights)
+  : bw_(bw)
+  , xmin_(xmin)
+  , xmax_(xmax)
+  , deg_(deg)
+  , is_discrete_(is_discrete)
 {
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::runtime_error("x and weights must have the same size");
@@ -87,14 +95,16 @@ inline Kde1d::Kde1d(Eigen::VectorXd x,
 
   // transform in case of boundary correction
   grid_points = boundary_transform(grid_points);
-  x = boundary_transform(x);
+  Eigen::VectorXd xx = boundary_transform(x);
+
+  bw_ = select_bw(xx, bw_, mult, deg, is_discrete_, weights);
 
   // fit model and evaluate in transformed domain
-  Eigen::MatrixXd fitted = fit_lp(grid_points, x, weights);
+  Eigen::MatrixXd fitted = fit_lp(grid_points, xx, weights);
 
   // back-transform grid to original domain
   grid_points = boundary_transform(grid_points, true);
-  x = boundary_transform(x, true);
+  xx = boundary_transform(xx, true);
 
   // correct estimated density for transformation
   Eigen::VectorXd values = boundary_correct(grid_points, fitted.col(0));
@@ -384,6 +394,33 @@ inline Eigen::VectorXd Kde1d::without_boundary_ext(
     grid_size -= 2;
 
   return grid_points.segment(grid_start, grid_size);
+}
+
+//  Bandwidth for Kernel Density Estimation
+//' @param x vector of observations
+//' @param bw bandwidth parameter, NA for automatic selection.
+//' @param mult bandwidth multiplier.
+//' @param discrete whether a jittered estimate is computed.
+//' @param weights vector of weights for each observation (can be empty).
+//' @param deg polynomial degree.
+//' @return the selected bandwidth
+//' @noRd
+inline double Kde1d::select_bw(const Eigen::VectorXd& x,
+                               double bw, double mult, size_t deg,
+                               bool is_discrete,
+                               const Eigen::VectorXd& weights) const
+{
+  if (std::isnan(bw)) {
+    bw::PluginBandwidthSelector selector(x, weights);
+    bw = selector.select_bw(deg);
+  }
+
+  bw *= mult;
+  if (is_discrete) {
+    bw = std::max(bw, 0.5 / 5);
+  }
+
+  return bw;
 }
 
 } // end kde1d
