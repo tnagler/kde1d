@@ -45,15 +45,3 @@ qkde1d_cpp <- function(x, R_object) {
     .Call('_kde1d_qkde1d_cpp', PACKAGE = 'kde1d', x, R_object)
 }
 
-#' @param x vector of observations
-#' @param bw bandwidth parameter, NA for automatic selection.
-#' @param mult bandwidth multiplier.
-#' @param discrete whether a jittered estimate is computed.
-#' @param weights vector of weights for each observation (can be empty).
-#' @param deg polynomial degree.
-#' @return the selected bandwidth
-#' @noRd
-select_bw_cpp <- function(x, bw, mult, discrete, weights, deg) {
-    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete, weights, deg)
-}
-

@@ -6,6 +6,7 @@
 #include <boost/math/special_functions/hermite.hpp>
 #include <algorithm>
 #include <vector>
+#include <random>
 
 namespace kde1d {
 
@@ -195,6 +196,35 @@ inline Eigen::VectorXd equi_jitter(const Eigen::VectorXd& x)
     srt(perm(i)) = jtr(i);
 
   return srt;
+}
+
+//! @brief simulates from the standard uniform distribution.
+//!
+//! @param n number of observations.
+//! @param seeds seeds of the random number generator; if empty (default),
+//!   the random number generator is seeded randomly.
+//!
+//! @return An size n vector of independent \f$ \mathrm{U}[0, 1] \f$ random
+//!   variables.
+inline Eigen::VectorXd simulate_uniform(size_t n, std::vector<int> seeds)
+{
+  if (n < 1)
+    throw std::runtime_error("n  must be at least 1.");
+
+  if (seeds.size() == 0) {  // no seeds provided, seed randomly
+    std::random_device rd{};
+    seeds = std::vector<int>(5);
+    for (auto& s : seeds)
+      s = static_cast<int>(rd());
+  }
+
+  // initialize random engine and uniform distribution
+  std::seed_seq seq(seeds.begin(), seeds.end());
+  std::mt19937 generator(seq);
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
+  Eigen::VectorXd U(n);
+  return U.unaryExpr([&](double) { return distribution(generator); });
 }
 
 } // end kde1d::stats

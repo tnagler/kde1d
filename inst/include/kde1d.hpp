@@ -18,6 +18,13 @@ public:
         double xmin, double xmax, size_t deg, bool is_discrete,
         const Eigen::VectorXd& weights = Eigen::VectorXd());
 
+  // statistical functions
+  Eigen::VectorXd pdf(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd cdf(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd quantile(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd simulate(size_t n,
+                           const std::vector<int>& seeds = {}) const;
+
   // getters
   Eigen::VectorXd get_values() const {return grid_.get_values();}
   Eigen::VectorXd get_grid_points() const {return grid_.get_grid_points();}
@@ -138,6 +145,62 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   edf_ = infl_grid.interpolate(x).sum();
 }
 
+//! computes the pdf of the kernel density estimate by interpolation.
+//! @param x vector of evaluation points.
+//! @return a vector of pdf values.
+inline Eigen::VectorXd Kde1d::pdf(const Eigen::VectorXd& x) const
+{
+  Eigen::VectorXd fhat = grid_.interpolate(x);
+  if (!std::isnan(xmin_)) {
+    fhat = (x.array() < xmin_).select(Eigen::VectorXd::Zero(x.size()), fhat);
+  }
+  if (!std::isnan(xmax_)) {
+    fhat = (x.array() > xmax_).select(Eigen::VectorXd::Zero(x.size()), fhat);
+  }
+  auto trunc = [] (const double& xx) { return std::max(xx, 0.0); };
+  return tools::unaryExpr_or_nan(fhat, trunc);
+}
+
+//! computes the cdf of the kernel density estimate by numerical integration.
+//! @param x vector of evaluation points.
+//! @return a vector of cdf values.
+inline Eigen::VectorXd Kde1d::cdf(const Eigen::VectorXd& x) const
+{
+  return grid_.integrate(x).array().max(0.0).min(1.0);
+}
+
+//! computes the cdf of the kernel density estimate by numerical inversion.
+//! @param x vector of evaluation points.
+//! @return a vector of quantiles.
+inline Eigen::VectorXd Kde1d::quantile(const Eigen::VectorXd& x) const
+{
+  auto cdf = [&] (const Eigen::VectorXd& xx) { return grid_.integrate(xx); };
+  auto q = tools::invert_f(x,
+                           cdf,
+                           grid_.get_grid_points().minCoeff(),
+                           grid_.get_grid_points().maxCoeff(),
+                           35);
+
+  // replace with NaN where the input was NaN
+  for (size_t i = 0; i < x.size(); i++) {
+    if (std::isnan(x(i)))
+      q(i) = std::numeric_limits<double>::quiet_NaN();
+  }
+
+  return q;
+}
+
+//! simulates data from the model.
+//! @param n the number of observations to simulate.
+//! @param seeds an optional vector of seeds.
+//! @return simulated observations from the kernel density.
+inline Eigen::VectorXd Kde1d::simulate(size_t n,
+                                       const std::vector<int>& seeds) const
+{
+  auto u = stats::simulate_uniform(n, seeds);
+  return this->quantile(u);
+}
+
 //! Gaussian kernel (truncated at +/- 5).
 //! @param x vector of evaluation points.
 inline Eigen::VectorXd Kde1d::kern_gauss(const Eigen::VectorXd& x)
@@ -160,8 +223,8 @@ inline Eigen::VectorXd Kde1d::kern_gauss(const Eigen::VectorXd& x)
 //! @return a two-column matrix containing the density estimate in the first
 //!   and the influence function in the second column.
 inline Eigen::MatrixXd Kde1d::fit_lp(const Eigen::VectorXd& x_ev,
-                                        const Eigen::VectorXd& x,
-                                        const Eigen::VectorXd& weights)
+                                     const Eigen::VectorXd& x,
+                                     const Eigen::VectorXd& weights)
 {
   Eigen::MatrixXd res(x_ev.size(), 2);
   size_t n = x.size();
@@ -230,11 +293,11 @@ inline Eigen::MatrixXd Kde1d::fit_lp(const Eigen::VectorXd& x_ev,
 //! calculate influence for data point for density estimate based on
 //! quantities pre-computed in `fit_lp()`.
 inline double Kde1d::calculate_infl(const size_t &n,
-                                       const double& f0,
-                                       const double& b,
-                                       const double& bw,
-                                       const double& s,
-                                       const double& weight)
+                                    const double& f0,
+                                    const double& b,
+                                    const double& bw,
+                                    const double& s,
+                                    const double& weight)
 {
   Eigen::MatrixXd M;
   double bw2 = std::pow(bw, 2);
@@ -270,7 +333,7 @@ inline double Kde1d::calculate_infl(const size_t &n,
 //! @param inverse whether the inverse transformation should be applied.
 //! @return the transformed evaluation points.
 inline Eigen::VectorXd Kde1d::boundary_transform(const Eigen::VectorXd& x,
-                                                    bool inverse)
+                                                 bool inverse)
 {
   Eigen::VectorXd x_new = x;
   if (!inverse) {
@@ -312,7 +375,7 @@ inline Eigen::VectorXd Kde1d::boundary_transform(const Eigen::VectorXd& x,
 //! @param fhat the density estimate evaluated in the transformed domain.
 //! @return corrected density estimates at `x`.
 inline Eigen::VectorXd Kde1d::boundary_correct(const Eigen::VectorXd& x,
-                                                  const Eigen::VectorXd& fhat)
+                                               const Eigen::VectorXd& fhat)
 {
   Eigen::VectorXd corr_term(fhat.size());
   if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
