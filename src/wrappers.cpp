@@ -2,6 +2,8 @@
 #include "dpik.hpp"
 #include "kde1d.hpp"
 
+using namespace kde1d;
+
 //' fits a kernel density estimate and calculates the effective degrees of
 //' freedom.
 //' @param x vector of observations.
@@ -22,7 +24,7 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          size_t deg,
                          const Eigen::VectorXd& weights)
 {
-  LPDens1d fit(x, bw, xmin, xmax, deg, weights);
+  Kde1d fit(x, bw, xmin, xmax, deg, weights);
   return Rcpp::List::create(
     Rcpp::Named("grid_points") = fit.get_grid_points(),
     Rcpp::Named("values") = fit.get_values(),
@@ -39,12 +41,12 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
 // converts a fitted R_object ('kde1d') to an interpolation grid in C++.
 // @param R_object the fitted object passed from R.
 // @return C++ object of class InterpolationGrid1d.
-InterpolationGrid1d wrap_to_cpp(const Rcpp::List& R_object)
+interp::InterpolationGrid1d wrap_to_cpp(const Rcpp::List& R_object)
 {
   Eigen::VectorXd grid_points = R_object["grid_points"];
   Eigen::VectorXd values = R_object["values"];
   // 0 -> already normalized during fit
-  return InterpolationGrid1d(grid_points, values, 0);
+  return interp::InterpolationGrid1d(grid_points, values, 0);
 }
 
 //' computes the pdf of a kernel density estimate by interpolation.
@@ -95,7 +97,7 @@ Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& x,
 Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x,
                            const Rcpp::List& R_object)
 {
-  InterpolationGrid1d fit = wrap_to_cpp(R_object);
+  interp::InterpolationGrid1d fit = wrap_to_cpp(R_object);
   auto cdf = [&fit] (const Eigen::VectorXd& xx) {
     return fit.integrate(xx);
   };
@@ -129,7 +131,7 @@ double select_bw_cpp(const Eigen::VectorXd& x,
                      const Eigen::VectorXd& weights, size_t deg)
 {
   if (std::isnan(bw)) {
-    PluginBandwidthSelector selector(x, weights);
+    bw::PluginBandwidthSelector selector(x, weights);
     bw = selector.select_bw(deg);
   }
 
@@ -140,13 +142,3 @@ double select_bw_cpp(const Eigen::VectorXd& x,
 
   return bw;
 }
-
-
-// // [[Rcpp::export]]
-// Eigen::VectorXd quan(const Eigen::VectorXd& x,
-//                      const Eigen::VectorXd& a,
-//                      const Eigen::VectorXd& w) {
-//     if (w.size() > 0)
-//         return stats::quantile(x, a, w);
-//     return stats::quantile(x, a);
-// }

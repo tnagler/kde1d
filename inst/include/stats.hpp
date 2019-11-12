@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <vector>
 
+namespace kde1d {
+
 //! statistical functions
 namespace stats {
 
@@ -137,4 +139,6 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
   return res;
 }
 
-}
+} // end kde1d::stats
+
+} // end kde1d

@@ -5,6 +5,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+namespace kde1d {
+
+namespace bw {
+
 //! Bandwidth selection for local-likelihood density estimation.
 //! Methodology is similar to Sheather and Jones(1991), but asymptotic
 //! bias/variance expressions are adapted for higher-order polynomials and
@@ -231,4 +235,8 @@ inline double PluginBandwidthSelector::select_bw(size_t deg)
 
   return bw;
 }
+
+} // end kde1d::bw
+
+} // end kde1d
 

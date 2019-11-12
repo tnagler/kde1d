@@ -4,6 +4,10 @@
 #include <functional>
 #include "tools.hpp"
 
+namespace kde1d {
+
+namespace interp {
+
 //! A class for cubic spline interpolation in one dimension
 //!
 //! The class is used for implementing kernel estimators. It makes storing the
@@ -294,3 +298,7 @@ inline double InterpolationGrid1d::int_on_grid(const double& upr,
 
   return tmpint;
 }
+
+} // end kde1d::interp
+
+} // end kde1d

@@ -6,6 +6,7 @@
 #include <functional>
 #include <cmath>
 
+namespace kde1d {
 
 //! Local-polynomial density estimation in 1-d.
 class Kde1d {
@@ -28,7 +29,7 @@ public:
 
 private:
   // data members
-  InterpolationGrid1d grid_;
+  interp::InterpolationGrid1d grid_;
   double bw_;
   double xmin_;
   double xmax_;
@@ -103,7 +104,7 @@ inline Kde1d::Kde1d(Eigen::VectorXd x,
 
   // construct interpolation grid
   // (3 iterations for normalization to a proper density)
-  grid_ = InterpolationGrid1d(grid_points, values, 3);
+  grid_ = interp::InterpolationGrid1d(grid_points, values, 3);
 
   // store normalized values
   values = grid_.get_values();
@@ -113,11 +114,9 @@ inline Kde1d::Kde1d(Eigen::VectorXd x,
 
   // calculate effective degrees of freedom
   double n = x.size();
-  InterpolationGrid1d infl_grid(without_boundary_ext(grid_points),
-                                without_boundary_ext(fitted.col(1)
-                                                           .cwiseMin(2.0)
-                                                           .cwiseMax(0)),
-                                0);
+  interp::InterpolationGrid1d infl_grid(
+      without_boundary_ext(grid_points),
+      without_boundary_ext(fitted.col(1).cwiseMin(2.0).cwiseMax(0)), 0);
   edf_ = infl_grid.interpolate(x).sum();
 }
 
@@ -387,3 +386,4 @@ inline Eigen::VectorXd Kde1d::without_boundary_ext(
   return grid_points.segment(grid_start, grid_size);
 }
 
+} // end kde1d

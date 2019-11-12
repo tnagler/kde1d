@@ -2,6 +2,8 @@
 
 #include <Eigen/Dense>
 
+namespace kde1d {
+
 namespace tools {
 
 //! applies a function to each non-NaN value, otherwise returns NaN
@@ -56,4 +58,6 @@ inline size_t find_min_index(const Eigen::VectorXd& x)
   return std::min_element(x.data(), x.data() + x.size()) - x.data();
 }
 
-}
+} // end kde1d tools
+
+} // end kde1d
