@@ -41,7 +41,9 @@ A gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
 finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
 log-transform is used if there is only one boundary (see, Geenens and Wang,
 2018); a probit transform is used if there are two (see, Geenens, 2014).
+
 Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
+A specific form of deterministic jittering is used, see \code{\link[=equi_jitter]{equi_jitter()}}.
 }
 \examples{
 

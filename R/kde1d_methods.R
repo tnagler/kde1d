@@ -29,34 +29,21 @@
 #' pkde1d(0, fit) # evaluate corresponding cdf (close to pnorm(0))
 #' qkde1d(0.5, fit) # quantile function (close to qnorm(0))
 #' hist(rkde1d(100, fit)) # simulate
-#' @importFrom cctools expand_as_numeric
 #' @export
 dkde1d <- function(x, obj) {
-  if (is.data.frame(x)) {
-    x <- x[[1]]
-  }
-  if (!is.ordered(x)) {
-    stopifnot(!is.factor(x))
-  }
+  x <- prep_eval_arg(x, obj)
 
   # adjust grid to stabilize estimates
   rng <- diff(range(obj$grid_points))
-  if (!is.nan(obj$xmin)) {
+  if (!is.nan(obj$xmin))
     obj$grid_points[1] <- obj$xmin - 0.1 * rng
-  }
-  if (!is.nan(obj$xmax)) {
+  if (!is.nan(obj$xmax))
     obj$grid_points[length(obj$grid_points)] <- obj$xmax + 0.1 * rng
-  }
 
-  if (length(obj$jitter_info$i_disc) == 1 & !is.ordered(x)) {
-    x <- ordered(x, obj$jitter_info$levels$x)
-  }
-
-  fhat <- dkde1d_cpp(expand_as_numeric(x), obj)
-
-  if (length(obj$jitter_info$i_disc) == 1) {
+  fhat <- dkde1d_cpp(as.numeric(x), obj)
+  if (is.ordered(obj$x)) {
     # for discrete variables we can normalize
-    f_all <- dkde1d_cpp(seq_along(obj$jitter_info$levels$x) - 1, obj)
+    f_all <- dkde1d_cpp(seq_along(levels(obj$x)), obj)
     fhat <- fhat / sum(f_all)
   }
 
@@ -67,20 +54,15 @@ dkde1d <- function(x, obj) {
 #' @rdname dkde1d
 #' @export
 pkde1d <- function(q, obj) {
-  if (is.data.frame(q)) {
-    q <- q[[1]]
-  }
-  if (!is.ordered(q)) {
-    stopifnot(!is.factor(q))
-  }
+  q <- prep_eval_arg(q, obj)
 
-  if (length(obj$jitter_info$i_disc) != 1) {
+  if (is.numeric(obj$x)) {
     p <- pkde1d_cpp(q, obj)
   } else {
     if (!is.ordered(q)) {
-      q <- ordered(q, obj$jitter_info$levels$x)
+      q <- ordered(q, levels(obj$x))
     }
-    x_all <- ordered(obj$jitter_info$levels$x, obj$jitter_info$levels$x)
+    x_all <- ordered(levels(obj$x), levels(obj$x))
     p_all <- dkde1d(x_all, obj)
     p_total <- sum(p_all)
     p <- sapply(q, function(y) sum(p_all[x_all <= y] / p_total))
@@ -95,16 +77,13 @@ pkde1d <- function(q, obj) {
 #' @export
 qkde1d <- function(p, obj) {
   stopifnot(all(na.omit(p) > 0.0) & all(na.omit(p) < 1.0))
-  if (length(obj$jitter_info$i_disc) != 1) {
-    ## qkde1d_cpp for continuous variables
+  if (is.numeric(obj$x)) {
     q <- qkde1d_cpp(p, obj)
   } else {
     ## for discrete variables compute quantile from the density
-    x_all <- ordered(obj$jitter_info$levels$x, obj$jitter_info$levels$x)
-
+    x_all <- ordered(levels(obj$x), levels(obj$x))
     # pdf at all possible values of x
     pp <- pkde1d(x_all, obj)
-
     # generalized inverse
     q <- x_all[vapply(p, function(y) which(y <= pp)[1], integer(1))]
   }
@@ -167,10 +146,8 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #' @export
 plot.kde1d <- function(x, ...) {
   plot_type <- "l" # for continuous variables, use a line plot
-  if (length(x$jitter_info$i_disc) == 1) {
-    ev <- ordered(x$jitter_info$levels$x,
-      levels = x$jitter_info$levels$x
-    )
+  if (is.ordered(x$x)) {
+    ev <- ordered(levels(x$x), levels(x$x))
     plot_type <- "h" # for discrete variables, use a histrogram
   } else {
     # adjust grid if necessary
@@ -203,7 +180,7 @@ plot.kde1d <- function(x, ...) {
 #' @importFrom utils modifyList
 #' @export
 lines.kde1d <- function(x, ...) {
-  if (length(x$jitter_info$i_disc) == 1) {
+  if (is.ordered(x$x)) {
     stop("lines does not work for discrete estimates.")
   }
   ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
@@ -230,7 +207,7 @@ logLik.kde1d <- function(object, ...) {
 #' @method print kde1d
 #' @export
 print.kde1d <- function(x, ...) {
-  if (length(x$jitter_info$i_disc) == 1) {
+  if (is.ordered(x$x)) {
     cat("(jittered) ")
   }
   cat("kernel density estimate ('kde1d')")
