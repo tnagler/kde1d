@@ -90,5 +90,5 @@ prep_eval_arg <- function(x, obj) {
   levels(x) <- levels(obj$x)
   if (!is.ordered(x) & is.ordered(obj$x))
     x <- ordered(x, levels(obj$x))
-  x
+  as.numeric(x) - 1
 }

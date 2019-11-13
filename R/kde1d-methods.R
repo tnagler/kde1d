@@ -32,22 +32,7 @@
 #' @export
 dkde1d <- function(x, obj) {
   x <- prep_eval_arg(x, obj)
-
-  # adjust grid to stabilize estimates
-  rng <- diff(range(obj$grid_points))
-  if (!is.nan(obj$xmin))
-    obj$grid_points[1] <- obj$xmin - 0.1 * rng
-  if (!is.nan(obj$xmax))
-    obj$grid_points[length(obj$grid_points)] <- obj$xmax + 0.1 * rng
-
-  fhat <- dkde1d_cpp(as.numeric(x), obj)
-  if (is.ordered(obj$x)) {
-    # for discrete variables we can normalize
-    f_all <- dkde1d_cpp(seq_along(levels(obj$x)), obj)
-    fhat <- fhat / sum(f_all)
-  }
-
-  as.vector(fhat)
+  dkde1d_cpp(as.numeric(x), obj)
 }
 
 #' @param q vector of quantiles.
@@ -55,39 +40,19 @@ dkde1d <- function(x, obj) {
 #' @export
 pkde1d <- function(q, obj) {
   q <- prep_eval_arg(q, obj)
-
-  if (is.numeric(obj$x)) {
-    p <- pkde1d_cpp(q, obj)
-  } else {
-    if (!is.ordered(q)) {
-      q <- ordered(q, levels(obj$x))
-    }
-    x_all <- ordered(levels(obj$x), levels(obj$x))
-    p_all <- dkde1d(x_all, obj)
-    p_total <- sum(p_all)
-    p <- sapply(q, function(y) sum(p_all[x_all <= y] / p_total))
-    p <- pmin(pmax(p, 0), 1)
-  }
-
-  p
+  message("TODO: fast integration by sorting")
+  pkde1d_cpp(q, obj)
 }
 
 #' @param p vector of probabilities.
 #' @rdname dkde1d
 #' @export
 qkde1d <- function(p, obj) {
-  stopifnot(all(na.omit(p) > 0.0) & all(na.omit(p) < 1.0))
-  if (is.numeric(obj$x)) {
-    q <- qkde1d_cpp(p, obj)
-  } else {
-    ## for discrete variables compute quantile from the density
-    x_all <- ordered(levels(obj$x), levels(obj$x))
-    # pdf at all possible values of x
-    pp <- pkde1d(x_all, obj)
-    # generalized inverse
-    q <- x_all[vapply(p, function(y) which(y <= pp)[1], integer(1))]
+  q <- qkde1d_cpp(p, obj)
+  if (is.ordered(obj$x)) {
+    ## for discrete variables, add factor levels
+    q <- ordered(levels(obj$x)[q + 1], levels(obj$x))
   }
-
   q
 }
 

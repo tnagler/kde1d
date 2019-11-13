@@ -106,8 +106,14 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
   w_norm <- weights / mean(weights)
 
   # fit model
-  fit <- fit_kde1d_cpp(
-    as.numeric(x), bw, mult, xmin, xmax, deg, is.ordered(x), w_norm)
+  fit <- fit_kde1d_cpp(x = as.numeric(x) - 1,
+                       nlevels = length(levels(x)),
+                       bw = bw,
+                       mult = mult,
+                       xmin = xmin,
+                       xmax = xmax,
+                       deg = deg,
+                       weights = w_norm)
 
   # add info
   fit$var_name <- as.character(match.call()[2])
@@ -115,7 +121,5 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
   fit$weights <- weights
   fit$x <- x
 
-  # return as kde1d object
-  class(fit) <- "kde1d"
   fit
 }
