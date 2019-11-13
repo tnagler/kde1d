@@ -140,11 +140,52 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(
 inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
   const
 {
-  auto integrate_one = [this] (const double& xx) {
-    return int_on_grid(xx, this->values_, this->grid_points_);
-  };
+  Eigen::VectorXd res(x.size());
+  auto ord = tools::get_order(x);
 
-  return tools::unaryExpr_or_nan(x, integrate_one);
+  // temporaries for the loop
+  Eigen::VectorXd tmpvals(4), tmpgrid(4), tmpa(4);
+  double new_int, new_upr, grid_eps, cum_int = 0.0;
+  int k = 0, m = grid_points_.size();
+
+  for (size_t i = 0; i < x.size(); ++i) {
+    double upr = x(ord(i));
+    if (upr <= grid_points_(0)) {
+      res(ord(i)) = cum_int;
+      continue;
+    }
+    // go up the grid and integrate
+    while (k < m - 1) {
+      // halt loop if x(k) is below integral boundary
+      if (upr < grid_points_(k + 1))
+        break;
+      // select length 4 subvectors and calculate spline coefficients
+      tmpvals(0) = values_(std::max(k - 1, 0));
+      tmpvals(1) = values_(k);
+      tmpvals(2) = values_(k + 1);
+      tmpvals(3) = values_(std::min(k + 2, m - 1));
+
+      tmpgrid(0) = grid_points_(std::max(k - 1, 0));
+      tmpgrid(1) = grid_points_(k);
+      tmpgrid(2) = grid_points_(k + 1);
+      tmpgrid(3) = grid_points_(std::min(k + 2, m - 1));
+
+      tmpa = find_coefs(tmpvals, tmpgrid);
+
+      // integrate over full cell
+      grid_eps = (grid_points_(k + 1) - grid_points_(k));
+      cum_int += cubic_integral(0.0, 1.0, tmpa) * grid_eps;
+      k++;
+    }
+
+    // integrate over partial cell
+    upr = (upr - grid_points_(k)) / grid_eps;
+    new_int = cubic_integral(0.0, std::min(upr, 1.0), tmpa) * grid_eps;
+    res(ord(i)) = cum_int + new_int;
+  }
+
+  // TODO: integrate until end to normalize all values
+  return res;
 }
 
 // ---------------- Utility functions for spline interpolation ----------------

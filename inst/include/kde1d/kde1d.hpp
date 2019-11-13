@@ -305,7 +305,6 @@ inline void Kde1d::check_levels(const Eigen::VectorXd& x) const
   if (nlevels_ == 0)
     return;
   if ((x.array() != x.array().round()).any() | (x.minCoeff() < 0)) {
-    std::cout << x << std::endl;
     throw std::runtime_error("x must only contain non-negatives "
                              " integers when nlevels > 0.");
   }
