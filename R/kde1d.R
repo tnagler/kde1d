@@ -103,7 +103,6 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
   x <- na.omit(x)
   # sanity checks
   check_arguments(x, mult, xmin, xmax, bw, deg, weights)
-  w_norm <- weights / mean(weights)
 
   # fit model
   fit <- fit_kde1d_cpp(x = as.numeric(x) - 1,
@@ -113,7 +112,7 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
                        xmin = xmin,
                        xmax = xmax,
                        deg = deg,
-                       weights = w_norm)
+                       weights = weights)
 
   # add info
   fit$var_name <- as.character(match.call()[2])

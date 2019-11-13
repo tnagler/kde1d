@@ -127,6 +127,8 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   Eigen::VectorXd xx = x;
   Eigen::VectorXd w = weights;
   tools::remove_nans(xx, w);
+  if (w.size() > 0)
+    w /= w.sum();
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
 
@@ -139,9 +141,11 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
 
   // bandwidth selection
   bw_ = select_bw(xx, bw_, mult, deg, nlevels_, w);
+  std::cout << "bw = " << bw_ << std::endl;
 
   // fit model and evaluate in transformed domain
   Eigen::MatrixXd fitted = fit_lp(grid_points, xx, w);
+  std::cout << "fitted" << bw_ << std::endl;
 
   // back-transform grid to original domain
   grid_points = boundary_transform(grid_points, true);
@@ -352,6 +356,8 @@ inline Eigen::MatrixXd Kde1d::fit_lp(const Eigen::VectorXd& x_ev,
   Eigen::VectorXd xx(x.size());
   Eigen::VectorXd xx2(x.size());
   Eigen::VectorXd kernels(x.size());
+
+  std::cout << x_ev << std::endl;
   for (size_t k = 0; k < x_ev.size(); k++) {
     double s = bw_;
     // classical (local constant) kernel density estimate
