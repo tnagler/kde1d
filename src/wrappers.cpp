@@ -1,6 +1,5 @@
 #include <RcppEigen.h>
-#include "dpik.hpp"
-#include "kde1d.hpp"
+#include "kde1d/kde1d.hpp"
 
 using namespace kde1d;
 

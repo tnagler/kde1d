@@ -1,9 +1,9 @@
 #pragma once
 
-#include "interpolation.hpp"
-#include "stats.hpp"
-#include "tools.hpp"
-#include "dpik.hpp"
+#include "kde1d/interpolation.hpp"
+#include "kde1d/stats.hpp"
+#include "kde1d/tools.hpp"
+#include "kde1d/dpik.hpp"
 #include <functional>
 #include <cmath>
 
@@ -35,8 +35,9 @@ public:
                            const std::vector<int>& seeds = {}) const;
 
   // getters
-  Eigen::VectorXd get_values() const {return grid_.get_values();}
-  Eigen::VectorXd get_grid_points() const {return grid_.get_grid_points();}
+  Eigen::VectorXd get_values() const { return grid_.get_values(); }
+  Eigen::VectorXd get_grid_points() const { return grid_.get_grid_points(); }
+  size_t get_nlevels() const { return nlevels_; }
   double get_bw() const {return bw_;}
   double get_p() const {return deg_;}
   double get_xmin() const {return xmin_;}
