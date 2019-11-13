@@ -133,19 +133,15 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
     xx = stats::equi_jitter(xx);
 
   // bandwidth selection
-  xx = boundary_transform(xx);
-  bw_ = select_bw(xx, bw_, mult, deg, nlevels_, w);
+  bw_ = select_bw(boundary_transform(xx), bw_, mult, deg, nlevels_, w);
 
   // construct grid on original domain
   Eigen::VectorXd grid_points = construct_grid_points(xx, w);
-  grid_points = boundary_transform(grid_points);
 
   // fit model and evaluate in transformed domain
-  Eigen::MatrixXd fitted = fit_lp(grid_points, xx, w);
-
-  // back-transform grid to original domain
-  grid_points = boundary_transform(grid_points, true);
-  xx = boundary_transform(xx, true);
+  Eigen::MatrixXd fitted = fit_lp(boundary_transform(grid_points),
+                                  boundary_transform(xx),
+                                  w);
 
   // correct estimated density for transformation
   Eigen::VectorXd values = boundary_correct(grid_points, fitted.col(0));
@@ -456,7 +452,8 @@ inline Eigen::VectorXd Kde1d::boundary_transform(const Eigen::VectorXd& x,
   if (!inverse) {
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
       // two boundaries -> probit transform
-      x_new = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
+      auto rng = xmax_ - xmin_;
+      x_new = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
       x_new = stats::qnorm(x_new);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
@@ -470,8 +467,9 @@ inline Eigen::VectorXd Kde1d::boundary_transform(const Eigen::VectorXd& x,
   } else {
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
       // two boundaries -> probit transform
-      x_new = stats::pnorm(x).array() + xmin_ - 5e-5;
-      x_new *=  (xmax_ - xmin_ + 1e-4);
+      auto rng = xmax_ - xmin_;
+      x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
+      x_new *=  (xmax_ - xmin_ + 1e-4 * rng);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = x.array().exp() + xmin_ - 1e-3;
