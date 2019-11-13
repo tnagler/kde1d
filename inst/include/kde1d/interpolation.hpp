@@ -4,6 +4,10 @@
 #include <functional>
 #include "tools.hpp"
 
+namespace kde1d {
+
+namespace interp {
+
 //! A class for cubic spline interpolation in one dimension
 //!
 //! The class is used for implementing kernel estimators. It makes storing the
@@ -19,9 +23,9 @@ public:
 
   void normalize(int times);
 
-  Eigen::VectorXd interpolate(const Eigen::VectorXd& x);
+  Eigen::VectorXd interpolate(const Eigen::VectorXd& x) const;
 
-  Eigen::VectorXd integrate(const Eigen::VectorXd& u);
+  Eigen::VectorXd integrate(const Eigen::VectorXd& u) const;
 
   Eigen::VectorXd get_values() const {return values_;}
   Eigen::VectorXd get_grid_points() const {return grid_points_;}
@@ -29,28 +33,28 @@ public:
 private:
   // Utility functions for spline Interpolation
   double cubic_poly(const double& x,
-                    const Eigen::VectorXd& a);
+                    const Eigen::VectorXd& a) const;
 
   double cubic_indef_integral(const double& x,
-                              const Eigen::VectorXd& a);
+                              const Eigen::VectorXd& a) const;
 
   double cubic_integral(const double& lower,
                         const double& upper,
-                        const Eigen::VectorXd& a);
+                        const Eigen::VectorXd& a) const;
 
   Eigen::VectorXd find_coefs(const Eigen::VectorXd& vals,
-                             const Eigen::VectorXd& grid);
+                             const Eigen::VectorXd& grid) const;
 
   double interp_on_grid(const double& x,
                         const Eigen::VectorXd& vals,
-                        const Eigen::VectorXd& grid);
+                        const Eigen::VectorXd& grid) const;
 
-  ptrdiff_t find_cell(const double& x0);
+  ptrdiff_t find_cell(const double& x0) const;
 
   // Utility functions for integration
   double int_on_grid(const double& upr,
                      const Eigen::VectorXd& vals,
-                     const Eigen::VectorXd& grid);
+                     const Eigen::VectorXd& grid) const;
 
   Eigen::VectorXd grid_points_;
   Eigen::MatrixXd values_;
@@ -88,7 +92,7 @@ inline void InterpolationGrid1d::normalize(int times)
   }
 }
 
-inline ptrdiff_t InterpolationGrid1d::find_cell(const double& x0)
+inline ptrdiff_t InterpolationGrid1d::find_cell(const double& x0) const
 {
   ptrdiff_t low = 0, high = grid_points_.size() - 1;
   ptrdiff_t mid;
@@ -105,7 +109,8 @@ inline ptrdiff_t InterpolationGrid1d::find_cell(const double& x0)
 
 //! Interpolation
 //! @param x vector of evaluation points.
-inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x)
+inline Eigen::VectorXd InterpolationGrid1d::interpolate(
+    const Eigen::VectorXd& x) const
 {
   Eigen::VectorXd tmpgrid(4), tmpvals(4);
   ptrdiff_t m = grid_points_.size();
@@ -133,6 +138,7 @@ inline Eigen::VectorXd InterpolationGrid1d::interpolate(const Eigen::VectorXd& x
 //!
 //! @param x a vector  of evaluation points
 inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
+  const
 {
   auto integrate_one = [this] (const double& xx) {
     return int_on_grid(xx, this->values_, this->grid_points_);
@@ -148,7 +154,7 @@ inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x)
 //! @param x evaluation point.
 //! @param a polynomial coefficients
 inline double InterpolationGrid1d::cubic_poly(const double& x,
-                                              const Eigen::VectorXd& a)
+                                              const Eigen::VectorXd& a) const
 {
   double x2 = x * x;
   double x3 = x2 * x;
@@ -160,7 +166,7 @@ inline double InterpolationGrid1d::cubic_poly(const double& x,
 //! @param x evaluation point.
 //! @param a polynomial coefficients.
 inline double InterpolationGrid1d::cubic_indef_integral(
-        const double& x, const Eigen::VectorXd& a)
+        const double& x, const Eigen::VectorXd& a) const
 {
   double x2 = x * x;
   double x3 = x2 * x;
@@ -176,6 +182,7 @@ inline double InterpolationGrid1d::cubic_indef_integral(
 inline double InterpolationGrid1d::cubic_integral(const double& lower,
                                                   const double& upper,
                                                   const Eigen::VectorXd& a)
+  const
 {
   return cubic_indef_integral(upper, a) - cubic_indef_integral(lower, a);
 }
@@ -185,7 +192,7 @@ inline double InterpolationGrid1d::cubic_integral(const double& lower,
 //! @param vals length 4 vector of function values.
 //! @param grid length 4 vector of grid points.
 inline Eigen::VectorXd InterpolationGrid1d::find_coefs(
-  const Eigen::VectorXd& vals, const Eigen::VectorXd& grid)
+  const Eigen::VectorXd& vals, const Eigen::VectorXd& grid) const
 {
   double dt0 = grid(1) - grid(0);
   double dt1 = grid(2) - grid(1);
@@ -231,6 +238,7 @@ inline Eigen::VectorXd InterpolationGrid1d::find_coefs(
 inline double InterpolationGrid1d::interp_on_grid(const double& x,
                                                   const Eigen::VectorXd& vals,
                                                   const Eigen::VectorXd& grid)
+  const
 {
   double xev = (x - grid(1)) / (grid(2) - grid(1));
   // use Gaussian tail for extrapolation
@@ -258,6 +266,7 @@ inline double InterpolationGrid1d::interp_on_grid(const double& x,
 inline double InterpolationGrid1d::int_on_grid(const double& upr,
                                                const Eigen::VectorXd& vals,
                                                const Eigen::VectorXd& grid)
+  const
 {
   ptrdiff_t m = grid.size();
   Eigen::VectorXd tmpvals(4), tmpgrid(4), tmpa(4);
@@ -294,3 +303,7 @@ inline double InterpolationGrid1d::int_on_grid(const double& upr,
 
   return tmpint;
 }
+
+} // end kde1d::interp
+
+} // end kde1d

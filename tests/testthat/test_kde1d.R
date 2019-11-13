@@ -1,39 +1,44 @@
 context("Testing 'kde1d'")
 
 set.seed(0)
-n_sim <- 1e2
+n_sim <- 20
 data_types <- c(
   "unbounded", "left_boundary", "right_boundary",
   "two_boundaries", "discrete"
 )
 deg <- 0:2
 
-scenarios <- expand.grid(data_types = data_types, deg = deg)
+scenarios <- expand.grid(data_types = data_types,
+                         deg = deg,
+                         stringsAsFactors = FALSE)
 scenarios <- split(scenarios, seq_len(nrow(scenarios)))
-fits <- lapply(
-  scenarios,
-  function(scenario) {
+fits <- as.list(seq_along(scenarios))
+sims <- as.list(seq_along(scenarios))
+
+for (k in seq_along(scenarios)) {
+  test_that(paste0("can fit ", paste(scenarios[[k]], collapse = "/")), {
     xmin <- xmax <- NaN
-    if (scenario$data_type == "unbounded") {
+    if (scenarios[[k]]$data_type == "unbounded") {
       x <- rnorm(n_sim)
-    } else if (scenario$data_type == "left_boundary") {
+    } else if (scenarios[[k]]$data_type == "left_boundary") {
       x <- rexp(n_sim)
       xmin <- 0
-    } else if (scenario$data_type == "right_boundary") {
+    } else if (scenarios[[k]]$data_type == "right_boundary") {
       x <- -rexp(n_sim)
       xmax <- 0
-    } else if (scenario$data_type == "two_boundaries") {
+    } else if (scenarios[[k]]$data_type == "two_boundaries") {
       x <- runif(n_sim)
       xmin <- 0
       xmax <- 1
     } else {
-      x <- ordered(rbinom(n_sim, size = 5, prob = 0.5),
-        levels = 0:5
-      )
+      x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
     }
-    kde1d(x, xmin = xmin, xmax = xmax, deg = scenario$deg)
-  }
-)
+    sims[[k]] <- x
+    expect_silent(
+      fits[[k]] <<- kde1d(x, xmin = xmin, xmax = xmax, deg = scenarios[[k]]$deg)
+    )
+  })
+}
 
 test_that("detects wrong arguments", {
   x <- rnorm(n_sim)
@@ -54,29 +59,28 @@ test_that("returns proper 'kde1d' object", {
   lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
   class_members <- c(
-    "grid_points", "values", "bw", "xmin", "xmax", "deg",
-    "edf", "loglik", "weights", "var_name", "nobs", "x"
+    "grid_points", "values", "nlevels", "bw", "xmin", "xmax", "deg",
+    "edf", "loglik", "var_name", "nobs", "weights", "x"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
 })
 
-test_that("d/p/r/h functions work", {
-  n <- 50
-  u <- runif(n)
-  test_dpqr <- function(fit, sim) {
-    sim <- data.frame(sim)
-    is_jittered <- is.ordered(fit$x)
+u <- runif(20)
+for (k in seq_along(scenarios)) {
+  test_that(paste("d/p/r/h works for", paste(scenarios[[k]], collapse = "/")), {
+    fit <- fits[[k]]
+    sim <- rkde1d(20, fit)
     if (is.nan(fit$xmax)) {
-      xmax <- ifelse(is_jittered, 5, Inf)
+      xmax <- ifelse(is.ordered(fit$x), 5, Inf)
     } else {
       xmax <- fit$xmax
     }
     if (is.nan(fit$xmin)) {
-      xmin <- ifelse(is_jittered, 0, -Inf)
+      xmin <- ifelse(is.ordered(fit$x), 0, -Inf)
     } else {
       xmin <- fit$xmin
     }
-    expect_that(all(sim >= xmin), equals(TRUE))
+    expect_that(all(sim >= xmin), equals(TRUE), label = scenarios)
     expect_that(all(sim <= xmax), equals(TRUE))
     expect_gte(max(dkde1d(sim, fit), 0), 0)
     expect_gte(max(pkde1d(sim, fit), 0), 0)
@@ -92,14 +96,9 @@ test_that("d/p/r/h functions work", {
       expect_equal(dkde1d(xmax + 1, fit), 0)
       expect_equal(pkde1d(xmax + 1, fit), 1)
     }
-  }
 
-  sims <- lapply(fits, function(x) rkde1d(n, x))
-  mapply(test_dpqr, fits, sims)
-
-  sim <- lapply(fits, function(x) rkde1d(n, x, quasi = TRUE))
-  mapply(test_dpqr, fits, sims)
-})
+  })
+}
 
 test_that("plot functions work", {
   test_plot <- function(fit) {
@@ -134,8 +133,7 @@ test_that("behavior for discrete data is consistent", {
   xx <- ordered(1:5, 1:5)
   expect_equal(dkde1d(1:5, fit), dkde1d(xx, fit))
   expect_equal(pkde1d(1:5, fit), pkde1d(xx, fit))
-  expect_true(all(is.na(dkde1d(c(0, 6), fit))))
-  expect_true(all(is.na(pkde1d(c(0, 6), fit))))
+  expect_error(all(is.na(dkde1d(c(0, 6), fit))))
   expect_true(all(rkde1d(n, fit) %in% x))
 })
 
