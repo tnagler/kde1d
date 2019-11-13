@@ -227,11 +227,7 @@ inline Eigen::VectorXd Kde1d::cdf(const Eigen::VectorXd& x) const
 
 inline Eigen::VectorXd Kde1d::cdf_continuous(const Eigen::VectorXd& x) const
 {
-  auto p = grid_.integrate(x);
-  auto trunc = [] (const double& xx) {
-    return std::min(std::max(xx, 0.0), 1.0);
-  };
-  return tools::unaryExpr_or_nan(p, trunc);
+  return grid_.integrate(x, /* normalize */ true);
 }
 
 inline Eigen::VectorXd Kde1d::cdf_discrete(const Eigen::VectorXd& x) const
@@ -269,7 +265,7 @@ inline Eigen::VectorXd Kde1d::quantile_continuous(const Eigen::VectorXd& x) cons
   // replace with NaN where the input was NaN
   for (size_t i = 0; i < x.size(); i++) {
     if (std::isnan(x(i)))
-      q(i) = std::numeric_limits<double>::quiet_NaN();
+      q(i) = x(i);
   }
 
   return q;
