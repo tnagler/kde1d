@@ -80,13 +80,13 @@ prep_eval_arg <- function(x, obj) {
   if (is.data.frame(x))
     x <- x[[1]]
   if (!is.ordered(x) & is.ordered(obj$x))
-    x <- ordered(x, levels(obj$x))
+    x <- as.ordered(x)
   if (is.numeric(x))
     return(x)
 
   stopifnot(is.ordered(x))
   if (!all(levels(x) %in% levels(obj$x)))
-    stop("'x' contains levels that were not observed in the data.")
+    stop("'x' contains levels that weren't present when fitting.")
   levels(x) <- levels(obj$x)
   if (!is.ordered(x) & is.ordered(obj$x))
     x <- ordered(x, levels(obj$x))

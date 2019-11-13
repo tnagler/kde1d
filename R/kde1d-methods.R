@@ -40,7 +40,6 @@ dkde1d <- function(x, obj) {
 #' @export
 pkde1d <- function(q, obj) {
   q <- prep_eval_arg(q, obj)
-  message("TODO: fast integration by sorting")
   pkde1d_cpp(q, obj)
 }
 
