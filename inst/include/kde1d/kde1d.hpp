@@ -39,7 +39,7 @@ public:
   Eigen::VectorXd get_grid_points() const { return grid_.get_grid_points(); }
   size_t get_nlevels() const { return nlevels_; }
   double get_bw() const {return bw_;}
-  double get_p() const {return deg_;}
+  double get_deg() const {return deg_;}
   double get_xmin() const {return xmin_;}
   double get_xmax() const {return xmax_;}
   double get_edf() const {return edf_;}
