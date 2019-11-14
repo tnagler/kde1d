@@ -1,12 +1,23 @@
-# kde1d 0.5.0
+# kde1d 1.0.0
 
-NEW FEATURE
+NEW FEATURES
 
   * optimal plug-in bandwidth selection for all polynomial degrees (#38).
-
+  
+  * avoid randomness through simplified, deterministic jittering, see 
+  `equi_jitter()` (#40).
+  
+  * removed dependencies to `cctools`.
+  
+  * headers in `inst/include` work as standalone C++ library with R 
+    interface (#41).
+    
+  * (several times) faster `pkde1d()`, `qkde1d()`, and `rkde1d()` due to
+    a more clever algorithm for numerical integration (#42).
+    
+  * faster `kde1d()` thanks to the Fast Fourier Transform (#43).
+  
 BUG FIXES
-
-  * allow already jittered input to be treated as continuous.
 
   * improvements to numerical stability, inter- and extrapolation (#32, #35, 
   #37).
