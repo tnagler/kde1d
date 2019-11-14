@@ -51,12 +51,6 @@ inline Eigen::VectorXd invert_f(
   return x_tmp;
 }
 
-//! finds the index, where the minimum in a vector occurs.
-//! @param x the vector.
-inline size_t find_min_index(const Eigen::VectorXd& x)
-{
-  return std::min_element(x.data(), x.data() + x.size()) - x.data();
-}
 
 //! remove rows of a matrix which contain nan values or have zero weight
 //! @param x the matrix.

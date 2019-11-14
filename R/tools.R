@@ -58,20 +58,6 @@ check_arguments <- function(x, mult, xmin, xmax, bw, deg, weights) {
   }
 }
 
-#' adjusts observations and evaluation points for boundary effects
-#' @importFrom stats qnorm
-#' @noRd
-boundary_transform <- function(x, xmin, xmax) {
-  if (!is.nan(xmin) & !is.nan(xmax)) { # two boundaries
-    x <- qnorm((x - xmin) / (xmax - xmin + 1e-1))
-  } else if (!is.nan(xmin)) { # left boundary
-    x <- log(x - xmin + 1e-3)
-  } else if (!is.nan(xmax)) { # right boundary
-    x <- log(xmax - x + 1e-3)
-  }
-
-  x
-}
 
 #' prepares evaluation points  observations and evaluation points for boundary effects
 #' @importFrom stats qnorm

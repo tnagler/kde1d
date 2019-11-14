@@ -82,7 +82,6 @@ private:
                                    const Eigen::VectorXd& fhat);
   Eigen::VectorXd construct_grid_points(const Eigen::VectorXd& x);
   Eigen::VectorXd finalize_grid(Eigen::VectorXd& grid_points);
-  Eigen::VectorXd without_boundary_ext(const Eigen::VectorXd& grid_points);
   double select_bw(const Eigen::VectorXd& x,
                    double bw,
                    double mult,
@@ -533,24 +532,6 @@ Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
   return grid_points;
 }
 
-//! removes the boundary extension from the grid_points (see
-//! `construct_grid_points`).
-//! @param grid_points the grid points.
-inline Eigen::VectorXd
-Kde1d::without_boundary_ext(const Eigen::VectorXd& grid_points)
-{
-  size_t grid_start = 0;
-  size_t grid_size = grid_points.size();
-  // (grid extension has length 2)
-  if (std::isnan(xmin_)) {
-    grid_start += 1;
-    grid_size -= 2;
-  }
-  if (std::isnan(xmax_))
-    grid_size -= 2;
-
-  return grid_points.segment(grid_start, grid_size);
-}
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations

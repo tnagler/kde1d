@@ -1,7 +1,6 @@
 context("Testing 'kde1d'")
 
-set.seed(0)
-n_sim <- 20
+n_sim <- 100
 data_types <- c(
   "unbounded", "left_boundary", "right_boundary",
   "two_boundaries", "discrete"
