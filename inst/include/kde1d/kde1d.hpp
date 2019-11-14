@@ -338,15 +338,24 @@ Kde1d::kern_gauss(const Eigen::VectorXd& x)
 inline Eigen::MatrixXd
 Kde1d::fit_lp(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 {
-  size_t n = x.size();
-  double w0 = 1.0;
-
   fft::KdeFFT kde_fft(x, bw_, weights);
   Eigen::VectorXd f0 = kde_fft.kde_drv(0);
 
+  Eigen::VectorXd wbin = Eigen::VectorXd::Ones(f0.size());
+  if (weights.size()) {
+    // compute the average weight per cell
+    auto wcount = kde_fft.get_bin_counts();
+    auto count = tools::linbin(x,
+                               x.minCoeff() - 4 * bw_,
+                               x.maxCoeff() + 4 * bw_,
+                               f0.size() - 1,
+                               wbin);
+    wbin = wcount.cwiseQuotient(count);
+  }
+
   Eigen::MatrixXd res(f0.size(), 2);
   res.col(0) = f0;
-  res.col(1) = K0_ * w0 / (n * bw_) * f0.cwiseInverse();
+  res.col(1) = K0_ / (x.size() * bw_) * wbin.cwiseQuotient(f0);
   if (deg_ == 0)
     return res;
 
@@ -368,7 +377,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 
   for (size_t k = 0; k < f0.size(); k++) {
     // TODO: weights
-    res(k, 1) = calculate_infl(n, f0(k), b(k), bw_, S(k), w0);
+    res(k, 1) = calculate_infl(x.size(), f0(k), b(k), bw_, S(k), wbin(k));
     if (std::isnan(res(k, 0)))
       res.row(k).setZero();
   }
@@ -497,8 +506,8 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
   Eigen::VectorXd xx(2);
   xx << x.minCoeff(), x.maxCoeff();
   Eigen::VectorXd rng = boundary_transform(xx);
-  rng(0) -= 3 * bw_;
-  rng(1) += 3 * bw_;
+  rng(0) -= 4 * bw_;
+  rng(1) += 4 * bw_;
   auto gr = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
   return boundary_transform(gr, true);
 }

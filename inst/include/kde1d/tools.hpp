@@ -102,6 +102,32 @@ inline Eigen::Matrix<size_t, Eigen::Dynamic, 1> get_order(
   return order;
 }
 
+//! Computes bin counts for univariate data via the linear binning strategy.
+//! @param x vector of observations
+//! @param weights vector of weights for each observation.
+inline Eigen::VectorXd linbin(const Eigen::VectorXd& x,
+                              double lower,
+                              double upper,
+                              size_t num_bins,
+                              const Eigen::VectorXd& weights)
+{
+  Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins + 1);
+  double rem, lxi, delta;
+
+  delta = (upper - lower) / num_bins;
+  for (size_t i = 0; i < x.size(); ++i) {
+    lxi = (x(i) - lower) / delta;
+    size_t li = static_cast<size_t>(lxi);
+    rem = lxi - li;
+    if (li < num_bins) {
+      gcnts(li) += (1 - rem) * weights(i);
+      gcnts(li + 1) += rem * weights(i);
+    }
+  }
+
+  return gcnts;
+}
+
 } // end kde1d tools
 
 } // end kde1d

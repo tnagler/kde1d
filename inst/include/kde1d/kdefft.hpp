@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tools.hpp"
 #include "stats.hpp"
 #include <unsupported/Eigen/FFT>
 
@@ -23,11 +24,6 @@ public:
   void set_bw(double bw) { bw_ = bw; };
 
 private:
-  Eigen::VectorXd linbin(const Eigen::VectorXd& x,
-                         double lower,
-                         double upper,
-                         const Eigen::VectorXd& weights) const;
-
   double bw_;
   Eigen::VectorXd bin_counts_;
   double lower_;
@@ -54,34 +50,9 @@ inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
 
   lower_ = x.minCoeff() - 4 * bw;
   upper_ = x.maxCoeff() + 4 * bw;
-  bin_counts_ = linbin(x, lower_, upper_, w);
+  bin_counts_ = tools::linbin(x, lower_, upper_, num_bins_, w);
 }
 
-//! Computes bin counts for univariate data via the linear binning strategy.
-//! @param x vector of observations
-//! @param weights vector of weights for each observation.
-inline Eigen::VectorXd
-KdeFFT::linbin(const Eigen::VectorXd& x,
-               double lower,
-               double upper,
-               const Eigen::VectorXd& weights) const
-{
-  Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins_ + 1);
-  double rem, lxi, delta;
-
-  delta = (upper_ - lower_) / num_bins_;
-  for (size_t i = 0; i < x.size(); ++i) {
-    lxi = (x(i) - lower_) / delta;
-    size_t li = static_cast<size_t>(lxi);
-    rem = lxi - li;
-    if (li < num_bins_) {
-      gcnts(li) += (1 - rem) * weights(i);
-      gcnts(li + 1) += rem * weights(i);
-    }
-  }
-
-  return gcnts;
-}
 
 //! Binned kernel density derivative estimate
 //! @param drv order of derivative.
