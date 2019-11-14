@@ -150,15 +150,7 @@ inline Eigen::VectorXd equi_jitter(const Eigen::VectorXd& x)
   size_t n = x.size();
 
   // first compute the corresponding permutation that sorts x (required later)
-  Eigen::VectorXi perm(n);
-  for (size_t i = 0; i < x.size(); ++i)
-    perm(i) = i;
-  std::stable_sort(
-    perm.data(),
-    perm.data() + n,
-    [&](const size_t& a, const size_t& b) { return (x[a] < x[b]); }
-  );
-
+  auto perm = tools::get_order(x);
   // actually sort x
   Eigen::VectorXd srt(n);
   for (size_t i = 0; i < n; ++i)

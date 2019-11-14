@@ -88,6 +88,20 @@ inline void remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
     weights.conservativeResize(last + 1);
 }
 
+inline Eigen::Matrix<size_t, Eigen::Dynamic, 1> get_order(
+    const Eigen::VectorXd& x)
+{
+  Eigen::Matrix<size_t, Eigen::Dynamic, 1> order(x.size());
+  for (size_t i = 0; i < x.size(); ++i)
+    order(i) = i;
+  std::stable_sort(
+    order.data(),
+    order.data() + order.size(),
+    [&] (const size_t& a, const size_t& b) { return (x[a] < x[b]); }
+  );
+  return order;
+}
+
 } // end kde1d tools
 
 } // end kde1d
