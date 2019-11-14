@@ -115,10 +115,10 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
                        weights = weights)
 
   # add info
-  fit$var_name <- as.character(match.call()[2])
-  fit$nobs <- sum(!is.na(x))
-  fit$weights <- weights
   fit$x <- x
+  fit$weights <- weights
+  fit$nobs <- sum(!is.na(x))
+  fit$var_name <- as.character(match.call()[2])
 
   fit
 }
