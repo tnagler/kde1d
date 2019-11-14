@@ -17,6 +17,8 @@ class KdeFFT
 public:
   KdeFFT(const Eigen::VectorXd& x,
          double bw,
+         double lower,
+         double upper,
          const Eigen::VectorXd& weights = Eigen::VectorXd());
 
   Eigen::VectorXd kde_drv(size_t drv) const;
@@ -32,11 +34,18 @@ private:
 };
 
 //! @param x vector of observations.
+//! @param bw the bandwidth parameter.
+//! @param lower lower bound of the grid.
+//! @param upper bound of the grid.
 //! @param weigths optional vector of weights for each observation.
 inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
                       double bw,
+                      double lower,
+                      double upper,
                       const Eigen::VectorXd& weights)
                       : bw_(bw)
+                      , lower_(lower)
+                      , upper_(upper)
 {
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::runtime_error("x and weights must have the same size");
@@ -47,9 +56,6 @@ inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
   } else {
     w = Eigen::VectorXd::Ones(x.size());
   }
-
-  lower_ = x.minCoeff() - 4 * bw;
-  upper_ = x.maxCoeff() + 4 * bw;
   bin_counts_ = tools::linbin(x, lower_, upper_, num_bins_, w);
 }
 

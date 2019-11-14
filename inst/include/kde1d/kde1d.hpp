@@ -68,6 +68,7 @@ private:
   void check_levels(const Eigen::VectorXd& x) const;
   Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
   Eigen::MatrixXd fit_lp(const Eigen::VectorXd& x,
+                         const Eigen::VectorXd& grid,
                          const Eigen::VectorXd& weights);
   double calculate_infl(const size_t& n,
                         const double& f0,
@@ -138,10 +139,10 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   bw_ = select_bw(xx, bw_, mult, deg, nlevels_, w);
 
   // fit model and evaluate in transformed domain
-  Eigen::MatrixXd fitted = fit_lp(xx, w);
+  Eigen::VectorXd grid_points = construct_grid_points(xx);
+  Eigen::MatrixXd fitted = fit_lp(xx, boundary_transform(grid_points), w);
 
   // correct estimated density for transformation
-  Eigen::VectorXd grid_points = construct_grid_points(xx);
   Eigen::VectorXd values = boundary_correct(grid_points, fitted.col(0));
 
   // move boundary points to xmin/xmax
@@ -149,7 +150,7 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
 
   // construct interpolation grid
   // (3 iterations for normalization to a proper density)
-  grid_ = interp::InterpolationGrid1d(grid_points, values, 0);
+  grid_ = interp::InterpolationGrid1d(grid_points, values, 3);
 
   // calculate log-likelihood of final estimate
   loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
@@ -336,19 +337,22 @@ Kde1d::kern_gauss(const Eigen::VectorXd& x)
 //! @return a two-column matrix containing the density estimate in the first
 //!   and the influence function in the second column.
 inline Eigen::MatrixXd
-Kde1d::fit_lp(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
+Kde1d::fit_lp(const Eigen::VectorXd& x,
+              const Eigen::VectorXd& grid_points,
+              const Eigen::VectorXd& weights)
 {
-  fft::KdeFFT kde_fft(x, bw_, weights);
+  size_t m = grid_points.size();
+  fft::KdeFFT kde_fft(x, bw_, grid_points(0), grid_points(m - 1), weights);
   Eigen::VectorXd f0 = kde_fft.kde_drv(0);
 
-  Eigen::VectorXd wbin = Eigen::VectorXd::Ones(f0.size());
+  Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
   if (weights.size()) {
     // compute the average weight per cell
     auto wcount = kde_fft.get_bin_counts();
     auto count = tools::linbin(x,
-                               x.minCoeff() - 4 * bw_,
-                               x.maxCoeff() + 4 * bw_,
-                               f0.size() - 1,
+                               grid_points(0),
+                               grid_points(m - 1),
+                               m - 1,
                                wbin);
     wbin = wcount.cwiseQuotient(count);
   }
@@ -375,7 +379,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   }
   res.col(0) = res.col(0).array() * (-0.5 * b.array().pow(2) * S.array()).exp();
 
-  for (size_t k = 0; k < f0.size(); k++) {
+  for (size_t k = 0; k < m; k++) {
     // TODO: weights
     res(k, 1) = calculate_infl(x.size(), f0(k), b(k), bw_, S(k), wbin(k));
     if (std::isnan(res(k, 0)))
@@ -441,10 +445,10 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       x_new = stats::qnorm(x_new);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
-      x_new = (1e-3 + x.array() - xmin_).log();
+      x_new = (1e-5 + x.array() - xmin_).log();
     } else if (!std::isnan(xmax_)) {
       // right boundary -> negative log transform
-      x_new = (1e-3 + xmax_ - x.array()).log();
+      x_new = (1e-5 + xmax_ - x.array()).log();
     } else {
       // no boundary -> no transform
     }
@@ -453,13 +457,13 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
       x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
-      x_new *= (xmax_ - xmin_ + 1e-4 * rng);
+      x_new *=  (xmax_ - xmin_ + 1e-4 * rng);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
-      x_new = x.array().exp() + xmin_ - 1e-3;
+      x_new = x.array().exp() + xmin_ - 1e-5;
     } else if (!std::isnan(xmax_)) {
       // right boundary -> negative log transform
-      x_new = -(x.array().exp() - xmax_ - 1e-3);
+      x_new = -(x.array().exp() - xmax_ - 1e-5);
     } else {
       // no boundary -> no transform
     }
@@ -479,16 +483,17 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   Eigen::VectorXd corr_term(fhat.size());
   if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
     // two boundaries -> probit transform
-    corr_term = (x.array() - xmin_ + 5e-5) / (xmax_ - xmin_ + 1e-4);
+    auto rng = xmax_ - xmin_;
+    corr_term = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
     corr_term = stats::dnorm(stats::qnorm(corr_term));
-    corr_term /= (xmax_ - xmin_ + 1e-4);
+    corr_term /= (xmax_ - xmin_ + 1e-4 * rng);
     corr_term = 1.0 / corr_term.array().max(1e-6);
   } else if (!std::isnan(xmin_)) {
     // left boundary -> log transform
-    corr_term = 1.0 / (1e-3 + x.array() - xmin_);
+    corr_term = 1.0 / (1e-5 + x.array() - xmin_).max(1e-6);
   } else if (!std::isnan(xmax_)) {
     // right boundary -> negative log transform
-    corr_term = 1.0 / (1e-3 + xmax_ - x.array());
+    corr_term = 1.0 / (1e-5 + xmax_ - x.array()).max(1e-6);
   } else {
     // no boundary -> no transform
     corr_term.fill(1.0);
@@ -497,19 +502,22 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   return fhat.array() * corr_term.array();
 }
 
-//! constructs a grid that is later used for interpolation.
+//! constructs a grid later used for interpolation
 //! @param x vector of observations.
 //! @return a grid of size 50.
 inline Eigen::VectorXd
 Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 {
-  Eigen::VectorXd xx(2);
-  xx << x.minCoeff(), x.maxCoeff();
-  Eigen::VectorXd rng = boundary_transform(xx);
-  rng(0) -= 4 * bw_;
-  rng(1) += 4 * bw_;
-  auto gr = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
-  return boundary_transform(gr, true);
+  Eigen::VectorXd rng(2);
+  rng << x.minCoeff(), x.maxCoeff();
+  if (std::isnan(xmin_) && std::isnan(xmax_))
+      rng(0) -= 4 * bw_;
+  if (std::isnan(xmax_))
+      rng(1) += 4 * bw_;
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
+    std::swap(rng(0), rng(1));
+  auto zgrid = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
+  return boundary_transform(zgrid, true);
 }
 
 //! moves the boundary points of the grid to xmin/xmax (if non-NaN).
