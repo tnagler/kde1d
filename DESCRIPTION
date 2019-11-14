@@ -20,7 +20,6 @@ LinkingTo:
     Rcpp,
     RcppEigen
 Imports:
-    cctools, 
     graphics,
     Rcpp, 
     qrng,
