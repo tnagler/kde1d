@@ -2,11 +2,12 @@
 
 #define BOOST_MATH_PROMOTE_DOUBLE_POLICY false
 #include <Eigen/Dense>
+#include <algorithm>
 #include <boost/math/distributions.hpp>
 #include <boost/math/special_functions/hermite.hpp>
-#include <algorithm>
-#include <vector>
 #include <random>
+#include <vector>
+#include "tools.hpp"
 
 namespace kde1d {
 
@@ -16,19 +17,20 @@ namespace stats {
 //! standard normal density
 //! @param x evaluation points.
 //! @return matrix of pdf values.
-inline Eigen::MatrixXd dnorm(const Eigen::MatrixXd& x)
+inline Eigen::MatrixXd
+dnorm(const Eigen::MatrixXd& x)
 {
   boost::math::normal dist;
-  return x.unaryExpr([&dist](const double& y) {
-    return boost::math::pdf(dist, y);
-  });
+  return x.unaryExpr(
+    [&dist](const double& y) { return boost::math::pdf(dist, y); });
 };
 
 //! standard normal density
 //! @param x evaluation points.
 //! @param drv order of the derivative
 //! @return matrix of pdf values.
-inline Eigen::MatrixXd dnorm_drv(const Eigen::MatrixXd& x, unsigned drv)
+inline Eigen::MatrixXd
+dnorm_drv(const Eigen::MatrixXd& x, unsigned drv)
 {
   boost::math::normal dist;
   double rt2 = std::sqrt(2);
@@ -46,31 +48,31 @@ inline Eigen::MatrixXd dnorm_drv(const Eigen::MatrixXd& x, unsigned drv)
 //! standard normal cdf
 //! @param x evaluation points.
 //! @return matrix of cdf values.
-inline Eigen::MatrixXd pnorm(const Eigen::MatrixXd& x)
+inline Eigen::MatrixXd
+pnorm(const Eigen::MatrixXd& x)
 {
   boost::math::normal dist;
-  return x.unaryExpr([&dist](const double& y) {
-    return boost::math::cdf(dist, y);
-  });
+  return x.unaryExpr(
+    [&dist](const double& y) { return boost::math::cdf(dist, y); });
 };
 
 //! standard normal quantiles
 //! @param x evaluation points.
 //! @return matrix of quantiles.
-inline Eigen::MatrixXd qnorm(const Eigen::MatrixXd& x)
+inline Eigen::MatrixXd
+qnorm(const Eigen::MatrixXd& x)
 {
   boost::math::normal dist;
-  return x.unaryExpr([&dist](const double& y) {
-    return boost::math::quantile(dist, y);
-  });
+  return x.unaryExpr(
+    [&dist](const double& y) { return boost::math::quantile(dist, y); });
 };
 
 //! empirical quantiles
 //! @param x data.
 //! @param q evaluation points.
 //! @return vector of quantiles.
-inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
-                                const Eigen::VectorXd& q)
+inline Eigen::VectorXd
+quantile(const Eigen::VectorXd& x, const Eigen::VectorXd& q)
 {
   double n = static_cast<double>(x.size() - 1);
   size_t m = q.size();
@@ -96,14 +98,15 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
 //! @param q evaluation points.
 //! @param w vector of weights.
 //! @return vector of quantiles.
-inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
-                                const Eigen::VectorXd& q,
-                                const Eigen::VectorXd& w)
+inline Eigen::VectorXd
+quantile(const Eigen::VectorXd& x,
+         const Eigen::VectorXd& q,
+         const Eigen::VectorXd& w)
 {
   if (w.size() == 0)
-      return quantile(x, q);
+    return quantile(x, q);
   if (w.size() != x.size())
-      throw std::runtime_error("x and w must have the same size");
+    throw std::runtime_error("x and w must have the same size");
   double n = static_cast<double>(x.size());
   size_t m = q.size();
   Eigen::VectorXd res(m);
@@ -112,8 +115,8 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
   std::vector<size_t> ind(n);
   for (size_t i = 0; i < n; ++i)
     ind[i] = i;
-  std::sort(ind.begin(), ind.end(),
-            [&x] (size_t i, size_t j) { return x(i) < x(j); });
+  std::sort(
+    ind.begin(), ind.end(), [&x](size_t i, size_t j) { return x(i) < x(j); });
 
   auto x2 = x;
   auto wcum = w;
@@ -125,15 +128,16 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
     wacc += w(ind[i]);
   }
 
-  double wsum = w.sum() - w(ind[n - 1]);;
+  double wsum = w.sum() - w(ind[n - 1]);
+  ;
   for (size_t j = 0; j < m; ++j) {
     size_t i = 1;
     while ((wcum(i) < q(j) * wsum) & (i < n))
       i++;
     res(j) = x2(i - 1);
     if (w(ind[i - 1]) > 1e-30) {
-      res(j) += (x2(i) - x2(i - 1)) *
-        (q(j) - wcum(i - 1) / wsum) / w(ind[i - 1]);
+      res(j) +=
+        (x2(i) - x2(i - 1)) * (q(j) - wcum(i - 1) / wsum) / w(ind[i - 1]);
     }
   }
 
@@ -145,7 +149,8 @@ inline Eigen::VectorXd quantile(const Eigen::VectorXd& x,
 //   noise <- unname(unlist(lapply(tab, function(l) -0.5 + 1:l / (l + 1))))
 //   s <- sort(x, index.return = TRUE)
 //   return((s$x + noise)[rank(x, ties.method = "first", na.last = "keep")])
-inline Eigen::VectorXd equi_jitter(const Eigen::VectorXd& x)
+inline Eigen::VectorXd
+equi_jitter(const Eigen::VectorXd& x)
 {
   size_t n = x.size();
 
@@ -198,12 +203,13 @@ inline Eigen::VectorXd equi_jitter(const Eigen::VectorXd& x)
 //!
 //! @return An size n vector of independent \f$ \mathrm{U}[0, 1] \f$ random
 //!   variables.
-inline Eigen::VectorXd simulate_uniform(size_t n, std::vector<int> seeds)
+inline Eigen::VectorXd
+simulate_uniform(size_t n, std::vector<int> seeds)
 {
   if (n < 1)
     throw std::runtime_error("n  must be at least 1.");
 
-  if (seeds.size() == 0) {  // no seeds provided, seed randomly
+  if (seeds.size() == 0) { // no seeds provided, seed randomly
     std::random_device rd{};
     seeds = std::vector<int>(5);
     for (auto& s : seeds)

@@ -51,12 +51,6 @@ inline Eigen::VectorXd invert_f(
   return x_tmp;
 }
 
-//! finds the index, where the minimum in a vector occurs.
-//! @param x the vector.
-inline size_t find_min_index(const Eigen::VectorXd& x)
-{
-  return std::min_element(x.data(), x.data() + x.size()) - x.data();
-}
 
 //! remove rows of a matrix which contain nan values or have zero weight
 //! @param x the matrix.
@@ -100,6 +94,32 @@ inline Eigen::Matrix<size_t, Eigen::Dynamic, 1> get_order(
     [&] (const size_t& a, const size_t& b) { return (x[a] < x[b]); }
   );
   return order;
+}
+
+//! Computes bin counts for univariate data via the linear binning strategy.
+//! @param x vector of observations
+//! @param weights vector of weights for each observation.
+inline Eigen::VectorXd linbin(const Eigen::VectorXd& x,
+                              double lower,
+                              double upper,
+                              size_t num_bins,
+                              const Eigen::VectorXd& weights)
+{
+  Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins + 1);
+  double rem, lxi, delta;
+
+  delta = (upper - lower) / num_bins;
+  for (size_t i = 0; i < x.size(); ++i) {
+    lxi = (x(i) - lower) / delta;
+    size_t li = static_cast<size_t>(lxi);
+    rem = lxi - li;
+    if (li < num_bins) {
+      gcnts(li) += (1 - rem) * weights(i);
+      gcnts(li + 1) += rem * weights(i);
+    }
+  }
+
+  return gcnts;
 }
 
 } // end kde1d tools

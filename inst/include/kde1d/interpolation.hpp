@@ -169,7 +169,7 @@ inline Eigen::VectorXd InterpolationGrid1d::integrate(const Eigen::VectorXd& x,
     cum_int += cubic_integral(0.0, 1.0, tmp_coefs) * tmp_eps;
     k++;
   }
-  return res / cum_int;
+  return (res / cum_int).cwiseMin(1.0).cwiseMax(0.0);
 }
 
 // ---------------- Utility functions for spline interpolation ----------------
