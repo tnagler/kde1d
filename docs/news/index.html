@@ -67,7 +67,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -110,18 +110,22 @@
       <small>Source: <a href='https://github.com/tnagler/kde1d/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="kde1d-0-5-0" class="section level1">
+    <div id="kde1d-1-0-0" class="section level1">
 <h1 class="page-header">
-<a href="#kde1d-0-5-0" class="anchor"></a>kde1d 0.5.0<small> Unreleased </small>
+<a href="#kde1d-1-0-0" class="anchor"></a>kde1d 1.0.0<small> Unreleased </small>
 </h1>
-<p>NEW FEATURE</p>
+<p>NEW FEATURES</p>
 <ul>
-<li>optimal plug-in bandwidth selection for all polynomial degrees (<a href='https://github.com/tnagler/kde1d/issues/38'>#38</a>).</li>
+<li><p>optimal plug-in bandwidth selection for all polynomial degrees (<a href='https://github.com/tnagler/kde1d/issues/38'>#38</a>).</p></li>
+<li><p>avoid randomness through simplified, deterministic jittering, see <code><a href="../reference/equi_jitter.html">equi_jitter()</a></code> (<a href='https://github.com/tnagler/kde1d/issues/40'>#40</a>).</p></li>
+<li><p>removed dependencies to <code>cctools</code>.</p></li>
+<li><p>headers in <code>inst/include</code> work as standalone C++ library with R interface (<a href='https://github.com/tnagler/kde1d/issues/41'>#41</a>).</p></li>
+<li><p>(several times) faster <code><a href="../reference/dkde1d.html">pkde1d()</a></code>, <code><a href="../reference/dkde1d.html">qkde1d()</a></code>, and <code><a href="../reference/dkde1d.html">rkde1d()</a></code> due to a more clever algorithm for numerical integration (<a href='https://github.com/tnagler/kde1d/issues/42'>#42</a>).</p></li>
+<li><p>faster <code><a href="../reference/kde1d.html">kde1d()</a></code> thanks to the Fast Fourier Transform (<a href='https://github.com/tnagler/kde1d/issues/43'>#43</a>).</p></li>
 </ul>
 <p>BUG FIXES</p>
 <ul>
-<li><p>allow already jittered input to be treated as continuous.</p></li>
-<li><p>improvements to numerical stability, inter- and extrapolation (<a href='https://github.com/tnagler/kde1d/issues/32'>#32</a>, <a href='https://github.com/tnagler/kde1d/issues/35'>#35</a>, <a href='https://github.com/tnagler/kde1d/issues/37'>#37</a>).</p></li>
+<li>improvements to numerical stability, inter- and extrapolation (<a href='https://github.com/tnagler/kde1d/issues/32'>#32</a>, <a href='https://github.com/tnagler/kde1d/issues/35'>#35</a>, <a href='https://github.com/tnagler/kde1d/issues/37'>#37</a>).</li>
 </ul>
 </div>
     <div id="kde1d-0-4-0" class="section level1">
@@ -181,7 +185,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-        <li><a href="#kde1d-0-5-0">0.5.0</a></li>
+        <li><a href="#kde1d-1-0-0">1.0.0</a></li>
         <li><a href="#kde1d-0-4-0">0.4.0</a></li>
         <li><a href="#kde1d-0-2-0">0.2.0</a></li>
         <li><a href="#kde1d-0-1-2">0.1.2</a></li>
