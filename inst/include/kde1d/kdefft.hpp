@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tools.hpp"
 #include "stats.hpp"
+#include "tools.hpp"
 #include <unsupported/Eigen/FFT>
 
 namespace kde1d {
@@ -30,7 +30,7 @@ private:
   Eigen::VectorXd bin_counts_;
   double lower_;
   double upper_;
-  size_t num_bins_{ 400 };
+  static constexpr size_t num_bins_{ 400 };
 };
 
 //! @param x vector of observations.
@@ -43,9 +43,9 @@ inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
                       double lower,
                       double upper,
                       const Eigen::VectorXd& weights)
-                      : bw_(bw)
-                      , lower_(lower)
-                      , upper_(upper)
+  : bw_(bw)
+  , lower_(lower)
+  , upper_(upper)
 {
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::runtime_error("x and weights must have the same size");
@@ -58,7 +58,6 @@ inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
   }
   bin_counts_ = tools::linbin(x, lower_, upper_, num_bins_, w);
 }
-
 
 //! Binned kernel density derivative estimate
 //! @param drv order of derivative.

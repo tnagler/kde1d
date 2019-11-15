@@ -1,13 +1,13 @@
 #pragma once
 
 #define BOOST_MATH_PROMOTE_DOUBLE_POLICY false
+#include "tools.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
 #include <boost/math/distributions.hpp>
 #include <boost/math/special_functions/hermite.hpp>
 #include <random>
 #include <vector>
-#include "tools.hpp"
 
 namespace kde1d {
 
@@ -120,7 +120,6 @@ quantile(const Eigen::VectorXd& x,
 
   auto x2 = x;
   auto wcum = w;
-  auto wrank = Eigen::VectorXd::Constant(n, 0.0);
   double wacc = 0.0;
   for (size_t i = 0; i < n; ++i) {
     x2(i) = x(ind[i]);

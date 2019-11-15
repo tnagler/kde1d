@@ -88,10 +88,10 @@ qkde1d <- function(p, obj) {
 #' @param n integer; number of observations.
 #' @param quasi logical; the default (`FALSE`) returns pseudo-random
 #' numbers, use `TRUE` for quasi-random numbers (generalized Halton, see
-#' [`qrng::ghalton()`]).
+#' [`randtoolbox::sobol()`]).
 #'
 #' @rdname dkde1d
-#' @importFrom qrng ghalton
+#' @importFrom randtoolbox sobol
 #' @importFrom stats runif
 #' @export
 rkde1d <- function(n, obj, quasi = FALSE) {
@@ -99,7 +99,7 @@ rkde1d <- function(n, obj, quasi = FALSE) {
   if (!quasi) {
     U <- runif(n)
   } else {
-    U <- ghalton(n, d = 1)
+    U <- randtoolbox::sobol(n, scrambling = 1, seed = sample.int(1e10, 1))
   }
   # simulated data from KDE is the quantile transform of U
   qkde1d(U, obj)

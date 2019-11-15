@@ -129,7 +129,7 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   Eigen::VectorXd w = weights;
   tools::remove_nans(xx, w);
   if (w.size() > 0)
-    w /= w.sum();
+    w /= w.mean();
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
   xx = boundary_transform(xx);
@@ -155,7 +155,6 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
 
   // calculate effective degrees of freedom
-  double n = x.size();
   interp::InterpolationGrid1d infl_grid(
     grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
   edf_ = infl_grid.interpolate(x).sum();
@@ -353,7 +352,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
                                grid_points(0),
                                grid_points(m - 1),
                                m - 1,
-                               wbin);
+                               Eigen::VectorXd::Ones(x.size()));
     wbin = wcount.cwiseQuotient(count);
   }
 
@@ -411,7 +410,7 @@ Kde1d::calculate_infl(const size_t& n,
     M(1, 0) = M(0, 1);
     M(1, 1) = f0 * bw2 + f0 * bw2 * bw2 * b2;
     M_inverse00 = M.inverse()(0, 0);
-  } else if (deg_ == 2) {
+  } else {
     Eigen::Matrix3d M;
     M(0, 0) = f0;
     M(0, 1) = f0 * b;
@@ -457,7 +456,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
       x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
-      x_new *=  (xmax_ - xmin_ + 1e-4 * rng);
+      x_new *= (xmax_ - xmin_ + 1e-4 * rng);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = x.array().exp() + xmin_ - 1e-5;
@@ -499,7 +498,11 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
     corr_term.fill(1.0);
   }
 
-  return fhat.array() * corr_term.array();
+  Eigen::VectorXd f_corr = fhat.cwiseProduct(corr_term);
+  if (std::isnan(xmin_) & !std::isnan(xmax_))
+    f_corr.reverseInPlace();
+
+  return f_corr;
 }
 
 //! constructs a grid later used for interpolation
@@ -510,12 +513,10 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 {
   Eigen::VectorXd rng(2);
   rng << x.minCoeff(), x.maxCoeff();
-  if (std::isnan(xmin_) && std::isnan(xmax_))
-      rng(0) -= 4 * bw_;
-  if (std::isnan(xmax_))
-      rng(1) += 4 * bw_;
-  if (std::isnan(xmin_) && !std::isnan(xmax_))
-    std::swap(rng(0), rng(1));
+  if (std::isnan(xmin_) && std::isnan(xmax_)) {
+    rng(0) -= 4 * bw_;
+    rng(1) += 4 * bw_;
+  }
   auto zgrid = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
   return boundary_transform(zgrid, true);
 }
@@ -525,6 +526,8 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 inline Eigen::VectorXd
 Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
+  if (std::isnan(xmin_) & !std::isnan(xmax_))
+    grid_points.reverseInPlace();
   if (!std::isnan(xmin_))
     grid_points(0) = xmin_;
   if (!std::isnan(xmax_))
@@ -532,7 +535,6 @@ Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 
   return grid_points;
 }
-
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations

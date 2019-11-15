@@ -1,4 +1,9 @@
+Patch to fix undefined behavior/heap overflow failures detected by the 
+sanitizers: https://cran.r-project.org/web/checks/check_results_kde1d.html
+
 ## Test environments
+* ubuntu 18.04 with valgrind (release)
+* ubuntu 18.04 with clang ASAN/UBSAN on rocker (devel)
 * ubuntu 14.04 on travis-ci (release, devel, oldrel)
 * win-builder (devel, release)
 
