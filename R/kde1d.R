@@ -1,7 +1,7 @@
 #' Univariate local-polynomial likelihood kernel density estimation
 #'
-#' The estimators can handle for bounded, unbounded, and discrete support, see
-#' *Details*.
+#' The estimators can handle data with bounded, unbounded, and discrete support,
+#' see *Details*.
 #'
 #' @param x vector (or one-column matrix/data frame) of observations; can be
 #'   `numeric` or `ordered`.

@@ -4,8 +4,15 @@
 \alias{kde1d}
 \title{Univariate local-polynomial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
-  weights = numeric(0))
+kde1d(
+  x,
+  xmin = NaN,
+  xmax = NaN,
+  mult = 1,
+  bw = NA,
+  deg = 2,
+  weights = numeric(0)
+)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -33,8 +40,8 @@ log-constant, log-linear, and log-quadratic fitting, respectively.}
 An object of class \code{kde1d}.
 }
 \description{
-The estimator can handle for bounded, unbounded, and discrete support, see
-\emph{Details}.
+The estimators can handle data with bounded, unbounded, and discrete support,
+see \emph{Details}.
 }
 \details{
 A gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
