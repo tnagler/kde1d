@@ -343,17 +343,14 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 {
   size_t m = grid_points.size();
   fft::KdeFFT kde_fft(x, bw_, grid_points(0), grid_points(m - 1), weights);
-  Eigen::VectorXd f0 = kde_fft.kde_drv(0);
+  Eigen::VectorXd f0 = kde_fft.kde_drv(static_cast<size_t>(0));
 
   Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
   if (weights.size()) {
     // compute the average weight per cell
     auto wcount = kde_fft.get_bin_counts();
-    auto count = tools::linbin(x,
-                               grid_points(0),
-                               grid_points(m - 1),
-                               m - 1,
-                               wbin);
+    auto count =
+      tools::linbin(x, grid_points(0), grid_points(m - 1), m - 1, wbin);
     wbin = wcount.cwiseQuotient(count);
   }
 
@@ -411,7 +408,7 @@ Kde1d::calculate_infl(const size_t& n,
     M(1, 0) = M(0, 1);
     M(1, 1) = f0 * bw2 + f0 * bw2 * bw2 * b2;
     M_inverse00 = M.inverse()(0, 0);
-  } else if (deg_ == 2) {
+  } else {
     Eigen::Matrix3d M;
     M(0, 0) = f0;
     M(0, 1) = f0 * b;
@@ -457,7 +454,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
       x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
-      x_new *=  (xmax_ - xmin_ + 1e-4 * rng);
+      x_new *= (xmax_ - xmin_ + 1e-4 * rng);
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = x.array().exp() + xmin_ - 1e-5;
@@ -510,10 +507,10 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 {
   Eigen::VectorXd rng(2);
   rng << x.minCoeff(), x.maxCoeff();
-  if (std::isnan(xmin_) && std::isnan(xmax_))
-      rng(0) -= 4 * bw_;
-  if (std::isnan(xmax_))
-      rng(1) += 4 * bw_;
+  if (std::isnan(xmin_) && std::isnan(xmax_)) {
+    rng(0) -= 4 * bw_;
+    rng(1) += 4 * bw_;
+  }
   if (std::isnan(xmin_) && !std::isnan(xmax_))
     std::swap(rng(0), rng(1));
   auto zgrid = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
@@ -532,7 +529,6 @@ Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 
   return grid_points;
 }
-
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations
