@@ -4,8 +4,15 @@
 \alias{kde1d}
 \title{Univariate local-polynomial likelihood kernel density estimation}
 \usage{
-kde1d(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA, deg = 2,
-  weights = numeric(0))
+kde1d(
+  x,
+  xmin = NaN,
+  xmax = NaN,
+  mult = 1,
+  bw = NA,
+  deg = 2,
+  weights = numeric(0)
+)
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
@@ -21,10 +28,11 @@ data); \code{NaN} means no boundary.}
 \eqn{bw*mult}.}
 
 \item{bw}{bandwidth parameter; has to be a positive number or \code{NA}; the
-latter uses the direct plug-in methodology of Sheather and Jones (1991).}
+latter uses the plug-in methodology of Sheather and Jones (1991) with
+appropriate modifications for \code{deg > 0}.}
 
-\item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for log-constant,
-log-linear, and log-quadratic fitting, respectively.}
+\item{deg}{degree of the polynomial; either \code{0}, \code{1}, or \code{2} for
+log-constant, log-linear, and log-quadratic fitting, respectively.}
 
 \item{weights}{optional vector of weights for individual observations.}
 }
@@ -32,67 +40,74 @@ log-linear, and log-quadratic fitting, respectively.}
 An object of class \code{kde1d}.
 }
 \description{
-The estimator can handle for bounded, unbounded, and discrete support, see
-\emph{Details}.
+The estimators can handle data with bounded, unbounded, and discrete support,
+see \emph{Details}.
 }
 \details{
 A gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
 finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
 log-transform is used if there is only one boundary (see, Geenens and Wang,
 2018); a probit transform is used if there are two (see, Geenens, 2014).
+
 Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
+A specific form of deterministic jittering is used, see \code{\link[=equi_jitter]{equi_jitter()}}.
 }
 \examples{
 
 ## unbounded data
-x <- rnorm(500)                    # simulate data
-fit <- kde1d(x)                    # estimate density
-dkde1d(0, fit)                     # evaluate density estimate
-summary(fit)                       # information about the estimate
-plot(fit)                          # plot the density estimate
-curve(dnorm(x), add = TRUE,        # add true density
-      col = "red")
+x <- rnorm(500) # simulate data
+fit <- kde1d(x) # estimate density
+dkde1d(0, fit) # evaluate density estimate
+summary(fit) # information about the estimate
+plot(fit) # plot the density estimate
+curve(dnorm(x),
+  add = TRUE, # add true density
+  col = "red"
+)
 
 ## bounded data, log-linear
-x <- rgamma(500, shape = 1)        # simulate data
+x <- rgamma(500, shape = 1) # simulate data
 fit <- kde1d(x, xmin = 0, deg = 1) # estimate density
-dkde1d(seq(0, 5, by = 1), fit)     # evaluate density estimate
-summary(fit)                       # information about the estimate
-plot(fit)                          # plot the density estimate
-curve(dgamma(x, shape = 1),        # add true density
-      add = TRUE, col = "red",
-      from = 1e-3)
+dkde1d(seq(0, 5, by = 1), fit) # evaluate density estimate
+summary(fit) # information about the estimate
+plot(fit) # plot the density estimate
+curve(dgamma(x, shape = 1), # add true density
+  add = TRUE, col = "red",
+  from = 1e-3
+)
 
 ## discrete data
-x <- rbinom(500, size = 5, prob = 0.5)  # simulate data
-x <- ordered(x, levels = 0:5)           # declare as ordered
-fit <- kde1d(x)                         # estimate density
-dkde1d(sort(unique(x)), fit)            # evaluate density estimate
-summary(fit)                            # information about the estimate
-plot(fit)                               # plot the density estimate
-points(ordered(0:5, 0:5),               # add true density
-       dbinom(0:5, 5, 0.5), col = "red")
+x <- rbinom(500, size = 5, prob = 0.5) # simulate data
+x <- ordered(x, levels = 0:5) # declare as ordered
+fit <- kde1d(x) # estimate density
+dkde1d(sort(unique(x)), fit) # evaluate density estimate
+summary(fit) # information about the estimate
+plot(fit) # plot the density estimate
+points(ordered(0:5, 0:5), # add true density
+  dbinom(0:5, 5, 0.5),
+  col = "red"
+)
 
 ## weighted estimate
-x <- rnorm(100)                         # simulate data
-weights <- rexp(100)                    # weights as in Bayesian bootstrap
-fit <- kde1d(x, weights = weights)      # weighted fit
-plot(fit)                               # compare with unweighted fit
+x <- rnorm(100) # simulate data
+weights <- rexp(100) # weights as in Bayesian bootstrap
+fit <- kde1d(x, weights = weights) # weighted fit
+plot(fit) # compare with unweighted fit
 lines(kde1d(x), col = 2)
-
 }
 \references{
-Geenens, G. (2014). \emph{Probit transformation for kernel density estimation on
-the unit interval}. Journal of the American Statistical Association,
-109:505, 346-358, \href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
+Geenens, G. (2014). \emph{Probit transformation for kernel density
+estimation on the unit interval}. Journal of the American Statistical
+Association, 109:505, 346-358,
+\href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
 
-Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel
-density estimation for positive random variables.} Journal of Computational
-and Graphical Statistics, to appear,
+Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel density
+estimation for positive random variables.} Journal of Computational and
+Graphical Statistics, to appear,
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
 
-Nagler, T. (2018a). \emph{A generic approach to nonparametric function
-estimation with mixed data.} Statistics & Probability Letters, 137:326–330,
+Nagler, T. (2018a). \emph{A generic approach to nonparametric function estimation
+with mixed data.} Statistics & Probability Letters, 137:326–330,
 \href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
 
 Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density

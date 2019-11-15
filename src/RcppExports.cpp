@@ -7,93 +7,65 @@
 using namespace Rcpp;
 
 // fit_kde1d_cpp
-Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double bw, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, size_t nlevels, double bw, double mult, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
+RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP nlevelsSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< size_t >::type nlevels(nlevelsSEXP);
     Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
     Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, bw, xmin, xmax, deg, weights));
+    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, nlevels, bw, mult, xmin, xmax, deg, weights));
     return rcpp_result_gen;
 END_RCPP
 }
 // dkde1d_cpp
-Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
-RcppExport SEXP _kde1d_dkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
+Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& kde1d_r);
+RcppExport SEXP _kde1d_dkde1d_cpp(SEXP xSEXP, SEXP kde1d_rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
-    rcpp_result_gen = Rcpp::wrap(dkde1d_cpp(x, R_object));
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type kde1d_r(kde1d_rSEXP);
+    rcpp_result_gen = Rcpp::wrap(dkde1d_cpp(x, kde1d_r));
     return rcpp_result_gen;
 END_RCPP
 }
 // pkde1d_cpp
-Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
-RcppExport SEXP _kde1d_pkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
+Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& q, const Rcpp::List& kde1d_r);
+RcppExport SEXP _kde1d_pkde1d_cpp(SEXP qSEXP, SEXP kde1d_rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
-    rcpp_result_gen = Rcpp::wrap(pkde1d_cpp(x, R_object));
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type kde1d_r(kde1d_rSEXP);
+    rcpp_result_gen = Rcpp::wrap(pkde1d_cpp(q, kde1d_r));
     return rcpp_result_gen;
 END_RCPP
 }
 // qkde1d_cpp
-Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& x, const Rcpp::List& R_object);
-RcppExport SEXP _kde1d_qkde1d_cpp(SEXP xSEXP, SEXP R_objectSEXP) {
+Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& p, const Rcpp::List& kde1d_r);
+RcppExport SEXP _kde1d_qkde1d_cpp(SEXP pSEXP, SEXP kde1d_rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::List& >::type R_object(R_objectSEXP);
-    rcpp_result_gen = Rcpp::wrap(qkde1d_cpp(x, R_object));
-    return rcpp_result_gen;
-END_RCPP
-}
-// select_bw_cpp
-double select_bw_cpp(const Eigen::VectorXd& x, double bw, double mult, bool discrete, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_select_bw_cpp(SEXP xSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP discreteSEXP, SEXP weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
-    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(select_bw_cpp(x, bw, mult, discrete, weights));
-    return rcpp_result_gen;
-END_RCPP
-}
-// quan
-Eigen::VectorXd quan(const Eigen::VectorXd& x, const Eigen::VectorXd& a, const Eigen::VectorXd& w);
-RcppExport SEXP _kde1d_quan(SEXP xSEXP, SEXP aSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(quan(x, a, w));
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type kde1d_r(kde1d_rSEXP);
+    rcpp_result_gen = Rcpp::wrap(qkde1d_cpp(p, kde1d_r));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_kde1d_fit_kde1d_cpp", (DL_FUNC) &_kde1d_fit_kde1d_cpp, 6},
+    {"_kde1d_fit_kde1d_cpp", (DL_FUNC) &_kde1d_fit_kde1d_cpp, 8},
     {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},
-    {"_kde1d_select_bw_cpp", (DL_FUNC) &_kde1d_select_bw_cpp, 5},
-    {"_kde1d_quan", (DL_FUNC) &_kde1d_quan, 3},
     {NULL, NULL, 0}
 };
 

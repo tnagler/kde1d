@@ -3,7 +3,9 @@
 
 #' fits a kernel density estimate and calculates the effective degrees of
 #' freedom.
-#' @param x vector of observations.
+#' @param x vector of observations; catergorical data must be converted to
+#'   non-negative integers.
+#' @param nlevels the number of factor levels; 0 for continuous data.
 #' @param bw the bandwidth parameter.
 #' @param xmin lower bound for the support of the density, `NaN` means no
 #'   boundary.
@@ -13,49 +15,35 @@
 #' @return `An Rcpp::List` containing the fitted density values on a grid and
 #'   additional information.
 #' @noRd
-fit_kde1d_cpp <- function(x, bw, xmin, xmax, deg, weights) {
-    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, bw, xmin, xmax, deg, weights)
+fit_kde1d_cpp <- function(x, nlevels, bw, mult, xmin, xmax, deg, weights) {
+    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, nlevels, bw, mult, xmin, xmax, deg, weights)
 }
 
 #' computes the pdf of a kernel density estimate by interpolation.
 #' @param x vector of evaluation points.
-#' @param R_object the fitted object passed from R.
+#' @param kde1d_r the fitted object passed from R.
 #' @return a vector of pdf values.
 #' @noRd
-dkde1d_cpp <- function(x, R_object) {
-    .Call('_kde1d_dkde1d_cpp', PACKAGE = 'kde1d', x, R_object)
+dkde1d_cpp <- function(x, kde1d_r) {
+    .Call('_kde1d_dkde1d_cpp', PACKAGE = 'kde1d', x, kde1d_r)
 }
 
 #' computes the cdf of a kernel density estimate by numerical integration.
 #' @param x vector of evaluation points.
-#' @param R_object the fitted object passed from R.
+#' @param kde1d_r the fitted object passed from R.
 #' @return a vector of cdf values.
 #' @noRd
-pkde1d_cpp <- function(x, R_object) {
-    .Call('_kde1d_pkde1d_cpp', PACKAGE = 'kde1d', x, R_object)
+pkde1d_cpp <- function(q, kde1d_r) {
+    .Call('_kde1d_pkde1d_cpp', PACKAGE = 'kde1d', q, kde1d_r)
 }
 
 #' computes the quantile of a kernel density estimate by numerical inversion
 #' (bisection method).
 #' @param x vector of evaluation points.
-#' @param R_object the fitted object passed from R.
+#' @param kde1d_r the fitted object passed from R.
 #' @return a vector of quantiles.
 #' @noRd
-qkde1d_cpp <- function(x, R_object) {
-    .Call('_kde1d_qkde1d_cpp', PACKAGE = 'kde1d', x, R_object)
-}
-
-#' @param x vector of observations
-#' @param grid_size number of equally-spaced points over which binning is
-#' performed to obtain kernel functional approximation
-#' @param weights vector of weights for each observation (can be empty).
-#' @return the selected bandwidth
-#' @noRd
-select_bw_cpp <- function(x, bw, mult, discrete, weights) {
-    .Call('_kde1d_select_bw_cpp', PACKAGE = 'kde1d', x, bw, mult, discrete, weights)
-}
-
-quan <- function(x, a, w) {
-    .Call('_kde1d_quan', PACKAGE = 'kde1d', x, a, w)
+qkde1d_cpp <- function(p, kde1d_r) {
+    .Call('_kde1d_qkde1d_cpp', PACKAGE = 'kde1d', p, kde1d_r)
 }
 
