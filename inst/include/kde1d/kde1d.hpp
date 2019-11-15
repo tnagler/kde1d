@@ -155,7 +155,6 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
 
   // calculate effective degrees of freedom
-  double n = x.size();
   interp::InterpolationGrid1d infl_grid(
     grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
   edf_ = infl_grid.interpolate(x).sum();
