@@ -1,13 +1,33 @@
+# kde1d 1.0.1
+
+DEPENDENCIES
+
+  * removed dependency on `copula`.
+
+BUG FIXES
+
+  * Fixed undefined behavior with potential to cause memory issues (#46).
+  
+  * Removed dependence on `qrng` package because it was to heavy 
+    (qrng <- copula <- gsl, #46).
+  
+  * Prevent rare `bw_ == NaN` cases (#46).
+  
+  * Fixed compiler warnings due to unused or uninitialized variables (#46).
+
+
 # kde1d 1.0.0
+
+DEPENDENCIES
+
+  * removed dependency on `cctools`.
 
 NEW FEATURES
 
   * optimal plug-in bandwidth selection for all polynomial degrees (#38).
   
   * avoid randomness through simplified, deterministic jittering, see 
-  `equi_jitter()` (#40).
-  
-  * removed dependency `cctools`.
+    `equi_jitter()` (#40).
   
   * headers in `inst/include` can be used as standalone C++ library with 
     convenience wrappers for R (#41).
