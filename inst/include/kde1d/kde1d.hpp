@@ -129,7 +129,7 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   Eigen::VectorXd w = weights;
   tools::remove_nans(xx, w);
   if (w.size() > 0)
-    w /= w.sum();
+    w /= w.mean();
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
   xx = boundary_transform(xx);
@@ -343,14 +343,17 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 {
   size_t m = grid_points.size();
   fft::KdeFFT kde_fft(x, bw_, grid_points(0), grid_points(m - 1), weights);
-  Eigen::VectorXd f0 = kde_fft.kde_drv(static_cast<size_t>(0));
+  Eigen::VectorXd f0 = kde_fft.kde_drv(0);
 
   Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
   if (weights.size()) {
     // compute the average weight per cell
     auto wcount = kde_fft.get_bin_counts();
-    auto count =
-      tools::linbin(x, grid_points(0), grid_points(m - 1), m - 1, wbin);
+    auto count = tools::linbin(x,
+                               grid_points(0),
+                               grid_points(m - 1),
+                               m - 1,
+                               Eigen::VectorXd::Ones(x.size()));
     wbin = wcount.cwiseQuotient(count);
   }
 
@@ -496,7 +499,11 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
     corr_term.fill(1.0);
   }
 
-  return fhat.array() * corr_term.array();
+  Eigen::VectorXd f_corr = fhat.cwiseProduct(corr_term);
+  if (std::isnan(xmin_) & !std::isnan(xmax_))
+    f_corr.reverseInPlace();
+
+  return f_corr;
 }
 
 //! constructs a grid later used for interpolation
@@ -511,8 +518,6 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
     rng(0) -= 4 * bw_;
     rng(1) += 4 * bw_;
   }
-  if (std::isnan(xmin_) && !std::isnan(xmax_))
-    std::swap(rng(0), rng(1));
   auto zgrid = Eigen::VectorXd::LinSpaced(401, rng(0), rng(1));
   return boundary_transform(zgrid, true);
 }
@@ -522,6 +527,8 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 inline Eigen::VectorXd
 Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
+  if (std::isnan(xmin_) & !std::isnan(xmax_))
+    grid_points.reverseInPlace();
   if (!std::isnan(xmin_))
     grid_points(0) = xmin_;
   if (!std::isnan(xmax_))
