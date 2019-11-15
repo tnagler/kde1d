@@ -36,8 +36,8 @@
 
 
 <meta property="og:title" content="Univariate local-polynomial likelihood kernel density estimation — kde1d" />
-<meta property="og:description" content="The estimator can handle for bounded, unbounded, and discrete support, see
-Details." />
+<meta property="og:description" content="The estimators can handle data with bounded, unbounded, and discrete support,
+see Details." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -115,12 +115,19 @@ Details." />
     </div>
 
     <div class="ref-description">
-    <p>The estimator can handle for bounded, unbounded, and discrete support, see
-<em>Details</em>.</p>
+    <p>The estimators can handle data with bounded, unbounded, and discrete support,
+see <em>Details</em>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>kde1d</span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>NaN</span>, <span class='kw'>xmax</span> <span class='kw'>=</span> <span class='fl'>NaN</span>, <span class='kw'>mult</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>bw</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></span>(<span class='fl'>0</span>))</pre>
+    <pre class="usage"><span class='fu'>kde1d</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>NaN</span>,
+  <span class='kw'>xmax</span> <span class='kw'>=</span> <span class='fl'>NaN</span>,
+  <span class='kw'>mult</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>bw</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></span>(<span class='fl'>0</span>)
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -202,7 +209,8 @@ Statistical Society, Series B, 53, 683–690.</p>
 <span class='co'>## unbounded data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>500</span>) <span class='co'># simulate data</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>) <span class='co'># estimate density</span>
-<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 0.3957527</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-quadratic
+<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-quadratic
 #&gt; -----------------------------------------------------------------
 #&gt; nobs = 500, bw = 0.71, loglik = -712.05, d.f. = 4.65</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit</span>) <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/curve.html'>curve</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>dnorm</a></span>(<span class='no'>x</span>),
   <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='co'># add true density</span>
@@ -211,8 +219,8 @@ Statistical Society, Series B, 53, 683–690.</p>
 <span class='co'>## bounded data, log-linear</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/GammaDist.html'>rgamma</a></span>(<span class='fl'>500</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>) <span class='co'># simulate data</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>, <span class='kw'>xmin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>deg</span> <span class='kw'>=</span> <span class='fl'>1</span>) <span class='co'># estimate density</span>
-<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>1</span>), <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 2.404083e+02 3.401890e-01 1.153253e-01 3.991093e-02 9.000695e-03
-#&gt; [6] 1.595532e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-linear with bounded support (xmin = 0)
+<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='fl'>0</span>, <span class='fl'>5</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>1</span>), <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; kernel density estimate ('kde1d'), log-linear with bounded support (xmin = 0)
 #&gt; -----------------------------------------------------------------
 #&gt; nobs = 500, bw = 0.3, loglik = -449.06, d.f. = 12.9</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit</span>) <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/curve.html'>curve</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/GammaDist.html'>dgamma</a></span>(<span class='no'>x</span>, <span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>1</span>), <span class='co'># add true density</span>
   <span class='kw'>add</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
@@ -222,7 +230,8 @@ Statistical Society, Series B, 53, 683–690.</p>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Binomial.html'>rbinom</a></span>(<span class='fl'>500</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>0.5</span>) <span class='co'># simulate data</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>ordered</a></span>(<span class='no'>x</span>, <span class='kw'>levels</span> <span class='kw'>=</span> <span class='fl'>0</span>:<span class='fl'>5</span>) <span class='co'># declare as ordered</span>
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>) <span class='co'># estimate density</span>
-<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span>(<span class='no'>x</span>)), <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span></div><div class='output co'>#&gt; [1] 0.04736923 0.16091189 0.29017110 0.30269678 0.16344180 0.03540920</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; (jittered) kernel density estimate ('kde1d'), log-quadratic
+<span class='fu'><a href='dkde1d.html'>dkde1d</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span>(<span class='no'>x</span>)), <span class='no'>fit</span>) <span class='co'># evaluate density estimate</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit</span>) <span class='co'># information about the estimate</span></div><div class='output co'>#&gt; (jittered) kernel density estimate ('kde1d'), log-quadratic
 #&gt; -----------------------------------------------------------------
 #&gt; nobs = 500, bw = 1.12, loglik = -789.98, d.f. = 10.08</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit</span>) <span class='co'># plot the density estimate</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/factor.html'>ordered</a></span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>0</span>:<span class='fl'>5</span>), <span class='co'># add true density</span>
   <span class='fu'><a href='https://rdrr.io/r/stats/Binomial.html'>dbinom</a></span>(<span class='fl'>0</span>:<span class='fl'>5</span>, <span class='fl'>5</span>, <span class='fl'>0.5</span>),
