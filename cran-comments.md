@@ -1,8 +1,6 @@
-Update following a request by Prof. Ripley to remove unconditional stripping of debug symbols.
-
 ## Test environments
-* ubuntu 12.04 on travis-ci (release, devel, oldrel)
-* win-builder (devel)
+* ubuntu 14.04 on travis-ci (release, devel, oldrel)
+* win-builder (devel, release)
 
 ## R CMD check results
 
@@ -10,7 +8,7 @@ Update following a request by Prof. Ripley to remove unconditional stripping of 
 
 ## revdepcheck results
 
-We checked 2 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
+Checked 2 reverse dependencies (Note is unrelated to this package):
 
- * We saw 0 new problems
- * We failed to check 0 packages
+rvinecopulib 0.3.2.1.1    0 errors | 0 warnings | 1 note                                
+vinereg 0.5.0             0 errors | 0 warnings | 0 notes                            
