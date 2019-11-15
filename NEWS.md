@@ -2,14 +2,11 @@
 
 DEPENDENCIES
 
-  * removed dependency on `copula`.
+  * Removed dependence on `qrng` (#46).
 
 BUG FIXES
 
   * Fixed undefined behavior with potential to cause memory issues (#46).
-  
-  * Removed dependence on `qrng` package because it was to heavy 
-    (qrng <- copula <- gsl, #46).
   
   * Prevent rare `bw_ == NaN` cases (#46).
   

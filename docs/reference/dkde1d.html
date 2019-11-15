@@ -70,7 +70,7 @@ for a 'kde1d' kernel density estimate." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
       </span>
     </div>
 
@@ -154,7 +154,7 @@ for a 'kde1d' kernel density estimate.</p>
       <th>quasi</th>
       <td><p>logical; the default (<code>FALSE</code>) returns pseudo-random
 numbers, use <code>TRUE</code> for quasi-random numbers (generalized Halton, see
-<code><a href='https://rdrr.io/pkg/qrng/man/qrng.html'>qrng::ghalton()</a></code>).</p></td>
+<code><a href='https://rdrr.io/pkg/randtoolbox/man/quasiRNG.html'>randtoolbox::sobol()</a></code>).</p></td>
     </tr>
     </table>
 
@@ -172,12 +172,12 @@ and <code>rkde1d()</code> generates random deviates.</p>
 is the length of the numerical argument for the other functions.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='kde1d.html'>kde1d()</a></code></p></div>
+    <div class='dont-index'><p><code>kde1d()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>0</span>) <span class='co'># for reproducibility</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>100</span>) <span class='co'># simulate some data</span>
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>) <span class='co'># estimate density</span>
+<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>kde1d</span>(<span class='no'>x</span>) <span class='co'># estimate density</span>
 <span class='fu'>dkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate density estimate (close to dnorm(0))</span>
 <span class='fu'>pkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate corresponding cdf (close to pnorm(0))</span></div><div class='output co'>#&gt; [1] 0.5008513</div><div class='input'><span class='fu'>qkde1d</span>(<span class='fl'>0.5</span>, <span class='no'>fit</span>) <span class='co'># quantile function (close to qnorm(0))</span></div><div class='output co'>#&gt; [1] -0.001893213</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span>(<span class='fu'>rkde1d</span>(<span class='fl'>100</span>, <span class='no'>fit</span>)) <span class='co'># simulate</span></div><div class='img'><img src='dkde1d-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
@@ -201,7 +201,7 @@ is the length of the numerical argument for the other functions.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>
