@@ -37,8 +37,8 @@ private:
 inline PluginBandwidthSelector::PluginBandwidthSelector(
   const Eigen::VectorXd& x,
   const Eigen::VectorXd& weights)
-  : weights_(weights)
-  , kde_(fft::KdeFFT(x, 0.0, x.minCoeff(), x.maxCoeff(), weights))
+  : kde_(fft::KdeFFT(x, 0.0, x.minCoeff(), x.maxCoeff(), weights))
+  , weights_(weights)
 {
   if (weights.size() == 0) {
     weights_ = Eigen::VectorXd::Ones(x.size());
