@@ -11,7 +11,8 @@
 - implements a univariate kernel density estimator that can handle
 bounded and discrete data. 
 - provides classical kernel density as well as log-linear and log-quadratic methods. 
-- is highly efficient due to spline interpolation and a C++ backend.
+- is highly efficient due to the Fast Fourier Transform, spline interpolation,
+  and a C++ backend.
 
 For details, see the 
 [API documentation](https://tnagler.github.io/kde1d/).

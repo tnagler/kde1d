@@ -32,7 +32,17 @@
 #' @export
 dkde1d <- function(x, obj) {
   x <- prep_eval_arg(x, obj)
-  dkde1d_cpp(as.numeric(x), obj)
+  if (length(obj$jitter_info$i_disc) == 1) {
+    # for backwards compatibility with rvinecopulib
+    # TODO: remove next version
+    if (!is.ordered(x))
+      x <- ordered(x, obj$jitter_info$levels$x)
+    fhat <- dkde1d_cpp(as.numeric(x) - 1, obj)
+    f_all <- dkde1d_cpp(seq_along(obj$jitter_info$levels$x) - 1, obj)
+    fhat <- fhat / sum(f_all)
+  } else {
+    fhat <- dkde1d_cpp(x, obj)
+  }
 }
 
 #' @param q vector of quantiles.
@@ -40,7 +50,20 @@ dkde1d <- function(x, obj) {
 #' @export
 pkde1d <- function(q, obj) {
   q <- prep_eval_arg(q, obj)
-  pkde1d_cpp(q, obj)
+  if (length(obj$jitter_info$i_disc) == 1) {
+    # for backwards compatibility with rvinecopulib
+    # TODO: remove next version
+    if (!is.ordered(q))
+      q <- ordered(q, obj$jitter_info$levels$x)
+    x_all <- as.ordered(obj$jitter_info$levels$x)
+    p_all <- dkde1d(x_all, obj)
+    p_total <- sum(p_all)
+    p <- sapply(q, function(y) sum(p_all[x_all <= y] / p_total))
+    p <- pmin(pmax(p, 0), 1)
+  } else {
+    p <- pkde1d_cpp(q, obj)
+  }
+  p
 }
 
 #' @param p vector of probabilities.
@@ -51,7 +74,14 @@ qkde1d <- function(p, obj) {
   if (is.ordered(obj$x)) {
     ## for discrete variables, add factor levels
     q <- ordered(levels(obj$x)[q + 1], levels(obj$x))
+  } else if (length(obj$jitter_info$i_disc) == 1) {
+    # for backwards compatibility with rvinecopulib
+    # TODO: remove next version
+    x_all <- as.ordered(obj$jitter_info$levels$x)
+    pp <- pkde1d(x_all, obj)
+    q <- x_all[vapply(p, function(y) which(y <= pp)[1], integer(1))]
   }
+
   q
 }
 

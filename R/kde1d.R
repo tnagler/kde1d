@@ -1,7 +1,7 @@
 #' Univariate local-polynomial likelihood kernel density estimation
 #'
-#' The estimator can handle for bounded, unbounded, and discrete support, see
-#' *Details*.
+#' The estimators can handle data with bounded, unbounded, and discrete support,
+#' see *Details*.
 #'
 #' @param x vector (or one-column matrix/data frame) of observations; can be
 #'   `numeric` or `ordered`.
@@ -28,6 +28,7 @@
 #'
 #'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 #'   A specific form of deterministic jittering is used, see [equi_jitter()].
+#'
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
