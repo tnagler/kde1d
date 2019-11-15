@@ -161,6 +161,9 @@ PluginBandwidthSelector::select_bw(size_t deg)
   } catch (...) {
     bw = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bwpow + 1));
   }
+  if (std::isnan(bw)) {
+    bw = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bwpow + 1));
+  }
 
   return bw;
 }

@@ -22,7 +22,7 @@ LinkingTo:
 Imports:
     graphics,
     Rcpp, 
-    qrng,
+    randtoolbox,
     stats,
     utils
 RoxygenNote: 7.0.0

@@ -10,7 +10,8 @@ namespace tools {
 //! @param x function argument.
 //! @param func function to be applied.
 template<typename T>
-Eigen::MatrixXd unaryExpr_or_nan(const Eigen::MatrixXd &x, const T& func)
+Eigen::MatrixXd
+unaryExpr_or_nan(const Eigen::MatrixXd& x, const T& func)
 {
   return x.unaryExpr([&func](double y) {
     if (std::isnan(y)) {
@@ -31,12 +32,12 @@ Eigen::MatrixXd unaryExpr_or_nan(const Eigen::MatrixXd &x, const T& func)
 //! @param n_iter the number of iterations for the bisection.
 //!
 //! @return \f$ f^{-1}(x) \f$.
-inline Eigen::VectorXd invert_f(
-  const Eigen::VectorXd &x,
-  std::function<Eigen::VectorXd(const Eigen::VectorXd &)> f,
-  const double lb,
-  const double ub,
-  int n_iter)
+inline Eigen::VectorXd
+invert_f(const Eigen::VectorXd& x,
+         std::function<Eigen::VectorXd(const Eigen::VectorXd&)> f,
+         const double lb,
+         const double ub,
+         int n_iter)
 {
   Eigen::VectorXd xl = Eigen::VectorXd::Constant(x.size(), lb);
   Eigen::VectorXd xh = Eigen::VectorXd::Constant(x.size(), ub);
@@ -51,12 +52,12 @@ inline Eigen::VectorXd invert_f(
   return x_tmp;
 }
 
-
 //! remove rows of a matrix which contain nan values or have zero weight
 //! @param x the matrix.
 //! @param a vector of weights that is either empty or whose size is equal to
 //!   the number of columns of x.
-inline void remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
+inline void
+remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
 {
   if ((weights.size() > 0) & (weights.size() != x.rows()))
     throw std::runtime_error("sizes of x and weights don't match.");
@@ -82,8 +83,8 @@ inline void remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
     weights.conservativeResize(last + 1);
 }
 
-inline Eigen::Matrix<size_t, Eigen::Dynamic, 1> get_order(
-    const Eigen::VectorXd& x)
+inline Eigen::Matrix<size_t, Eigen::Dynamic, 1>
+get_order(const Eigen::VectorXd& x)
 {
   Eigen::Matrix<size_t, Eigen::Dynamic, 1> order(x.size());
   for (size_t i = 0; i < x.size(); ++i)
@@ -91,27 +92,31 @@ inline Eigen::Matrix<size_t, Eigen::Dynamic, 1> get_order(
   std::stable_sort(
     order.data(),
     order.data() + order.size(),
-    [&] (const size_t& a, const size_t& b) { return (x[a] < x[b]); }
-  );
+    [&](const size_t& a, const size_t& b) { return (x[a] < x[b]); });
   return order;
 }
 
 //! Computes bin counts for univariate data via the linear binning strategy.
 //! @param x vector of observations
 //! @param weights vector of weights for each observation.
-inline Eigen::VectorXd linbin(const Eigen::VectorXd& x,
-                              double lower,
-                              double upper,
-                              size_t num_bins,
-                              const Eigen::VectorXd& weights)
+inline Eigen::VectorXd
+linbin(const Eigen::VectorXd& x,
+       double lower,
+       double upper,
+       size_t num_bins,
+       const Eigen::VectorXd& weights)
 {
   Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins + 1);
   double rem, lxi, delta;
+  size_t li;
+
+  if (upper <= lower)
+    throw std::runtime_error("upper != lower");
 
   delta = (upper - lower) / num_bins;
   for (size_t i = 0; i < x.size(); ++i) {
     lxi = (x(i) - lower) / delta;
-    size_t li = static_cast<size_t>(lxi);
+    li = static_cast<size_t>(lxi);
     rem = lxi - li;
     if (li < num_bins) {
       gcnts(li) += (1 - rem) * weights(i);
