@@ -30,7 +30,7 @@ rkde1d(n, obj, quasi = FALSE)
 
 \item{quasi}{logical; the default (\code{FALSE}) returns pseudo-random
 numbers, use \code{TRUE} for quasi-random numbers (generalized Halton, see
-\code{\link[randtoolbox:sobol]{randtoolbox::sobol()}}).}
+\code{\link[randtoolbox:quasiRNG]{randtoolbox::sobol()}}).}
 }
 \value{
 The density, distribution function or quantile functions estimates
