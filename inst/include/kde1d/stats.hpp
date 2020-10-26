@@ -161,7 +161,7 @@ equi_jitter(const Eigen::VectorXd& x)
     srt(i) = x(perm(i));
 
   // compute contingency table
-  Eigen::MatrixXd tab(n + 1, 2);
+  Eigen::MatrixXd tab(n, 2);
   size_t lev = 0;
   size_t cnt = 1;
   for (size_t k = 1; k < n; ++k) {
@@ -171,14 +171,16 @@ equi_jitter(const Eigen::VectorXd& x)
       cnt = 1;
     } else {
       cnt++;
-      if (k == n - 1)
+      if (k == n - 1) {
+        tab(lev, 0) = srt(k);
         tab(lev++, 1) = cnt;
+      }
     }
   }
   tab.conservativeResize(lev, 2);
 
   // add deterministic, conditionally uniorm noise
-  Eigen::VectorXd noise(n);
+  Eigen::VectorXd noise = Eigen::VectorXd::Zero(n);
   size_t i = 0;
   for (size_t k = 0; k < tab.rows(); ++k) {
     for (size_t cnt = 1; cnt <= tab(k, 1); ++cnt)

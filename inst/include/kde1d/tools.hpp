@@ -107,13 +107,9 @@ linbin(const Eigen::VectorXd& x,
        const Eigen::VectorXd& weights)
 {
   Eigen::VectorXd gcnts = Eigen::VectorXd::Zero(num_bins + 1);
-  double rem, lxi, delta;
+  double delta = (upper - lower) / num_bins;
+  double rem, lxi;
   size_t li;
-
-  if (upper <= lower)
-    throw std::runtime_error("upper != lower");
-
-  delta = (upper - lower) / num_bins;
   for (size_t i = 0; i < x.size(); ++i) {
     lxi = (x(i) - lower) / delta;
     li = static_cast<size_t>(lxi);

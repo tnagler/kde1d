@@ -1,3 +1,10 @@
+# kde1d 1.0.2
+
+BUG FIXES
+
+  * Prevent false positive on valgrind.
+
+
 # kde1d 1.0.1
 
 DEPENDENCIES
