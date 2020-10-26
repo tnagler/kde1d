@@ -1,3 +1,10 @@
+# kde1d 1.0.3
+
+BUG FIXES
+
+  * fix invisible output in `dkde1d()`.
+  
+
 # kde1d 1.0.2
 
 BUG FIXES

@@ -71,11 +71,6 @@ prep_eval_arg <- function(x, obj) {
     return(x)
 
   stopifnot(is.ordered(x))
-  if (length(obj$jitter_info$i_disc) == 1) {
-    # for backwards compatibility with rvinecopulib
-    # TODO: remove next version
-    return(x)
-  }
 
   if (!all(levels(x) %in% levels(obj$x)))
     stop("'x' contains levels that weren't present when fitting.")
