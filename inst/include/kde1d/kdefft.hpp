@@ -27,10 +27,10 @@ public:
 
 private:
   double bw_;
-  Eigen::VectorXd bin_counts_;
   double lower_;
   double upper_;
   static constexpr size_t num_bins_{ 400 };
+  Eigen::VectorXd bin_counts_;
 };
 
 //! @param x vector of observations.
