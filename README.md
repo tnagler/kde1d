@@ -1,9 +1,10 @@
 # kde1d
 
-[![Build status Linux](https://travis-ci.org/tnagler/kde1d.svg?branch=master)](https://travis-ci.org/tnagler/kde1d)
-[![Windows Build status](http://ci.appveyor.com/api/projects/status/github/tnagler/kde1d?svg=true)](https://ci.appveyor.com/project/tnagler/kde1d)
+<!-- badges: start -->
+[![R build status](https://github.com/tnagler/kde1d/workflows/R-CMD-check/badge.svg)](https://github.com/tnagler/kde1d/actions)
 [![CRAN version](http://www.r-pkg.org/badges/version/kde1d)](https://cran.r-project.org/package=kde1d) 
 [![Coverage Status](https://img.shields.io/codecov/c/github/tnagler/kde1d/master.svg)](https://codecov.io/github/tnagler/kde1d?branch=master)
+<!-- badges: end -->
 
 
 ### Summary
