@@ -440,8 +440,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
-      x_new = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
-      x_new = stats::qnorm(x_new);
+      x_new = stats::qnorm((x.array() - xmin_ + 5e-5 * rng) / (1.0001 * rng));
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = (1e-5 + x.array() - xmin_).log();
@@ -455,8 +454,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
     if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
-      x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
-      x_new *= (xmax_ - xmin_ + 1e-4 * rng);
+      x_new = stats::pnorm(x).array() * (1.0001 * rng) + xmin_ - 5e-5 * rng;
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = x.array().exp() + xmin_ - 1e-5;
@@ -483,9 +481,9 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
     // two boundaries -> probit transform
     auto rng = xmax_ - xmin_;
-    corr_term = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
+    corr_term = (x.array() - xmin_ + 5e-5 * rng) / (1.0001 * rng);
     corr_term = stats::dnorm(stats::qnorm(corr_term));
-    corr_term /= (xmax_ - xmin_ + 1e-4 * rng);
+    corr_term /= (1.0001 * rng);
     corr_term = 1.0 / corr_term.array().max(1e-6);
   } else if (!std::isnan(xmin_)) {
     // left boundary -> log transform
