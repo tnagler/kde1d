@@ -59,7 +59,7 @@ invert_f(const Eigen::VectorXd& x,
 inline void
 remove_nans(Eigen::VectorXd& x, Eigen::VectorXd& weights)
 {
-  if ((weights.size() > 0) & (weights.size() != x.rows()))
+  if ((weights.size() > 0) && (weights.size() != x.rows()))
     throw std::runtime_error("sizes of x and weights don't match.");
 
   // if an entry is nan or weight is zero, move it to the end
