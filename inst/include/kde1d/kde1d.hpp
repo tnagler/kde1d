@@ -248,7 +248,7 @@ Kde1d::cdf_discrete(const Eigen::VectorXd& x) const
 inline Eigen::VectorXd
 Kde1d::quantile(const Eigen::VectorXd& x) const
 {
-  if ((x.minCoeff() < 0) | (x.maxCoeff() > 1))
+  if ((x.minCoeff() < 0) || (x.maxCoeff() > 1))
     throw std::runtime_error("probabilities must lie in (0, 1).");
   return (nlevels_ == 0) ? quantile_continuous(x) : quantile_discrete(x);
 }
@@ -303,7 +303,7 @@ Kde1d::check_levels(const Eigen::VectorXd& x) const
 {
   if (nlevels_ == 0)
     return;
-  if ((x.array() != x.array().round()).any() | (x.minCoeff() < 0)) {
+  if ((x.array() != x.array().round()).any() || (x.minCoeff() < 0)) {
     throw std::runtime_error("x must only contain non-negatives "
                              " integers when nlevels > 0.");
   }
@@ -437,11 +437,10 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
 {
   Eigen::VectorXd x_new = x;
   if (!inverse) {
-    if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+    if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
-      x_new = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
-      x_new = stats::qnorm(x_new);
+      x_new = stats::qnorm((x.array() - xmin_ + 5e-5 * rng) / (1.0001 * rng));
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = (1e-5 + x.array() - xmin_).log();
@@ -452,11 +451,10 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       // no boundary -> no transform
     }
   } else {
-    if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+    if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
-      x_new = stats::pnorm(x).array() + xmin_ - 5e-5 * rng;
-      x_new *= (xmax_ - xmin_ + 1e-4 * rng);
+      x_new = stats::pnorm(x).array() * (1.0001 * rng) + xmin_ - 5e-5 * rng;
     } else if (!std::isnan(xmin_)) {
       // left boundary -> log transform
       x_new = x.array().exp() + xmin_ - 1e-5;
@@ -480,12 +478,12 @@ inline Eigen::VectorXd
 Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
 {
   Eigen::VectorXd corr_term(fhat.size());
-  if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+  if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
     // two boundaries -> probit transform
     auto rng = xmax_ - xmin_;
-    corr_term = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
+    corr_term = (x.array() - xmin_ + 5e-5 * rng) / (1.0001 * rng);
     corr_term = stats::dnorm(stats::qnorm(corr_term));
-    corr_term /= (xmax_ - xmin_ + 1e-4 * rng);
+    corr_term /= (1.0001 * rng);
     corr_term = 1.0 / corr_term.array().max(1e-6);
   } else if (!std::isnan(xmin_)) {
     // left boundary -> log transform
@@ -499,7 +497,7 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   }
 
   Eigen::VectorXd f_corr = fhat.cwiseProduct(corr_term);
-  if (std::isnan(xmin_) & !std::isnan(xmax_))
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
     f_corr.reverseInPlace();
 
   return f_corr;
@@ -526,7 +524,7 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 inline Eigen::VectorXd
 Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
-  if (std::isnan(xmin_) & !std::isnan(xmax_))
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
     grid_points.reverseInPlace();
   if (!std::isnan(xmin_))
     grid_points(0) = xmin_;

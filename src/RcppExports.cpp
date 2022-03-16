@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // fit_kde1d_cpp
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, size_t nlevels, double bw, double mult, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
 RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP nlevelsSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {

@@ -1,3 +1,10 @@
+# kde1d 1.0.4
+
+BUG FIXES
+
+  * avoid bit-wise operations on Boolean variables.
+  
+
 # kde1d 1.0.3
 
 BUG FIXES

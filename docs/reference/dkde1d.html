@@ -73,7 +73,7 @@ for a 'kde1d' kernel density estimate." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kde1d</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.4</span>
       </span>
     </div>
 
@@ -81,7 +81,7 @@ for a 'kde1d' kernel density estimate." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -95,7 +95,7 @@ for a 'kde1d' kernel density estimate." />
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/tnagler/kde1d/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -122,13 +122,13 @@ for a 'kde1d' kernel density estimate." />
 for a 'kde1d' kernel density estimate.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>dkde1d</span>(<span class='no'>x</span>, <span class='no'>obj</span>)
+    <pre class="usage"><span class='fu'>dkde1d</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>obj</span><span class='op'>)</span>
 
-<span class='fu'>pkde1d</span>(<span class='no'>q</span>, <span class='no'>obj</span>)
+<span class='fu'>pkde1d</span><span class='op'>(</span><span class='va'>q</span>, <span class='va'>obj</span><span class='op'>)</span>
 
-<span class='fu'>qkde1d</span>(<span class='no'>p</span>, <span class='no'>obj</span>)
+<span class='fu'>qkde1d</span><span class='op'>(</span><span class='va'>p</span>, <span class='va'>obj</span><span class='op'>)</span>
 
-<span class='fu'>rkde1d</span>(<span class='no'>n</span>, <span class='no'>obj</span>, <span class='kw'>quasi</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='fu'>rkde1d</span><span class='op'>(</span><span class='va'>n</span>, <span class='va'>obj</span>, quasi <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -178,10 +178,18 @@ is the length of the numerical argument for the other functions.</p>
     <div class='dont-index'><p><code><a href='kde1d.html'>kde1d()</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>0</span>) <span class='co'># for reproducibility</span>
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>100</span>) <span class='co'># simulate some data</span>
-<span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span>(<span class='no'>x</span>) <span class='co'># estimate density</span>
-<span class='fu'>dkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate density estimate (close to dnorm(0))</span></div><div class='output co'>#&gt; [1] 0.4495823</div><div class='input'><span class='fu'>pkde1d</span>(<span class='fl'>0</span>, <span class='no'>fit</span>) <span class='co'># evaluate corresponding cdf (close to pnorm(0))</span></div><div class='output co'>#&gt; [1] 0.5008513</div><div class='input'><span class='fu'>qkde1d</span>(<span class='fl'>0.5</span>, <span class='no'>fit</span>) <span class='co'># quantile function (close to qnorm(0))</span></div><div class='output co'>#&gt; [1] -0.001893213</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span>(<span class='fu'>rkde1d</span>(<span class='fl'>100</span>, <span class='no'>fit</span>)) <span class='co'># simulate</span></div><div class='img'><img src='dkde1d-1.png' alt='' width='700' height='433' /></div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>0</span><span class='op'>)</span> <span class='co'># for reproducibility</span></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='co'># simulate some data</span></span>
+<span class='r-in'><span class='va'>fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='kde1d.html'>kde1d</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='co'># estimate density</span></span>
+<span class='r-in'><span class='fu'>dkde1d</span><span class='op'>(</span><span class='fl'>0</span>, <span class='va'>fit</span><span class='op'>)</span> <span class='co'># evaluate density estimate (close to dnorm(0))</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 0.4495823</span>
+<span class='r-in'><span class='fu'>pkde1d</span><span class='op'>(</span><span class='fl'>0</span>, <span class='va'>fit</span><span class='op'>)</span> <span class='co'># evaluate corresponding cdf (close to pnorm(0))</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 0.5008513</span>
+<span class='r-in'><span class='fu'>qkde1d</span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='va'>fit</span><span class='op'>)</span> <span class='co'># quantile function (close to qnorm(0))</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] -0.001893213</span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span><span class='op'>(</span><span class='fu'>rkde1d</span><span class='op'>(</span><span class='fl'>100</span>, <span class='va'>fit</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># simulate</span></span>
+<span class='r-plt img'><img src='dkde1d-1.png' alt='' width='700' height='433' /></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -197,7 +205,7 @@ is the length of the numerical argument for the other functions.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
