@@ -301,13 +301,16 @@ Kde1d::simulate(size_t n, const std::vector<int>& seeds) const
 inline void
 Kde1d::check_levels(const Eigen::VectorXd& x) const
 {
+  auto xx = x;
+  auto w = Eigen::VectorXd();
+  tools::remove_nans(xx, w);
   if (nlevels_ == 0)
     return;
-  if ((x.array() != x.array().round()).any() || (x.minCoeff() < 0)) {
+  if ((xx.array() != xx.array().round()).any() || (xx.minCoeff() < 0)) {
     throw std::runtime_error("x must only contain non-negatives "
                              " integers when nlevels > 0.");
   }
-  if (x.maxCoeff() > nlevels_) {
+  if (xx.maxCoeff() > nlevels_) {
     throw std::runtime_error("maximum value of 'x' is larger than the "
                              "number of factor levels.");
   }

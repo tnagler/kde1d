@@ -81,11 +81,12 @@ for (k in seq_along(scenarios)) {
     }
     expect_that(all(sim >= xmin), equals(TRUE), label = scenarios)
     expect_that(all(sim <= xmax), equals(TRUE))
-    expect_gte(max(dkde1d(sim, fit), 0), 0)
-    expect_gte(max(pkde1d(sim, fit), 0), 0)
-    expect_lte(max(pkde1d(sim, fit), 1), 1)
-    expect_that(all(qkde1d(u, fit) >= xmin), equals(TRUE))
-    expect_that(all(qkde1d(u, fit) <= xmax), equals(TRUE))
+    sim[c(2, 5, 9)] <- NA
+    expect_gte(max(na.omit(dkde1d(sim, fit)), 0), 0)
+    expect_gte(max(na.omit(pkde1d(sim, fit)), 0), 0)
+    expect_lte(max(na.omit(pkde1d(sim, fit)), 1), 1)
+    expect_that(all(na.omit(qkde1d(u, fit) >= xmin)), equals(TRUE))
+    expect_that(all(na.omit(qkde1d(u, fit) <= xmax)), equals(TRUE))
     if (!is.nan(fit$xmin)) {
       expect_equal(dkde1d(xmin - 1, fit), 0)
       expect_equal(pkde1d(xmin - 1, fit), 0)
@@ -95,7 +96,6 @@ for (k in seq_along(scenarios)) {
       expect_equal(dkde1d(xmax + 1, fit), 0)
       expect_equal(pkde1d(xmax + 1, fit), 1)
     }
-
   })
 }
 
