@@ -1,3 +1,10 @@
+# kde1d 1.0.5
+
+BUG FIXES
+
+  * fix cdf and input checks with NAs.
+
+  
 # kde1d 1.0.4
 
 BUG FIXES

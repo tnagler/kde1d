@@ -29,8 +29,8 @@ install.packages("kde1d")
 - the latest development version:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("tnagler/kde1d@dev")
+# install.packages("remotes")
+remotes::install_github("tnagler/kde1d@dev")
 ```
 
 ### Examples
