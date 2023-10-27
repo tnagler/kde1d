@@ -20,6 +20,7 @@ using namespace kde1d;
 // [[Rcpp::export]]
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          size_t nlevels,
+                         bool zero_inflated,
                          double bw,
                          double mult,
                          double xmin,
@@ -27,7 +28,7 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
                          size_t deg,
                          const Eigen::VectorXd& weights)
 {
-  Kde1d fit(x, nlevels, bw, mult, xmin, xmax, deg, weights);
+  Kde1d fit(x, nlevels, zero_inflated, bw, mult, xmin, xmax, deg, weights);
   return kde1d_wrap(fit);
 }
 

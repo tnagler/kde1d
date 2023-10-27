@@ -12,20 +12,21 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // fit_kde1d_cpp
-Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, size_t nlevels, double bw, double mult, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP nlevelsSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, size_t nlevels, bool zero_inflated, double bw, double mult, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
+RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP nlevelsSEXP, SEXP zero_inflatedSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
     Rcpp::traits::input_parameter< size_t >::type nlevels(nlevelsSEXP);
+    Rcpp::traits::input_parameter< bool >::type zero_inflated(zero_inflatedSEXP);
     Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
     Rcpp::traits::input_parameter< double >::type mult(multSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
     Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, nlevels, bw, mult, xmin, xmax, deg, weights));
+    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, nlevels, zero_inflated, bw, mult, xmin, xmax, deg, weights));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -67,7 +68,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_kde1d_fit_kde1d_cpp", (DL_FUNC) &_kde1d_fit_kde1d_cpp, 8},
+    {"_kde1d_fit_kde1d_cpp", (DL_FUNC) &_kde1d_fit_kde1d_cpp, 9},
     {"_kde1d_dkde1d_cpp", (DL_FUNC) &_kde1d_dkde1d_cpp, 2},
     {"_kde1d_pkde1d_cpp", (DL_FUNC) &_kde1d_pkde1d_cpp, 2},
     {"_kde1d_qkde1d_cpp", (DL_FUNC) &_kde1d_qkde1d_cpp, 2},

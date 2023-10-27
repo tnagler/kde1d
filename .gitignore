@@ -5,3 +5,6 @@
 revdep
 /revdep/.cache.rds
 .vscode
+README.Rmd
+README.html
+README_files

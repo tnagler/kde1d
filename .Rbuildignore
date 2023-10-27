@@ -1,12 +1,2 @@
-^docs$
-^_pkgdown\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.travis\.yml$
-^appveyor\.yml$
-^codecov\.yml$
-docs
-^cran-comments\.md$
-^revdep$
-^.vscode$
-^\.github$

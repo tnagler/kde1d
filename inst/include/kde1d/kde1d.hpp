@@ -17,14 +17,28 @@ public:
   Kde1d() {}
   Kde1d(const Eigen::VectorXd& x,
         size_t nlevels = 0,
+        bool zero_inflated = false,
         double bw = NAN,
         double mult = 1.0,
         double xmin = NAN,
         double xmax = NAN,
         size_t deg = 2,
         const Eigen::VectorXd& weights = Eigen::VectorXd());
+  // for back wards caompatibility
+  Kde1d(const Eigen::VectorXd& x,
+        size_t nlevels = 0,
+        double bw = NAN,
+        double mult = 1.0,
+        double xmin = NAN,
+        double xmax = NAN,
+        size_t deg = 2,
+        const Eigen::VectorXd& weights = Eigen::VectorXd(),
+        bool zero_inflated = false) :
+    Kde1d(x, nlevels, zero_inflated, bw, mult, xmin, xmax, deg, weights)
+  { }
   Kde1d(const interp::InterpolationGrid1d& grid,
         size_t nlevels = 0,
+        double prob0 = 0.0,
         double xmin = NAN,
         double xmax = NAN);
 
@@ -40,6 +54,7 @@ public:
   size_t get_nlevels() const { return nlevels_; }
   double get_bw() const { return bw_; }
   double get_deg() const { return deg_; }
+  double get_prob0() const { return prob0_; }
   double get_xmin() const { return xmin_; }
   double get_xmax() const { return xmax_; }
   double get_edf() const { return edf_; }
@@ -49,6 +64,7 @@ private:
   // data members
   interp::InterpolationGrid1d grid_;
   size_t nlevels_;
+  bool zero_inflated_{ false };
   double xmin_;
   double xmax_;
   double bw_{ NAN };
@@ -56,6 +72,7 @@ private:
   double loglik_{ NAN };
   double edf_{ NAN };
   static constexpr double K0_ = 0.3989425;
+  double prob0_{ 0 };
 
   // private methods
   Eigen::VectorXd pdf_continuous(const Eigen::VectorXd& x) const;
@@ -102,6 +119,7 @@ private:
 //! @param weights vector of weights for each observation (can be empty).
 inline Kde1d::Kde1d(const Eigen::VectorXd& x,
                     size_t nlevels,
+                    bool zero_inflated,
                     double bw,
                     double mult,
                     double xmin,
@@ -109,6 +127,7 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
                     size_t deg,
                     const Eigen::VectorXd& weights)
   : nlevels_(nlevels)
+  , zero_inflated_(zero_inflated)
   , xmin_(xmin)
   , xmax_(xmax)
   , bw_(bw)
@@ -127,12 +146,18 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   // preprocessing for nans and jittering
   Eigen::VectorXd xx = x;
   Eigen::VectorXd w = weights;
-  tools::remove_nans(xx, w);
   if (w.size() > 0)
     w /= w.mean();
+  if (zero_inflated_) {
+    prob0_ = (xx.array() == 0).mean();
+    xx = (x.array() == 0.0).select(Eigen::VectorXd::Constant(x.size(), NAN), xx);
+  }
+  tools::remove_nans(xx, w);
+
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
-  xx = boundary_transform(xx);
+
+  boundary_transform(xx);
 
   // bandwidth selection
   bw_ = select_bw(xx, bw_, mult, deg, nlevels_, w);
@@ -169,10 +194,13 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
 //!   boundary.
 inline Kde1d::Kde1d(const interp::InterpolationGrid1d& grid,
                     size_t nlevels,
+                    double prob0,
                     double xmin,
                     double xmax)
   : grid_(grid)
   , nlevels_(nlevels)
+  , prob0_(prob0)
+  , zero_inflated_(prob0 != 0.0)
   , xmin_(xmin)
   , xmax_(xmax)
 {}
@@ -183,7 +211,14 @@ inline Kde1d::Kde1d(const interp::InterpolationGrid1d& grid,
 inline Eigen::VectorXd
 Kde1d::pdf(const Eigen::VectorXd& x) const
 {
-  return (nlevels_ == 0) ? pdf_continuous(x) : pdf_discrete(x);
+  if (!zero_inflated_) {
+    return (nlevels_ == 0) ? pdf_continuous(x) : pdf_discrete(x);
+  } else {
+    std::cout << " zi density" << std::endl;
+    return (x.array() == 0).select(
+      Eigen::VectorXd::Constant(x.size(), prob0_),
+      pdf_continuous(x));
+  }
 }
 
 inline Eigen::VectorXd
@@ -199,7 +234,6 @@ Kde1d::pdf_continuous(const Eigen::VectorXd& x) const
 
   auto trunc = [](const double& xx) { return std::max(xx, 0.0); };
   return tools::unaryExpr_or_nan(fhat, trunc);
-  ;
 }
 
 inline Eigen::VectorXd
@@ -219,7 +253,17 @@ Kde1d::pdf_discrete(const Eigen::VectorXd& x) const
 inline Eigen::VectorXd
 Kde1d::cdf(const Eigen::VectorXd& x) const
 {
-  return (nlevels_ == 0) ? cdf_continuous(x) : cdf_discrete(x);
+  if (!zero_inflated_) {
+    return (nlevels_ == 0) ? cdf_continuous(x) : cdf_discrete(x);
+  } else {
+    Eigen::VectorXd zi = (x.array() >= 0).select(
+      Eigen::VectorXd::Ones(x.size()),
+      Eigen::VectorXd::Zero(x.size())
+    );
+    return prob0_ * zi + (x.array() <= 0).select(
+        Eigen::VectorXd::Zero(x.size()),
+        cdf_continuous(x) * (1 - prob0_));
+  }
 }
 
 inline Eigen::VectorXd
@@ -250,7 +294,24 @@ Kde1d::quantile(const Eigen::VectorXd& x) const
 {
   if ((x.minCoeff() < 0) || (x.maxCoeff() > 1))
     throw std::runtime_error("probabilities must lie in (0, 1).");
-  return (nlevels_ == 0) ? quantile_continuous(x) : quantile_discrete(x);
+  if (!zero_inflated_) {
+    return (nlevels_ == 0) ? quantile_continuous(x) : quantile_discrete(x);
+  } else {
+    // check where 0 is in the quantile range
+    Eigen::VectorXd qs(x.size());
+    auto p0 = cdf_continuous(Eigen::VectorXd::Zero(1))(0);
+    auto newx = (x.array() <= p0 - prob0_).select(
+      x / (1 - prob0_),
+      (x.array() - prob0_).cwiseMin(0.0) / (1 - prob0_)
+    );
+    qs = quantile_continuous(newx);
+    for (size_t i = 0; i < x.size(); i++) {
+      if ((p0 - prob0_) && (x(i) <= p0)) {
+        qs(i) = 0;
+      }
+    }
+    return qs;
+  }
 }
 
 inline Eigen::VectorXd
