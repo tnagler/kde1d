@@ -29,7 +29,7 @@ for (k in seq_along(scenarios)) {
       x <- runif(n_sim)
       xmin <- 0
       xmax <- 1
-    } else {
+    } else if (scenarios[[k]]$data_type == "discrete") {
       x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
     }
     sims[[k]] <- x
@@ -141,6 +141,17 @@ test_that("estimates for discrete data are reasonable", {
   x <- ordered(sample(5, 1e5, TRUE), 1:5)
   fit <- kde1d(x)
   expect_true(all(abs(dkde1d(1:5, fit) - 0.2) < 0.1))
+})
+
+test_that("works for zero-inflated data", {
+  x <- rnorm(100)
+  x <- x * rbinom(100, 1, 0.7)
+  fit <- kde1d(x, zero_inflated = TRUE)
+  expect_true(abs(dkde1d(0, fit) - 0.3) < 0.1)
+  expect_true(abs(pkde1d(0, fit) - pkde1d(-0.001, fit) - 0.3) < 0.1)
+  sim <- rkde1d(1000, fit)
+  expect_true(abs(mean(sim == 0) - 0.3) < 0.1)
+  expect_true(abs(mean(sim > 0) - mean(sim < 0)) < 0.1)
 })
 
 test_that("works with weights", {
