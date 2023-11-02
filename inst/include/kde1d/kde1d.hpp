@@ -72,7 +72,7 @@ private:
   double loglik_{ NAN };
   double edf_{ NAN };
   static constexpr double K0_ = 0.3989425;
-  double prob0_{ 0 };
+  double prob0_{ 0.0 };
 
   // private methods
   Eigen::VectorXd pdf_continuous(const Eigen::VectorXd& x) const;
@@ -148,11 +148,15 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   Eigen::VectorXd w = weights;
   if (w.size() > 0)
     w /= w.mean();
-  if (zero_inflated_) {
-    prob0_ = (xx.array() == 0).mean();
-    xx = (x.array() == 0.0).select(Eigen::VectorXd::Constant(x.size(), NAN), xx);
-  }
   tools::remove_nans(xx, w);
+  if (zero_inflated_) {
+    if (w.size() == 0)
+      w = Eigen::VectorXd::Ones(x.size());
+    w = (x.array() == 0.0).select(Eigen::VectorXd::Zero(x.size()), w);
+    prob0_ = (1 - w.array()).mean();
+    xx = (w.array() == 0.0).select(Eigen::VectorXd::Constant(x.size(), NAN), xx);
+    tools::remove_nans(xx, w);
+  }
 
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
@@ -214,7 +218,6 @@ Kde1d::pdf(const Eigen::VectorXd& x) const
   if (!zero_inflated_) {
     return (nlevels_ == 0) ? pdf_continuous(x) : pdf_discrete(x);
   } else {
-    std::cout << " zi density" << std::endl;
     return (x.array() == 0).select(
       Eigen::VectorXd::Constant(x.size(), prob0_),
       pdf_continuous(x));
@@ -305,7 +308,7 @@ Kde1d::quantile(const Eigen::VectorXd& x) const
       (x.array() - prob0_).cwiseMin(0.0) / (1 - prob0_)
     );
     qs = quantile_continuous(newx);
-    for (size_t i = 0; i < x.size(); i++) {
+    for (Eigen::Index i = 0; i < x.size(); i++) {
       if ((p0 - prob0_) && (x(i) <= p0)) {
         qs(i) = 0;
       }
@@ -325,7 +328,7 @@ Kde1d::quantile_continuous(const Eigen::VectorXd& x) const
                            35);
 
   // replace with NaN where the input was NaN
-  for (size_t i = 0; i < x.size(); i++) {
+  for (Eigen::Index i = 0; i < x.size(); i++) {
     if (std::isnan(x(i)))
       q(i) = x(i);
   }
