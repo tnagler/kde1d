@@ -143,12 +143,13 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
     xmax = NAN;
   }
 
-  // preprocessing for nans and jittering
+  // preprocessing
   Eigen::VectorXd xx = x;
   Eigen::VectorXd w = weights;
   if (w.size() > 0)
     w /= w.mean();
   tools::remove_nans(xx, w);
+
   if (zero_inflated_) {
     if (w.size() == 0)
       w = Eigen::VectorXd::Ones(x.size());
@@ -203,10 +204,10 @@ inline Kde1d::Kde1d(const interp::InterpolationGrid1d& grid,
                     double xmax)
   : grid_(grid)
   , nlevels_(nlevels)
-  , prob0_(prob0)
   , zero_inflated_(prob0 != 0.0)
   , xmin_(xmin)
   , xmax_(xmax)
+  , prob0_(prob0)
 {}
 
 //! computes the pdf of the kernel density estimate by interpolation.
@@ -263,9 +264,7 @@ Kde1d::cdf(const Eigen::VectorXd& x) const
       Eigen::VectorXd::Ones(x.size()),
       Eigen::VectorXd::Zero(x.size())
     );
-    return prob0_ * zi + (x.array() <= 0).select(
-        Eigen::VectorXd::Zero(x.size()),
-        cdf_continuous(x) * (1 - prob0_));
+    return prob0_ * zi + cdf_continuous(x) * (1 - prob0_);
   }
 }
 
@@ -302,14 +301,15 @@ Kde1d::quantile(const Eigen::VectorXd& x) const
   } else {
     // check where 0 is in the quantile range
     Eigen::VectorXd qs(x.size());
-    auto p0 = cdf_continuous(Eigen::VectorXd::Zero(1))(0);
+    auto p0 = this->cdf(Eigen::VectorXd::Zero(1))(0);
     auto newx = (x.array() <= p0 - prob0_).select(
       x / (1 - prob0_),
-      (x.array() - prob0_).cwiseMin(0.0) / (1 - prob0_)
+      (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_)
     );
-    qs = quantile_continuous(newx);
+    // std::cout << newx << std::endl;
+    qs = this->quantile_continuous(newx);
     for (Eigen::Index i = 0; i < x.size(); i++) {
-      if ((p0 - prob0_) && (x(i) <= p0)) {
+      if ((x(i) > p0 - prob0_) && (x(i) <= p0)) {
         qs(i) = 0;
       }
     }
