@@ -105,6 +105,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
   x <- na.omit(x)
   # sanity checks
   check_arguments(x, mult, xmin, xmax, bw, deg, weights)
+  if (inherits(x, "zero_inflated"))
+    zero_inflated <- TRUE
 
   # fit model
   fit <- fit_kde1d_cpp(x = if (is.numeric(x)) x else as.numeric(x) - 1,
@@ -124,4 +126,12 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
   fit$var_name <- as.character(match.call()[2])
 
   fit
+}
+
+#' Declare a variable as zero inflated (experimental)
+#' @param x a numeric vector.
+#' @export
+zero_inflated <- function(x) {
+  class(x) <- c(class(x), "zero_inflated")
+  x
 }

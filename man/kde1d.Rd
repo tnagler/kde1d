@@ -11,7 +11,8 @@ kde1d(
   mult = 1,
   bw = NA,
   deg = 2,
-  weights = numeric(0)
+  weights = numeric(0),
+  zero_inflated = FALSE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ appropriate modifications for \code{deg > 0}.}
 log-constant, log-linear, and log-quadratic fitting, respectively.}
 
 \item{weights}{optional vector of weights for individual observations.}
+
+\item{zero_inflated}{whether to expect a zero-inflated distribution.}
 }
 \value{
 An object of class \code{kde1d}.
