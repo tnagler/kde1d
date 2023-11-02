@@ -82,6 +82,10 @@ private:
   Eigen::VectorXd cdf_discrete(const Eigen::VectorXd& x) const;
   Eigen::VectorXd quantile_discrete(const Eigen::VectorXd& x) const;
 
+  Eigen::VectorXd pdf_zi(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd cdf_zi(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd quantile_zi(const Eigen::VectorXd& x) const;
+
   void check_levels(const Eigen::VectorXd& x) const;
   Eigen::VectorXd kern_gauss(const Eigen::VectorXd& x);
   Eigen::MatrixXd fit_lp(const Eigen::VectorXd& x,
@@ -216,13 +220,11 @@ inline Kde1d::Kde1d(const interp::InterpolationGrid1d& grid,
 inline Eigen::VectorXd
 Kde1d::pdf(const Eigen::VectorXd& x) const
 {
-  if (!zero_inflated_) {
-    return (nlevels_ == 0) ? pdf_continuous(x) : pdf_discrete(x);
-  } else {
-    return (x.array() == 0).select(
-      Eigen::VectorXd::Constant(x.size(), prob0_),
-      pdf_continuous(x));
-  }
+  if (zero_inflated_)
+    return pdf_zi(x);
+  if (nlevels_ != 0)
+    return pdf_discrete(x);
+  return pdf_continuous(x);
 }
 
 inline Eigen::VectorXd
@@ -251,21 +253,25 @@ Kde1d::pdf_discrete(const Eigen::VectorXd& x) const
   return fhat;
 }
 
+inline Eigen::VectorXd
+Kde1d::pdf_zi(const Eigen::VectorXd& x) const
+{
+  return (x.array() == 0).select(
+    Eigen::VectorXd::Constant(x.size(), prob0_),
+    pdf_continuous(x));
+}
+
 //! computes the cdf of the kernel density estimate by numerical integration.
 //! @param x vector of evaluation points.
 //! @return a vector of cdf values.
 inline Eigen::VectorXd
 Kde1d::cdf(const Eigen::VectorXd& x) const
 {
-  if (!zero_inflated_) {
-    return (nlevels_ == 0) ? cdf_continuous(x) : cdf_discrete(x);
-  } else {
-    Eigen::VectorXd zi = (x.array() >= 0).select(
-      Eigen::VectorXd::Ones(x.size()),
-      Eigen::VectorXd::Zero(x.size())
-    );
-    return prob0_ * zi + cdf_continuous(x) * (1 - prob0_);
-  }
+  if (zero_inflated_)
+    return cdf_zi(x);
+  if (nlevels_ != 0)
+    return cdf_discrete(x);
+  return cdf_continuous(x);
 }
 
 inline Eigen::VectorXd
@@ -288,6 +294,16 @@ Kde1d::cdf_discrete(const Eigen::VectorXd& x) const
   });
 }
 
+inline Eigen::VectorXd
+Kde1d::cdf_zi(const Eigen::VectorXd& x) const
+{
+  Eigen::VectorXd zi = (x.array() >= 0).select(
+    Eigen::VectorXd::Ones(x.size()),
+    Eigen::VectorXd::Zero(x.size())
+  );
+  return prob0_ * zi + cdf_continuous(x) * (1 - prob0_);
+
+}
 //! computes the cdf of the kernel density estimate by numerical inversion.
 //! @param x vector of evaluation points.
 //! @return a vector of quantiles.
@@ -296,25 +312,12 @@ Kde1d::quantile(const Eigen::VectorXd& x) const
 {
   if ((x.minCoeff() < 0) || (x.maxCoeff() > 1))
     throw std::runtime_error("probabilities must lie in (0, 1).");
-  if (!zero_inflated_) {
-    return (nlevels_ == 0) ? quantile_continuous(x) : quantile_discrete(x);
-  } else {
-    // check where 0 is in the quantile range
-    Eigen::VectorXd qs(x.size());
-    auto p0 = this->cdf(Eigen::VectorXd::Zero(1))(0);
-    auto newx = (x.array() <= p0 - prob0_).select(
-      x / (1 - prob0_),
-      (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_)
-    );
-    // std::cout << newx << std::endl;
-    qs = this->quantile_continuous(newx);
-    for (Eigen::Index i = 0; i < x.size(); i++) {
-      if ((x(i) > p0 - prob0_) && (x(i) <= p0)) {
-        qs(i) = 0;
-      }
-    }
-    return qs;
-  }
+
+  if (zero_inflated_)
+    return quantile_zi(x);
+  if (nlevels_ != 0)
+    return quantile_discrete(x);
+  return quantile_continuous(x);
 }
 
 inline Eigen::VectorXd
@@ -349,6 +352,24 @@ Kde1d::quantile_discrete(const Eigen::VectorXd& x) const
   };
 
   return tools::unaryExpr_or_nan(x, quan);
+}
+
+inline Eigen::VectorXd
+Kde1d::quantile_zi(const Eigen::VectorXd& x) const
+{
+  Eigen::VectorXd qs(x.size());
+  auto p0 = this->cdf(Eigen::VectorXd::Zero(1))(0);
+  auto newx = (x.array() <= p0 - prob0_).select(
+    x / (1 - prob0_),
+    (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_)
+  );
+  qs = this->quantile_continuous(newx);
+  for (Eigen::Index i = 0; i < x.size(); i++) {
+    if ((x(i) > p0 - prob0_) && (x(i) <= p0)) {
+      qs(i) = 0;
+    }
+  }
+  return qs;
 }
 
 //! simulates data from the model.
