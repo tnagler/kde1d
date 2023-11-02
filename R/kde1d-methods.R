@@ -196,6 +196,9 @@ print.kde1d <- function(x, ...) {
     }
     cat(")")
   }
+  if (x$prob0 != 0) {
+    cat(", zero-inflated")
+  }
   cat("\n")
   invisible(x)
 }
@@ -209,6 +212,9 @@ summary.kde1d <- function(object, ...) {
   df[2] <- object$bw
   df[3] <- object$loglik
   df[4] <- object$edf
+  if (object$prob0 != 0.0) {
+    df <- append(df, c(prob0 = round(object$prob0, 2)))
+  }
 
   print(object)
   cat(strrep("-", 65), "\n", sep = "")
