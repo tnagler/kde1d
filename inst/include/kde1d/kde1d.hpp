@@ -154,7 +154,7 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   if (nlevels_ > 0)
     xx = stats::equi_jitter(xx);
 
-  boundary_transform(xx);
+  xx = boundary_transform(xx);
 
   // bandwidth selection
   bw_ = select_bw(xx, bw_, mult, deg, nlevels_, w);
