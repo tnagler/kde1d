@@ -17,25 +17,13 @@ public:
   Kde1d() {}
   Kde1d(const Eigen::VectorXd& x,
         size_t nlevels = 0,
-        bool zero_inflated = false,
-        double bw = NAN,
-        double mult = 1.0,
-        double xmin = NAN,
-        double xmax = NAN,
-        size_t deg = 2,
-        const Eigen::VectorXd& weights = Eigen::VectorXd());
-  // for back wards caompatibility
-  Kde1d(const Eigen::VectorXd& x,
-        size_t nlevels = 0,
         double bw = NAN,
         double mult = 1.0,
         double xmin = NAN,
         double xmax = NAN,
         size_t deg = 2,
         const Eigen::VectorXd& weights = Eigen::VectorXd(),
-        bool zero_inflated = false) :
-    Kde1d(x, nlevels, zero_inflated, bw, mult, xmin, xmax, deg, weights)
-  { }
+        bool zero_inflated = false);
   Kde1d(const interp::InterpolationGrid1d& grid,
         size_t nlevels = 0,
         double prob0 = 0.0,
@@ -123,13 +111,13 @@ private:
 //! @param weights vector of weights for each observation (can be empty).
 inline Kde1d::Kde1d(const Eigen::VectorXd& x,
                     size_t nlevels,
-                    bool zero_inflated,
                     double bw,
                     double mult,
                     double xmin,
                     double xmax,
                     size_t deg,
-                    const Eigen::VectorXd& weights)
+                    const Eigen::VectorXd& weights,
+                    bool zero_inflated)
   : nlevels_(nlevels)
   , zero_inflated_(zero_inflated)
   , xmin_(xmin)
@@ -150,9 +138,9 @@ inline Kde1d::Kde1d(const Eigen::VectorXd& x,
   // preprocessing
   Eigen::VectorXd xx = x;
   Eigen::VectorXd w = weights;
+  tools::remove_nans(xx, w);
   if (w.size() > 0)
     w /= w.mean();
-  tools::remove_nans(xx, w);
 
   if (zero_inflated_) {
     if (w.size() == 0)
