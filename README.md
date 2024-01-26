@@ -3,7 +3,6 @@
 <!-- badges: start -->
 [![R build status](https://github.com/tnagler/kde1d/workflows/R-CMD-check/badge.svg)](https://github.com/tnagler/kde1d/actions)
 [![CRAN version](http://www.r-pkg.org/badges/version/kde1d)](https://cran.r-project.org/package=kde1d) 
-[![Coverage Status](https://img.shields.io/codecov/c/github/tnagler/kde1d/master.svg)](https://codecov.io/github/tnagler/kde1d?branch=master)
 <!-- badges: end -->
 
 
