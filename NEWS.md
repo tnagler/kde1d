@@ -1,4 +1,4 @@
-# kde1d 1.0.6
+# kde1d 1.0.7
 
 DEPENDS
 
