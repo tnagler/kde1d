@@ -79,3 +79,17 @@ prep_eval_arg <- function(x, obj) {
     x <- ordered(x, levels(obj$x))
   as.numeric(x) - 1
 }
+
+#' boolean vector for observations below the distribution's support
+#' @noRd
+is_below_support <- function(x, obj) {
+  lower <- if (!is.nan(obj$xmin)) obj$xmin else -Inf
+  x < lower
+}
+
+#' boolean vector for observations above the distribution's support
+#' @noRd
+is_above_support <- function(x, obj) {
+  upper <- if (!is.nan(obj$xmax)) obj$xmax else Inf
+  x > upper
+}

@@ -3,20 +3,20 @@
 
 #' fits a kernel density estimate and calculates the effective degrees of
 #' freedom.
-#' @param x vector of observations; catergorical data must be converted to
+#' @param x vector of observations; categorical data must be converted to
 #'   non-negative integers.
 #' @param nlevels the number of factor levels; 0 for continuous data.
-#' @param bw the bandwidth parameter.
+#' @param bandwidth the bandwidth parameter.
 #' @param xmin lower bound for the support of the density, `NaN` means no
 #'   boundary.
 #' @param xmax upper bound for the support of the density, `NaN` means no
 #'   boundary.
-#' @param deg order of the local polynomial.
+#' @param degree order of the local polynomial.
 #' @return `An Rcpp::List` containing the fitted density values on a grid and
 #'   additional information.
 #' @noRd
-fit_kde1d_cpp <- function(x, nlevels, bw, mult, xmin, xmax, deg, weights) {
-    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, nlevels, bw, mult, xmin, xmax, deg, weights)
+fit_kde1d_cpp <- function(x, nlevels, bandwidth, mult, xmin, xmax, degree, weights) {
+    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, nlevels, bandwidth, mult, xmin, xmax, degree, weights)
 }
 
 #' computes the pdf of a kernel density estimate by interpolation.

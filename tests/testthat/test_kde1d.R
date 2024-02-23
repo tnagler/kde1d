@@ -17,6 +17,7 @@ sims <- as.list(seq_along(scenarios))
 for (k in seq_along(scenarios)) {
   test_that(paste0("can fit ", paste(scenarios[[k]], collapse = "/")), {
     xmin <- xmax <- NaN
+    nlevels <- 0
     if (scenarios[[k]]$data_type == "unbounded") {
       x <- rnorm(n_sim)
     } else if (scenarios[[k]]$data_type == "left_boundary") {
@@ -34,7 +35,7 @@ for (k in seq_along(scenarios)) {
     }
     sims[[k]] <- x
     expect_silent(
-      fits[[k]] <<- kde1d(x, xmin = xmin, xmax = xmax, deg = scenarios[[k]]$deg)
+      fits[[k]] <<- kde1d(x,  xmin = xmin, xmax = xmax, deg = scenarios[[k]]$deg)
     )
   })
 }

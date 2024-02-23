@@ -32,7 +32,11 @@
 #' @export
 dkde1d <- function(x, obj) {
   x <- prep_eval_arg(x, obj)
-  dkde1d_cpp(x, obj)
+  sel <- is_below_support(x, obj) | is_above_support(x, obj)
+  x[sel] <- NA
+  d <- dkde1d_cpp(x, obj)
+  d[sel] <- 0
+  d
 }
 
 #' @param q vector of quantiles.
@@ -40,7 +44,13 @@ dkde1d <- function(x, obj) {
 #' @export
 pkde1d <- function(q, obj) {
   q <- prep_eval_arg(q, obj)
-  pkde1d_cpp(q, obj)
+  below <- is_below_support(q, obj)
+  above <- is_above_support(q, obj)
+  q[below | above] <- NA
+  p <- pkde1d_cpp(q, obj)
+  p[below] <- 0
+  p[above] <- 1
+  p
 }
 
 #' @param p vector of probabilities.
