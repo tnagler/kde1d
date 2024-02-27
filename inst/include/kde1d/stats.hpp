@@ -103,7 +103,7 @@ quantile(const Eigen::VectorXd& x,
          const Eigen::VectorXd& q,
          const Eigen::VectorXd& w)
 {
-  if (w.size() == 0)
+  if (w.size() == 0 || w.minCoeff() == w.maxCoeff())
     return quantile(x, q);
   if (w.size() != x.size())
     throw std::invalid_argument("x and w must have the same size");

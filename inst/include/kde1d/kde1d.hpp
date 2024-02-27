@@ -152,7 +152,7 @@ inline Kde1d::Kde1d(size_t nlevels,
   }
   if (nlevels_ > 0 && (!std::isnan(xmin) || !std::isnan(xmax))) {
     throw std::invalid_argument(
-        "xmin and xmax are not meaningful for discrete distributions");
+      "xmin and xmax are not meaningful for discrete distributions");
   }
   this->check_xmin_xmax(xmin, xmax);
 }
@@ -221,7 +221,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
-      grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
+    grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
   edf_ = infl_grid.interpolate(x).sum();
 }
 
@@ -372,13 +372,13 @@ Kde1d::check_levels(const Eigen::VectorXd& x) const
     return;
   if ((xx.array() != xx.array().round()).any() || (xx.minCoeff() < 0)) {
     throw std::runtime_error(
-        "when nlevels > 0, 'x' must only contain non-negatives  integers.");
+      "when nlevels > 0, 'x' must only contain non-negatives  integers.");
   }
   if (xx.maxCoeff() > static_cast<double>(nlevels_ - 1)) {
     throw std::runtime_error(
-        "maximum value of 'x' is" + std::to_string(xx.maxCoeff()) +
-          ", which is larger than " + std::to_string(nlevels_ - 1) +
-          " (number of factor levels minus 1).");
+      "maximum value of 'x' is" + std::to_string(xx.maxCoeff()) +
+      ", which is larger than " + std::to_string(nlevels_ - 1) +
+      " (number of factor levels minus 1).");
     // throw std::runtime_error("maximum value of 'x' is larger than the "
     //                          "number of factor levels.");
   }
@@ -413,7 +413,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 {
   size_t m = grid_points.size();
   fft::KdeFFT kde_fft(
-      x, bandwidth_, grid_points(0), grid_points(m - 1), weights);
+    x, bandwidth_, grid_points(0), grid_points(m - 1), weights);
   Eigen::VectorXd f0 = kde_fft.kde_drv(0);
 
   Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
@@ -465,42 +465,42 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 //! calculate influence for data point for density estimate based on
 //! quantities pre-computed in `fit_lp()`.
 inline double
-  Kde1d::calculate_infl(const size_t& n,
-                        const double& f0,
-                        const double& b,
-                        const double& bandwidth,
-                        const double& s,
-                        const double& weight)
-  {
-    double M_inverse00;
-    double bandwidth2 = std::pow(bandwidth, 2);
-    double b2 = std::pow(b, 2);
-    if (degree_ == 0) {
-      M_inverse00 = 1 / f0;
-    } else if (degree_ == 1) {
-      Eigen::Matrix2d M;
-      M(0, 0) = f0;
-      M(0, 1) = bandwidth2 * b * f0;
-      M(1, 0) = M(0, 1);
-      M(1, 1) = f0 * bandwidth2 + f0 * bandwidth2 * bandwidth2 * b2;
-      M_inverse00 = M.inverse()(0, 0);
-    } else {
-      Eigen::Matrix3d M;
-      M(0, 0) = f0;
-      M(0, 1) = f0 * b;
-      M(1, 0) = M(0, 1);
-      M(1, 1) = f0 * bandwidth2 + f0 * b2;
-      M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
-      M(2, 1) = M(1, 2);
-      M(2, 2) = 0.25 * f0;
-      M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2 + b2 * b2;
-      M(0, 2) = M(2, 2);
-      M(2, 0) = M(2, 2);
-      M_inverse00 = M.inverse()(0, 0);
-    }
-
-    return K0_ * weight / (static_cast<double>(n) * bandwidth) * M_inverse00;
+Kde1d::calculate_infl(const size_t& n,
+                      const double& f0,
+                      const double& b,
+                      const double& bandwidth,
+                      const double& s,
+                      const double& weight)
+{
+  double M_inverse00;
+  double bandwidth2 = std::pow(bandwidth, 2);
+  double b2 = std::pow(b, 2);
+  if (degree_ == 0) {
+    M_inverse00 = 1 / f0;
+  } else if (degree_ == 1) {
+    Eigen::Matrix2d M;
+    M(0, 0) = f0;
+    M(0, 1) = bandwidth2 * b * f0;
+    M(1, 0) = M(0, 1);
+    M(1, 1) = f0 * bandwidth2 + f0 * bandwidth2 * bandwidth2 * b2;
+    M_inverse00 = M.inverse()(0, 0);
+  } else {
+    Eigen::Matrix3d M;
+    M(0, 0) = f0;
+    M(0, 1) = f0 * b;
+    M(1, 0) = M(0, 1);
+    M(1, 1) = f0 * bandwidth2 + f0 * b2;
+    M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
+    M(2, 1) = M(1, 2);
+    M(2, 2) = 0.25 * f0;
+    M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2 + b2 * b2;
+    M(0, 2) = M(2, 2);
+    M(2, 0) = M(2, 2);
+    M_inverse00 = M.inverse()(0, 0);
   }
+
+  return K0_ * weight / (static_cast<double>(n) * bandwidth) * M_inverse00;
+}
 
 //! transformations for density estimates with bounded support.
 //! @param x evaluation points.
@@ -611,32 +611,32 @@ Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations
- //' @param bandwidth bandwidth parameter, NA for automatic selection.
- //' @param multiplier bandwidth multiplieriplier.
- //' @param discrete whether a jittered estimate is computed.
- //' @param weights vector of weights for each observation (can be empty).
- //' @param degree polynomial degree.
- //' @return the selected bandwidth
- //' @noRd
- inline double
-  Kde1d::select_bandwidth(const Eigen::VectorXd& x,
-                          double bandwidth,
-                          double multiplier,
-                          size_t degree,
-                          const Eigen::VectorXd& weights) const
-  {
-    if (std::isnan(bandwidth)) {
-      bandwidth::PluginBandwidthSelector selector(x, weights);
-      bandwidth = selector.select_bandwidth(degree);
-    }
-
-    bandwidth *= multiplier;
-    if (nlevels_ > 0) {
-      bandwidth = std::max(bandwidth, 0.5 / 5);
-    }
-
-    return bandwidth;
+//' @param bandwidth bandwidth parameter, NA for automatic selection.
+//' @param multiplier bandwidth multiplieriplier.
+//' @param discrete whether a jittered estimate is computed.
+//' @param weights vector of weights for each observation (can be empty).
+//' @param degree polynomial degree.
+//' @return the selected bandwidth
+//' @noRd
+inline double
+Kde1d::select_bandwidth(const Eigen::VectorXd& x,
+                        double bandwidth,
+                        double multiplier,
+                        size_t degree,
+                        const Eigen::VectorXd& weights) const
+{
+  if (std::isnan(bandwidth)) {
+    bandwidth::PluginBandwidthSelector selector(x, weights);
+    bandwidth = selector.select_bandwidth(degree);
   }
+
+  bandwidth *= multiplier;
+  if (nlevels_ > 0) {
+    bandwidth = std::max(bandwidth, 0.5 / 5);
+  }
+
+  return bandwidth;
+}
 
 inline void
 Kde1d::check_xmin_xmax(const double& xmin, const double& xmax) const
@@ -665,11 +665,11 @@ Kde1d::check_inputs(const Eigen::VectorXd& x,
 
   if (!std::isnan(xmin_) && (x.minCoeff() < xmin_))
     throw std::invalid_argument(
-        "all values in x must be larger than or equal to xmin");
+      "all values in x must be larger than or equal to xmin");
 
   if (!std::isnan(xmax_) && (x.maxCoeff() > xmax_))
     throw std::invalid_argument(
-        "all values in x must be smaller than or equal to xmax");
+      "all values in x must be smaller than or equal to xmax");
 }
 
 void
