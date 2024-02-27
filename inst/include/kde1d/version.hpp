@@ -24,4 +24,4 @@
 //  major version number, y is the minor version number, and z is the patch
 //  level if not 0.
 
-#define KDE1D_LIB_VERSION "0_6_3"
+#define KDE1D_LIB_VERSION "0_1_1"
