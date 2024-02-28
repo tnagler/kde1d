@@ -51,6 +51,7 @@ public:
   size_t get_degree() const { return degree_; }
   double get_edf() const { return edf_; }
   double get_loglik() const { return loglik_; }
+  void set_xmin_xmax(double xmin = NAN, double xmax = NAN);
 
   std::string str() const
   {
@@ -64,7 +65,6 @@ public:
 
 protected:
   void set_interpolation_grid(const interp::InterpolationGrid& grid);
-  void set_xmin_xmax(double xmin = NAN, double xmax = NAN);
 
 private:
   // data members
@@ -81,7 +81,10 @@ private:
 
   // private methods
   void check_fitted() const;
-  void check_xmin_xmax(const double& xmin, const double& xmax) const;
+  void check_notfitted() const;
+  void check_xmin_xmax(const size_t& nlevels,
+                       const double& xmin,
+                       const double& xmax) const;
   void check_inputs(const Eigen::VectorXd& x,
                     const Eigen::VectorXd& weights = Eigen::VectorXd()) const;
   void fit_internal(const Eigen::VectorXd& x,
@@ -124,8 +127,8 @@ private:
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
-//! @param multiplier bandwidth multiplieriplier.
-//! @param bandwidth positive bandwidth parameter (NaN means automatic
+//! @param multiplier bandwidth multiplier (default is 1.0).
+//! @param bandwidth positive bandwidth parameter (`NaN` means automatic
 //! selection).
 //! @param degree degree of the local polynomial.
 inline Kde1d::Kde1d(size_t nlevels,
@@ -141,6 +144,7 @@ inline Kde1d::Kde1d(size_t nlevels,
   , bandwidth_(bandwidth)
   , degree_(degree)
 {
+  this->check_xmin_xmax(nlevels, xmin, xmax);
   if (multiplier <= 0.0) {
     throw std::invalid_argument("multiplier must be positive");
   }
@@ -150,11 +154,6 @@ inline Kde1d::Kde1d(size_t nlevels,
   if (degree_ > 2) {
     throw std::invalid_argument("degree must be 0, 1 or 2");
   }
-  if (nlevels_ > 0 && (!std::isnan(xmin) || !std::isnan(xmax))) {
-    throw std::invalid_argument(
-      "xmin and xmax are not meaningful for discrete distributions");
-  }
-  this->check_xmin_xmax(xmin, xmax);
 }
 
 //! construct model from an already fit interpolation grid.
@@ -193,6 +192,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   Eigen::VectorXd xx = x;
   Eigen::VectorXd w = weights;
   tools::remove_nans(xx, w);
+
   if (w.size() > 0)
     w /= w.mean();
   if (nlevels_ > 0)
@@ -639,10 +639,23 @@ Kde1d::select_bandwidth(const Eigen::VectorXd& x,
 }
 
 inline void
-Kde1d::check_xmin_xmax(const double& xmin, const double& xmax) const
+Kde1d::check_xmin_xmax(const size_t& nlevels,
+                       const double& xmin,
+                       const double& xmax) const
 {
-  if (!std::isnan(xmax) && !std::isnan(xmax) && (xmin > xmax))
-    throw std::invalid_argument("xmin must be smaller than xmax");
+  if (nlevels > 0) { // discrete distribution
+    if (!std::isnan(xmin)) {
+      throw std::invalid_argument(
+        "xmin is not meaningful for discrete distributions");
+    }
+    if (!std::isnan(xmax)) {
+      throw std::invalid_argument(
+        "xmax is not meaningful for discrete distributions");
+    }
+  } else { // continuous distribution
+    if (!std::isnan(xmax) && !std::isnan(xmax) && (xmin > xmax))
+      throw std::invalid_argument("xmin must be smaller than xmax");
+  }
 }
 
 inline void
@@ -650,6 +663,15 @@ Kde1d::check_fitted() const
 {
   if (std::isnan(loglik_)) {
     throw std::runtime_error("You must first fit the KDE to data.");
+  }
+}
+
+inline void
+Kde1d::check_notfitted() const
+{
+  if (!std::isnan(loglik_)) {
+    throw std::runtime_error(
+      "This method can't be used for already fitted objects.");
   }
 }
 
@@ -681,7 +703,8 @@ Kde1d::set_interpolation_grid(const interp::InterpolationGrid& grid)
 void
 Kde1d::set_xmin_xmax(double xmin, double xmax)
 {
-  this->check_xmin_xmax(xmin, xmax);
+  this->check_notfitted();
+  this->check_xmin_xmax(nlevels_, xmin, xmax);
   xmin_ = xmin;
   xmax_ = xmax;
 }
