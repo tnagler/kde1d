@@ -101,18 +101,15 @@
 #' @export
 kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
                   weights = numeric(0)) {
-  x <- na.omit(x)
-  # sanity checks
-  check_arguments(x, mult, xmin, xmax, bw, deg, weights)
 
   # fit model
   fit <- fit_kde1d_cpp(x = if (is.numeric(x)) x else (as.numeric(x) - 1),
                        nlevels = length(levels(x)),
-                       bw = bw,
+                       bandwidth = bw,
                        mult = mult,
                        xmin = xmin,
                        xmax = xmax,
-                       deg = deg,
+                       degree = deg,
                        weights = weights)
 
   # add info
