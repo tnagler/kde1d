@@ -237,12 +237,13 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   grid_ = interp::InterpolationGrid(grid_points, values, 3);
 
   // calculate log-likelihood of final estimate
-  loglik_ = grid_.interpolate(x).cwiseMax(1e-20).array().log().sum();
+  loglik_ = this->pdf(x, false).array().log().sum();
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
     grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
-  edf_ = infl_grid.interpolate(x).sum();
+  Eigen::VectorXd influences = infl_grid.interpolate(x).array() * (1 - prob0_);
+  edf_ = influences.sum() + (prob0_ > 0);
 }
 
 //! computes the pdf of the kernel density estimate by interpolation.
@@ -422,7 +423,7 @@ inline Eigen::VectorXd
 Kde1d::quantile_zi(const Eigen::VectorXd& x) const
 {
   Eigen::VectorXd qs(x.size());
-  auto p0 = this->cdf(Eigen::VectorXd::Zero(1))(0);
+  auto p0 = this->cdf(Eigen::VectorXd::Zero(1), false)(0);
   auto newx = (x.array() <= p0 - prob0_)
                 .select(x / (1 - prob0_),
                         (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_));

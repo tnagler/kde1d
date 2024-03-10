@@ -11,7 +11,7 @@ using namespace kde1d;
 //'   boundary.
 //' @param xmax upper bound for the support of the density, `NaN` means no
 //'   boundary.
-//' @param type variable type; muste be one of {c, cont, continuous} for
+//' @param type variable type; must be one of {c, cont, continuous} for
 //'   continuous variables, one of {d, disc, discrete} for discrete integer
 //'   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
 //'   variables.
