@@ -9,7 +9,7 @@
 ### Summary
 
 - implements a univariate kernel density estimator that can handle
-bounded and discrete data. 
+bounded, discrete, and zero-inflated data. 
 - provides classical kernel density as well as log-linear and log-quadratic methods. 
 - is highly efficient due to the Fast Fourier Transform, spline interpolation,
   and a C++ backend.
@@ -61,12 +61,28 @@ curve(dgamma(x, shape = 1),        # add true density
 ``` r
 x <- rbinom(100, size = 5, prob = 0.5)  # simulate data
 x <- ordered(x, levels = 0:5)           # declare as ordered
-fit <- kde1d(x)                         # estimate density
+fit <- kde1d(x, xmin = 0, xmax = 5,     # estimate density
+            type = "discrete") 
+fit <- kde1d(ordered(x, levels = 0:5))  # alternative API
 dkde1d(sort(unique(x)), fit)            # evaluate density estimate
 summary(fit)                            # information about the estimate
 plot(fit)                               # plot the density estimate
 points(ordered(0:5, 0:5),               # add true density
        dbinom(0:5, 5, 0.5), col = "red")
+```
+
+##### Zero-inflated data data
+``` r
+x <- rexp(500, 0.5)                    # simulate data
+x[sample(1:500, 200)] <- 0             # add zero-inflation
+fit <- kde1d(x, xmin = 0, type = "zi") # estimate density
+plot(fit)                              # plot the density estimate
+lines(                                 # add true density        
+  seq(0, 20, l = 100),
+  0.6 * dexp(seq(0, 20, l = 100), 0.5),
+  col = "red"
+)
+points(0, 0.4, col = "red")
 ```
 
 ##### Weighted estimate
@@ -86,7 +102,7 @@ the unit interval*. Journal of the American Statistical Association,
 
 Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
 density estimation for positive random variables.* Journal of Computational
-and Graphical Statistics, to appear,
+and Graphical Statistics, 27(4), 822-835.
 [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
 
 Loader, C. (2006). *Local regression and likelihood*. Springer Science & 
@@ -97,5 +113,5 @@ estimation with mixed data.* Statistics & Probability Letters, 137:326–330,
 [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
 
 Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
-estimator.* Mathematical Methods of Statistics, in press,
+estimator.* Mathematical Methods of Statistics, 27, 32-46.
 [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
