@@ -2,12 +2,15 @@
 
 #include "kdefft.hpp"
 #include "stats.hpp"
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 namespace kde1d {
 
-namespace bw {
+namespace bandwidth {
+
+#ifndef M_PI
+static constexpr double M_PI = 3.141592653589793;
+#endif
 
 //! Bandwidth selection for local-likelihood density estimation.
 //! Methodology is similar to Sheather and Jones(1991), but asymptotic
@@ -18,13 +21,13 @@ class PluginBandwidthSelector
 public:
   PluginBandwidthSelector(const Eigen::VectorXd& x,
                           const Eigen::VectorXd& weights = Eigen::VectorXd());
-  double select_bw(size_t deg);
+  double select_bandwidth(size_t degree);
 
 private:
   double scale_est(const Eigen::VectorXd& x);
-  double get_bw_for_bkfe(size_t drv);
-  double ll_ibias2(size_t deg);
-  double ll_ivar(size_t deg);
+  double get_bandwidth_for_bkfe(unsigned drv);
+  double ll_ibias2(size_t degree);
+  double ll_ivar(size_t degree);
 
   fft::KdeFFT kde_;
   Eigen::VectorXd weights_;
@@ -57,8 +60,8 @@ PluginBandwidthSelector::scale_est(const Eigen::VectorXd& x)
 {
   double m_x = x.cwiseProduct(weights_).mean();
   Eigen::VectorXd sx = (x - Eigen::VectorXd::Constant(x.size(), m_x));
-  double sd_x =
-    std::sqrt(sx.cwiseAbs2().cwiseProduct(weights_).sum() / (x.size() - 1));
+  double sd_x = std::sqrt(sx.cwiseAbs2().cwiseProduct(weights_).sum() /
+                          (static_cast<double>(x.size()) - 1));
   Eigen::VectorXd q_x(2);
   q_x << 0.25, 0.75;
   q_x = stats::quantile(x, q_x, weights_);
@@ -73,10 +76,10 @@ PluginBandwidthSelector::scale_est(const Eigen::VectorXd& x)
 //! only works for even drv
 //! @param drv order of the derivative in the kernel functional.
 inline double
-PluginBandwidthSelector::get_bw_for_bkfe(size_t drv)
+PluginBandwidthSelector::get_bandwidth_for_bkfe(unsigned drv)
 {
   if (drv % 2 != 0) {
-    throw std::runtime_error("only even drv allowed.");
+    throw std::invalid_argument("only even drv allowed.");
   }
 
   // effective sample size
@@ -88,7 +91,7 @@ PluginBandwidthSelector::get_bw_for_bkfe(size_t drv)
   psi *= std::tgamma(r + 1);
   psi /= std::pow(2 * scale_, r + 1) * std::tgamma(r / 2 + 1) * std::sqrt(M_PI);
   double Kr = stats::dnorm_drv(Eigen::VectorXd::Zero(1), r - 2)(0);
-  kde_.set_bw(std::pow(-2 * Kr / (psi * n), 1.0 / (r + 1)));
+  kde_.set_bandwidth(std::pow(-2 * Kr / (psi * n), 1.0 / (r + 1)));
 
   // now use plug in to select the actual bandwidth (eq. 3.6)
   r -= 2;
@@ -101,26 +104,26 @@ PluginBandwidthSelector::get_bw_for_bkfe(size_t drv)
   return std::pow(-2 * Kr / (psi * n), 1.0 / (r + 1));
 }
 
-//! computes the integrated squared bias (without bw and n terms).
+//! computes the integrated squared bias (without bandwidth and n terms).
 //! Bias expressions can be found in Geenens (JASA, 2014)
-//! @param deg degree of the local polynomial.
+//! @param degree degree of the local polynomial.
 inline double
-PluginBandwidthSelector::ll_ibias2(size_t deg)
+PluginBandwidthSelector::ll_ibias2(size_t degree)
 {
   Eigen::VectorXd arg;
-  if (deg == 0) {
-    kde_.set_bw(get_bw_for_bkfe(4));
+  if (degree == 0) {
+    kde_.set_bandwidth(get_bandwidth_for_bkfe(4));
     arg = 0.25 * kde_.kde_drv(4);
-  } else if (deg == 1) {
-    kde_.set_bw(get_bw_for_bkfe(4));
+  } else if (degree == 1) {
+    kde_.set_bandwidth(get_bandwidth_for_bkfe(4));
     Eigen::VectorXd f0 = kde_.kde_drv(0);
     Eigen::VectorXd f1 = kde_.kde_drv(1);
     Eigen::VectorXd f2 = kde_.kde_drv(2);
     arg = (0.5 * f2 + f1.cwiseAbs2().cwiseQuotient(f0))
             .cwiseAbs2()
             .cwiseQuotient(f0);
-  } else if (deg == 2) {
-    kde_.set_bw(get_bw_for_bkfe(8));
+  } else if (degree == 2) {
+    kde_.set_bandwidth(get_bandwidth_for_bkfe(8));
     Eigen::VectorXd f0 = kde_.kde_drv(0);
     Eigen::VectorXd f1 = kde_.kde_drv(1);
     Eigen::VectorXd f2 = kde_.kde_drv(2);
@@ -129,45 +132,46 @@ PluginBandwidthSelector::ll_ibias2(size_t deg)
           2 * (f1.array().pow(4) / f0.array().pow(3)).matrix();
     arg = (0.125 * arg).cwiseAbs2().cwiseQuotient(f0);
   } else {
-    throw std::runtime_error("deg must be one of {0, 1, 2}.");
+    throw std::invalid_argument("degree must be one of {0, 1, 2}.");
   }
   return bin_counts_.cwiseProduct(arg).sum() / bin_counts_.sum();
 }
 
-//! computes the integrated squared variance (without bw and n terms).
+//! computes the integrated squared variance (without bandwidth and n terms).
 //! Variance expressions can be found in Geenens (JASA, 2014)
-  //! @param deg degree of the local polynomial.
+//! @param degree degree of the local polynomial.
 inline double
-PluginBandwidthSelector::ll_ivar(size_t deg)
+PluginBandwidthSelector::ll_ivar(size_t degree)
 {
-  if (deg > 2)
-    throw std::runtime_error("deg must be one of {0, 1, 2}.");
-  return (deg < 2 ? 1.0 : 27.0 / 16.0) * 0.5 / std::sqrt(M_PI);
+  if (degree > 2)
+    throw std::invalid_argument("degree must be one of {0, 1, 2}.");
+  return (degree < 2 ? 1.0 : 27.0 / 16.0) * 0.5 / std::sqrt(M_PI);
 }
 
 //! Selects the bandwidth for kernel density estimation.
-//! @param deg degree of the local polynomial.
+//! @param degree degree of the local polynomial.
 inline double
-PluginBandwidthSelector::select_bw(size_t deg)
+PluginBandwidthSelector::select_bandwidth(size_t degree)
 {
   // effective sample size
   double n = std::pow(weights_.sum(), 2) / weights_.cwiseAbs2().sum();
-  double bw;
-  int bwpow = (deg < 2 ? 4 : 8);
+  double bandwidth;
+  int bandwidthpow = (degree < 2 ? 4 : 8);
   try {
-    double ibias2 = ll_ibias2(deg);
-    double ivar = ll_ivar(deg);
-    bw = std::pow(ivar / (bwpow * n * ibias2), 1.0 / (bwpow + 1));
+    double ibias2 = ll_ibias2(degree);
+    double ivar = ll_ivar(degree);
+    bandwidth =
+      std::pow(ivar / (bandwidthpow * n * ibias2), 1.0 / (bandwidthpow + 1));
   } catch (...) {
-    bw = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bwpow + 1));
+    bandwidth = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bandwidthpow + 1));
   }
-  if (std::isnan(bw)) {
-    bw = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bwpow + 1));
+  if (std::isnan(bandwidth)) {
+    bandwidth = 4.0 * 1.06 * scale_ * std::pow(n, -1.0 / (bandwidthpow + 1));
   }
 
-  return bw;
+  return bandwidth;
 }
 
-} // end kde1d::bw
+} // end kde1d::bandwidth
 
 } // end kde1d
