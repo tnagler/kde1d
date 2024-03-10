@@ -3,11 +3,14 @@
 \name{plot.kde1d}
 \alias{plot.kde1d}
 \alias{lines.kde1d}
+\alias{points.kde1d}
 \title{Plotting kde1d objects}
 \usage{
 \method{plot}{kde1d}(x, ...)
 
 \method{lines}{kde1d}(x, ...)
+
+\method{points}{kde1d}(x, ...)
 }
 \arguments{
 \item{x}{\code{kde1d} object.}

@@ -3,6 +3,7 @@
 S3method(lines,kde1d)
 S3method(logLik,kde1d)
 S3method(plot,kde1d)
+S3method(points,kde1d)
 S3method(print,kde1d)
 S3method(summary,kde1d)
 export(dkde1d)

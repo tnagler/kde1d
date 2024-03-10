@@ -119,22 +119,9 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #' @importFrom utils modifyList
 #' @export
 plot.kde1d <- function(x, ...) {
-  plot_type <- "l" # for continuous variables, use a line plot
-  if (is.ordered(x$x)) {
-    ev <- ordered(levels(x$x), levels(x$x))
-    plot_type <- "h" # for discrete variables, use a histrogram
-  } else {
-    # adjust grid if necessary
-    ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
-    if (!is.nan(x$xmin)) {
-      ev[1] <- x$xmin
-    }
-    if (!is.nan(x$xmax)) {
-      ev[length(ev)] <- x$xmax
-    }
-  }
+  ev <- make_plotting_grid(x)
   vals <- dkde1d(ev, x)
-
+  plot_type <- ifelse(x$type == "discrete", "p", "l")
   pars <- list(
     x = ev,
     y = vals,
@@ -143,8 +130,11 @@ plot.kde1d <- function(x, ...) {
     ylab = "density",
     ylim = c(0, 1.1 * max(x$values))
   )
-
   do.call(plot, modifyList(pars, list(...)))
+
+  if (x$type == "zero-inflated") {
+    points(0, dkde1d(0, x))
+  }
 }
 
 #' @method lines kde1d
@@ -154,20 +144,51 @@ plot.kde1d <- function(x, ...) {
 #' @importFrom utils modifyList
 #' @export
 lines.kde1d <- function(x, ...) {
-  if (is.ordered(x$x)) {
-    stop("lines does not work for discrete estimates.")
+  if (x$type == "discrete") {
+    points(x, ...)
   }
-  ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
-  if (!is.nan(x$xmin)) {
-    ev[1] <- x$xmin
-  }
-  if (!is.nan(x$xmax)) {
-    ev[length(ev)] <- x$xmax
-  }
+  ev <- make_plotting_grid(x)
   vals <- dkde1d(ev, x)
-
   pars <- list(x = ev, y = vals)
   do.call(lines, modifyList(pars, list(...)))
+
+  if (x$type == "zero-inflated") {
+    points(0, dkde1d(0, x))
+  }
+}
+
+#' @method points kde1d
+#'
+#' @rdname plot.kde1d
+#' @importFrom graphics lines
+#' @importFrom utils modifyList
+#' @export
+points.kde1d <- function(x, ...) {
+  ev <- make_plotting_grid(x)
+  vals <- dkde1d(ev, x)
+  pars <- list(x = ev, y = vals)
+  do.call(points, modifyList(pars, list(...)))
+}
+
+make_plotting_grid <- function(x) {
+  if (is.ordered(x$x)) {
+    ev <- ordered(levels(x$x), levels(x$x))
+  } else if (x$type == "discrete") {
+    ev <- seq.int(floor(min(grid_points)), ceiling(max(x$grid_points)))
+  } else {
+    # adjust grid if necessary
+    ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
+    if (!is.nan(x$xmin)) {
+      ev[1] <- x$xmin
+    }
+    if (!is.nan(x$xmax)) {
+      ev[length(ev)] <- x$xmax
+    }
+    if (x$type == "zero-inflated") {
+      ev <- setdiff(ev, 0)
+    }
+  }
+  ev
 }
 
 #' @importFrom stats logLik
