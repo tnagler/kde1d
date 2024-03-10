@@ -7,27 +7,32 @@ using namespace kde1d;
 //' freedom.
 //' @param x vector of observations; categorical data must be converted to
 //'   non-negative integers.
-//' @param nlevels the number of factor levels; 0 for continuous data.
-//' @param bandwidth the bandwidth parameter.
 //' @param xmin lower bound for the support of the density, `NaN` means no
 //'   boundary.
 //' @param xmax upper bound for the support of the density, `NaN` means no
 //'   boundary.
+//' @param type variable type; muste be one of {c, cont, continuous} for
+//'   continuous variables, one of {d, disc, discrete} for discrete integer
+//'   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
+//'   variables.
+//' @param bandwidth the bandwidth parameter.
+//' @param mult positive bandwidth multiplier; the actual bandwidth used is
+//'   bw*mult.
 //' @param degree order of the local polynomial.
 //' @return `An Rcpp::List` containing the fitted density values on a grid and
 //'   additional information.
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
-                         size_t nlevels,
-                         double bandwidth,
-                         double mult,
                          double xmin,
                          double xmax,
+                         std::string type,
+                         double mult,
+                         double bandwidth,
                          size_t degree,
                          const Eigen::VectorXd& weights)
 {
-  Kde1d model(nlevels, xmin, xmax, mult, bandwidth, degree);
+  Kde1d model(xmin, xmax, type, mult, bandwidth, degree);
   model.fit(x, weights);
   return kde1d_wrap(model);
 }

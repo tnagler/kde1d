@@ -99,16 +99,22 @@
 #' lines(kde1d(x), col = 2)
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
-                  weights = numeric(0)) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, type = "continuous",
+                  mult = 1, bw = NA,  deg = 2, weights = numeric(0)) {
+
+  if (is.ordered(x)) {
+    type <- "discrete"
+    xmin <- 0
+    xmax <- nlevels(x) - 1
+  }
 
   # fit model
   fit <- fit_kde1d_cpp(x = if (is.numeric(x)) x else (as.numeric(x) - 1),
-                       nlevels = length(levels(x)),
-                       bandwidth = bw,
-                       mult = mult,
                        xmin = xmin,
                        xmax = xmax,
+                       type = type,
+                       bandwidth = bw,
+                       mult = mult,
                        degree = deg,
                        weights = weights)
 

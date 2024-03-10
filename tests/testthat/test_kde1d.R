@@ -50,17 +50,14 @@ test_that("detects wrong arguments", {
   expect_error(kde1d(x, deg = 3))
   expect_error(supressWarnings(kde1d(x, weights = list())))
   expect_error(kde1d(x, weights = 1:3))
-
-  x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
-  expect_error(kde1d(x, xmax = 0))
 })
 
 test_that("returns proper 'kde1d' object", {
   lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
   class_members <- c(
-    "grid_points", "values", "nlevels", "bw", "xmin", "xmax", "deg",
-    "edf", "loglik", "x", "weights", "nobs",  "var_name"
+    "grid_points", "values", "xmin", "xmax", "type", "bw", "mult", "deg",
+    "prob0", "edf", "loglik", "x", "weights", "nobs",  "var_name"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
 })
@@ -88,12 +85,12 @@ for (k in seq_along(scenarios)) {
     expect_lte(max(na.omit(pkde1d(sim, fit)), 1), 1)
     expect_that(all(na.omit(qkde1d(u, fit) >= xmin)), equals(TRUE))
     expect_that(all(na.omit(qkde1d(u, fit) <= xmax)), equals(TRUE))
-    if (!is.nan(fit$xmin)) {
+    if (!(fit$type == "discrete") & !is.nan(fit$xmin)) {
       expect_equal(dkde1d(xmin - 1, fit), 0)
       expect_equal(pkde1d(xmin - 1, fit), 0)
     }
 
-    if (!is.nan(fit$xmax)) {
+    if (!(fit$type == "discrete") & !is.nan(fit$xmax)) {
       expect_equal(dkde1d(xmax + 1, fit), 0)
       expect_equal(pkde1d(xmax + 1, fit), 1)
     }
