@@ -3,7 +3,7 @@ context("Testing 'kde1d'")
 n_sim <- 100
 data_types <- c(
   "unbounded", "left_boundary", "right_boundary",
-  "two_boundaries", "discrete"
+  "two_boundaries", "discrete_old", "discrete_new", "zero-inflated"
 )
 deg <- 0:2
 
@@ -18,6 +18,7 @@ for (k in seq_along(scenarios)) {
   test_that(paste0("can fit ", paste(scenarios[[k]], collapse = "/")), {
     xmin <- xmax <- NaN
     nlevels <- 0
+    type <- "continuous"
     if (scenarios[[k]]$data_type == "unbounded") {
       x <- rnorm(n_sim)
     } else if (scenarios[[k]]$data_type == "left_boundary") {
@@ -30,20 +31,29 @@ for (k in seq_along(scenarios)) {
       x <- runif(n_sim)
       xmin <- 0
       xmax <- 1
-    } else {
+    } else if (scenarios[[k]]$data_type == "discrete_old") {
       x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
+    } else if (scenarios[[k]]$data_type == "discrete_new") {
+      x <- rbinom(n_sim, size = 5, prob = 0.5)
+      type <- "discrete"
+    } else if (scenarios[[k]]$data_type == "zero-inflated") {
+      x <- rexp(n_sim)
+      x[sample(1:n_sim, floor(n_sim / 3))] <- 0
+      type <- "zi"
     }
+
     sims[[k]] <- x
     expect_silent(
-      fits[[k]] <<- kde1d(x,  xmin = xmin, xmax = xmax, deg = scenarios[[k]]$deg)
+      fits[[k]] <<- kde1d(x, xmin = xmin, xmax = xmax, type = type,
+                          deg = scenarios[[k]]$deg)
     )
   })
 }
 
 test_that("detects wrong arguments", {
   x <- rnorm(n_sim)
-  expect_error(kde1d(x, xmin = 0))
-  expect_error(kde1d(x, xmax = 0))
+  expect_error(kde1d(x, xmin = mean(x)))
+  expect_error(kde1d(x, xmax = mean(x)))
   expect_error(kde1d(x, xmin = 10, xmax = -10))
   expect_error(kde1d(x, mult = 0))
   expect_error(kde1d(x, bw = -1))
@@ -100,11 +110,8 @@ for (k in seq_along(scenarios)) {
 test_that("plot functions work", {
   test_plot <- function(fit) {
     expect_silent(plot(fit))
-    if (is.ordered(fit$x)) {
-      expect_error(lines(fit))
-    } else {
-      expect_silent(lines(fit))
-    }
+    expect_silent(lines(fit))
+    expect_silent(points(fit))
   }
 
   lapply(fits, test_plot)

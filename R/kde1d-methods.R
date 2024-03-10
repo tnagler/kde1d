@@ -174,7 +174,7 @@ make_plotting_grid <- function(x) {
   if (is.ordered(x$x)) {
     ev <- ordered(levels(x$x), levels(x$x))
   } else if (x$type == "discrete") {
-    ev <- seq.int(floor(min(grid_points)), ceiling(max(x$grid_points)))
+    ev <- seq.int(floor(min(x$grid_points)), ceiling(max(x$grid_points)))
   } else {
     # adjust grid if necessary
     ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
@@ -202,8 +202,10 @@ logLik.kde1d <- function(object, ...) {
 #' @method print kde1d
 #' @export
 print.kde1d <- function(x, ...) {
-  if (is.ordered(x$x)) {
+  if (x$type == "discrete") {
     cat("(jittered) ")
+  } else  if (x$type == "zero-inflated") {
+    cat("(zero-inflated) ")
   }
   cat("kernel density estimate ('kde1d')")
   if (x$deg > 0) {
