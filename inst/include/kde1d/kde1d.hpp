@@ -244,6 +244,9 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
     grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
   Eigen::VectorXd influences = infl_grid.interpolate(x).array() * (1 - prob0_);
   edf_ = influences.sum() + (prob0_ > 0);
+
+  // store bandwidth in standardized format
+  bandwidth_ = bandwidth_ / multiplier_;
 }
 
 //! computes the pdf of the kernel density estimate by interpolation.

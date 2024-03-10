@@ -249,12 +249,13 @@ print.kde1d <- function(x, ...) {
 #' @method summary kde1d
 #' @export
 summary.kde1d <- function(object, ...) {
-  df <- rep(NA, 4)
-  names(df) <- c("nobs", "bw", "loglik", "d.f.")
+  df <- rep(NA, 5)
+  names(df) <- c("nobs", "bw", "mult", "loglik", "d.f.")
   df[1] <- object$nobs
   df[2] <- object$bw
-  df[3] <- object$loglik
-  df[4] <- object$edf
+  df[3] <- object$mult
+  df[4] <- object$loglik
+  df[5] <- object$edf
 
   print(object)
   cat(strrep("-", 65), "\n", sep = "")

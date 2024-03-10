@@ -122,7 +122,7 @@ test_that("other generics work", {
     expect_output(print(fit))
     expect_output(s <- summary(fit))
     expect_is(s, "numeric")
-    expect_equal(length(s), 4)
+    expect_equal(length(s), 5)
     expect_silent(s <- logLik(fit))
     expect_is(s, "numeric")
   }
