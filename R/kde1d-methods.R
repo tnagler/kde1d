@@ -173,7 +173,7 @@ lines.kde1d <- function(x, ...) {
 #' @method points kde1d
 #'
 #' @rdname plot.kde1d
-#' @importFrom graphics lines
+#' @importFrom graphics points
 #' @importFrom utils modifyList
 #' @export
 points.kde1d <- function(x, ...) {
