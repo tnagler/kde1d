@@ -89,8 +89,7 @@ private:
   void check_xmin_xmax(const double& xmin, const double& xmax) const;
   void check_inputs(const Eigen::VectorXd& x,
                     const Eigen::VectorXd& weights = Eigen::VectorXd()) const;
-  void fit_internal(const Eigen::VectorXd& x,
-                    const Eigen::VectorXd& weights = Eigen::VectorXd());
+  void check_boundaries(const Eigen::VectorXd& x) const;
   Eigen::VectorXd pdf_continuous(const Eigen::VectorXd& x) const;
   Eigen::VectorXd cdf_continuous(const Eigen::VectorXd& x) const;
   Eigen::VectorXd quantile_continuous(const Eigen::VectorXd& x) const;
@@ -196,6 +195,7 @@ inline void
 Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 {
   check_inputs(x, weights);
+  check_boundaries(x);
 
   // preprocessing for nans and jittering
   Eigen::VectorXd xx = x;
@@ -768,6 +768,14 @@ Kde1d::check_inputs(const Eigen::VectorXd& x,
 
   if ((weights.size() > 0) && (weights.size() != x.size()))
     throw std::invalid_argument("x and weights must have the same size");
+}
+
+inline void
+Kde1d::check_boundaries(const Eigen::VectorXd& x) const
+{
+  if ((x.array() < xmin_).any() | (x.array() > xmax_).any()) {
+    throw std::invalid_argument("x must be contained in [xmin, xmax].");
+  }
 }
 
 void
