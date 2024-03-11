@@ -12,20 +12,20 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // fit_kde1d_cpp
-Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, size_t nlevels, double bw, double mult, double xmin, double xmax, size_t deg, const Eigen::VectorXd& weights);
-RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP nlevelsSEXP, SEXP bwSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP degSEXP, SEXP weightsSEXP) {
+Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x, double xmin, double xmax, std::string type, double mult, double bandwidth, size_t degree, const Eigen::VectorXd& weights);
+RcppExport SEXP _kde1d_fit_kde1d_cpp(SEXP xSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP typeSEXP, SEXP multSEXP, SEXP bandwidthSEXP, SEXP degreeSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nlevels(nlevelsSEXP);
-    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
-    Rcpp::traits::input_parameter< size_t >::type deg(degSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< double >::type bandwidth(bandwidthSEXP);
+    Rcpp::traits::input_parameter< size_t >::type degree(degreeSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, nlevels, bw, mult, xmin, xmax, deg, weights));
+    rcpp_result_gen = Rcpp::wrap(fit_kde1d_cpp(x, xmin, xmax, type, mult, bandwidth, degree, weights));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -3,7 +3,7 @@ context("Testing 'kde1d'")
 n_sim <- 100
 data_types <- c(
   "unbounded", "left_boundary", "right_boundary",
-  "two_boundaries", "discrete"
+  "two_boundaries", "discrete_old", "discrete_new", "zero-inflated"
 )
 deg <- 0:2
 
@@ -17,6 +17,8 @@ sims <- as.list(seq_along(scenarios))
 for (k in seq_along(scenarios)) {
   test_that(paste0("can fit ", paste(scenarios[[k]], collapse = "/")), {
     xmin <- xmax <- NaN
+    nlevels <- 0
+    type <- "continuous"
     if (scenarios[[k]]$data_type == "unbounded") {
       x <- rnorm(n_sim)
     } else if (scenarios[[k]]$data_type == "left_boundary") {
@@ -29,37 +31,43 @@ for (k in seq_along(scenarios)) {
       x <- runif(n_sim)
       xmin <- 0
       xmax <- 1
-    } else {
+    } else if (scenarios[[k]]$data_type == "discrete_old") {
       x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
+    } else if (scenarios[[k]]$data_type == "discrete_new") {
+      x <- rbinom(n_sim, size = 5, prob = 0.5)
+      type <- "discrete"
+    } else if (scenarios[[k]]$data_type == "zero-inflated") {
+      x <- rexp(n_sim)
+      x[sample(1:n_sim, floor(n_sim / 3))] <- 0
+      type <- "zi"
     }
+
     sims[[k]] <- x
     expect_silent(
-      fits[[k]] <<- kde1d(x, xmin = xmin, xmax = xmax, deg = scenarios[[k]]$deg)
+      fits[[k]] <<- kde1d(x, xmin = xmin, xmax = xmax, type = type,
+                          deg = scenarios[[k]]$deg)
     )
   })
 }
 
 test_that("detects wrong arguments", {
   x <- rnorm(n_sim)
-  expect_error(kde1d(x, xmin = 0))
-  expect_error(kde1d(x, xmax = 0))
+  expect_error(kde1d(x, xmin = mean(x)))
+  expect_error(kde1d(x, xmax = mean(x)))
   expect_error(kde1d(x, xmin = 10, xmax = -10))
   expect_error(kde1d(x, mult = 0))
   expect_error(kde1d(x, bw = -1))
   expect_error(kde1d(x, deg = 3))
   expect_error(supressWarnings(kde1d(x, weights = list())))
   expect_error(kde1d(x, weights = 1:3))
-
-  x <- ordered(rbinom(n_sim, size = 5, prob = 0.5), levels = 0:5)
-  expect_error(kde1d(x, xmax = 0))
 })
 
 test_that("returns proper 'kde1d' object", {
   lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
   class_members <- c(
-    "grid_points", "values", "nlevels", "bw", "xmin", "xmax", "deg",
-    "edf", "loglik", "x", "weights", "nobs",  "var_name"
+    "grid_points", "values", "xmin", "xmax", "type", "bw", "mult", "deg",
+    "prob0", "edf", "loglik", "x", "weights", "nobs",  "var_name"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
 })
@@ -87,12 +95,12 @@ for (k in seq_along(scenarios)) {
     expect_lte(max(na.omit(pkde1d(sim, fit)), 1), 1)
     expect_that(all(na.omit(qkde1d(u, fit) >= xmin)), equals(TRUE))
     expect_that(all(na.omit(qkde1d(u, fit) <= xmax)), equals(TRUE))
-    if (!is.nan(fit$xmin)) {
+    if (!(fit$type == "discrete") & !is.nan(fit$xmin)) {
       expect_equal(dkde1d(xmin - 1, fit), 0)
       expect_equal(pkde1d(xmin - 1, fit), 0)
     }
 
-    if (!is.nan(fit$xmax)) {
+    if (!(fit$type == "discrete") & !is.nan(fit$xmax)) {
       expect_equal(dkde1d(xmax + 1, fit), 0)
       expect_equal(pkde1d(xmax + 1, fit), 1)
     }
@@ -102,11 +110,8 @@ for (k in seq_along(scenarios)) {
 test_that("plot functions work", {
   test_plot <- function(fit) {
     expect_silent(plot(fit))
-    if (is.ordered(fit$x)) {
-      expect_error(lines(fit))
-    } else {
-      expect_silent(lines(fit))
-    }
+    expect_silent(lines(fit))
+    expect_silent(points(fit))
   }
 
   lapply(fits, test_plot)
@@ -117,7 +122,7 @@ test_that("other generics work", {
     expect_output(print(fit))
     expect_output(s <- summary(fit))
     expect_is(s, "numeric")
-    expect_equal(length(s), 4)
+    expect_equal(length(s), 5)
     expect_silent(s <- logLik(fit))
     expect_is(s, "numeric")
   }

@@ -5,30 +5,36 @@ using namespace kde1d;
 
 //' fits a kernel density estimate and calculates the effective degrees of
 //' freedom.
-//' @param x vector of observations; catergorical data must be converted to
+//' @param x vector of observations; categorical data must be converted to
 //'   non-negative integers.
-//' @param nlevels the number of factor levels; 0 for continuous data.
-//' @param bw the bandwidth parameter.
 //' @param xmin lower bound for the support of the density, `NaN` means no
 //'   boundary.
 //' @param xmax upper bound for the support of the density, `NaN` means no
 //'   boundary.
-//' @param deg order of the local polynomial.
+//' @param type variable type; must be one of {c, cont, continuous} for
+//'   continuous variables, one of {d, disc, discrete} for discrete integer
+//'   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
+//'   variables.
+//' @param bandwidth the bandwidth parameter.
+//' @param mult positive bandwidth multiplier; the actual bandwidth used is
+//'   bw*mult.
+//' @param degree order of the local polynomial.
 //' @return `An Rcpp::List` containing the fitted density values on a grid and
 //'   additional information.
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
-                         size_t nlevels,
-                         double bw,
-                         double mult,
                          double xmin,
                          double xmax,
-                         size_t deg,
+                         std::string type,
+                         double mult,
+                         double bandwidth,
+                         size_t degree,
                          const Eigen::VectorXd& weights)
 {
-  Kde1d fit(x, nlevels, bw, mult, xmin, xmax, deg, weights);
-  return kde1d_wrap(fit);
+  Kde1d model(xmin, xmax, type, mult, bandwidth, degree);
+  model.fit(x, weights);
+  return kde1d_wrap(model);
 }
 
 //' computes the pdf of a kernel density estimate by interpolation.
@@ -40,7 +46,7 @@ Rcpp::List fit_kde1d_cpp(const Eigen::VectorXd& x,
 Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
                            const Rcpp::List& kde1d_r)
 {
-  return kde1d_wrap(kde1d_r).pdf(x);
+  return kde1d_wrap(kde1d_r).pdf(x, false);
 }
 
 //' computes the cdf of a kernel density estimate by numerical integration.
@@ -52,7 +58,7 @@ Eigen::VectorXd dkde1d_cpp(const Eigen::VectorXd& x,
 Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& q,
                            const Rcpp::List& kde1d_r)
 {
-  return kde1d_wrap(kde1d_r).cdf(q);
+  return kde1d_wrap(kde1d_r).cdf(q, false);
 }
 
 //' computes the quantile of a kernel density estimate by numerical inversion
@@ -65,6 +71,6 @@ Eigen::VectorXd pkde1d_cpp(const Eigen::VectorXd& q,
 Eigen::VectorXd qkde1d_cpp(const Eigen::VectorXd& p,
                            const Rcpp::List& kde1d_r)
 {
-  return kde1d_wrap(kde1d_r).quantile(p);
+  return kde1d_wrap(kde1d_r).quantile(p, false);
 }
 

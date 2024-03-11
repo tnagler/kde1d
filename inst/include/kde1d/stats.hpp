@@ -23,7 +23,7 @@ dnorm(const Eigen::MatrixXd& x)
   boost::math::normal dist;
   return x.unaryExpr(
     [&dist](const double& y) { return boost::math::pdf(dist, y); });
-};
+}
 
 //! standard normal density
 //! @param x evaluation points.
@@ -43,7 +43,7 @@ dnorm_drv(const Eigen::MatrixXd& x, unsigned drv)
       res = -res;
     return res;
   });
-};
+}
 
 //! standard normal cdf
 //! @param x evaluation points.
@@ -54,7 +54,7 @@ pnorm(const Eigen::MatrixXd& x)
   boost::math::normal dist;
   return x.unaryExpr(
     [&dist](const double& y) { return boost::math::cdf(dist, y); });
-};
+}
 
 //! standard normal quantiles
 //! @param x evaluation points.
@@ -65,7 +65,7 @@ qnorm(const Eigen::MatrixXd& x)
   boost::math::normal dist;
   return x.unaryExpr(
     [&dist](const double& y) { return boost::math::quantile(dist, y); });
-};
+}
 
 //! empirical quantiles
 //! @param x data.
@@ -84,10 +84,10 @@ quantile(const Eigen::VectorXd& x, const Eigen::VectorXd& q)
 
   // linear interpolation (quantile of type 7 in R)
   for (size_t i = 0; i < m; ++i) {
-    size_t k = std::floor(n * q(i));
+    size_t k = static_cast<size_t>(std::floor(n * q(i)));
     double p = static_cast<double>(k) / n;
     res(i) = x2[k];
-    if (k < n)
+    if (static_cast<double>(k) < n)
       res(i) += (x2[k + 1] - x2[k]) * (q(i) - p) * n;
   }
   return res;
@@ -103,11 +103,11 @@ quantile(const Eigen::VectorXd& x,
          const Eigen::VectorXd& q,
          const Eigen::VectorXd& w)
 {
-  if (w.size() == 0)
+  if (w.size() == 0 || w.minCoeff() == w.maxCoeff())
     return quantile(x, q);
   if (w.size() != x.size())
-    throw std::runtime_error("x and w must have the same size");
-  double n = static_cast<double>(x.size());
+    throw std::invalid_argument("x and w must have the same size");
+  size_t n = x.size();
   size_t m = q.size();
   Eigen::VectorXd res(m);
 
@@ -128,7 +128,6 @@ quantile(const Eigen::VectorXd& x,
   }
 
   double wsum = w.sum() - w(ind[n - 1]);
-  ;
   for (size_t j = 0; j < m; ++j) {
     size_t i = 1;
     while ((wcum(i) < q(j) * wsum) & (i < n))
@@ -163,7 +162,7 @@ equi_jitter(const Eigen::VectorXd& x)
   // compute contingency table
   Eigen::MatrixXd tab(n, 2);
   size_t lev = 0;
-  size_t cnt = 1;
+  double cnt = 1;
   for (size_t k = 1; k < n; ++k) {
     if (srt(k - 1) != srt(k)) {
       tab(lev, 0) = srt(k - 1);
@@ -179,18 +178,18 @@ equi_jitter(const Eigen::VectorXd& x)
   }
   tab.conservativeResize(lev, 2);
 
-  // add deterministic, conditionally uniorm noise
+  // add deterministic, conditionally uniform noise
   Eigen::VectorXd noise = Eigen::VectorXd::Zero(n);
   size_t i = 0;
-  for (size_t k = 0; k < tab.rows(); ++k) {
-    for (size_t cnt = 1; cnt <= tab(k, 1); ++cnt)
+  for (long k = 0; k < tab.rows(); ++k) {
+    for (cnt = 1; cnt <= tab(k, 1); ++cnt)
       noise(i++) = -0.5 + cnt / (tab(k, 1) + 1.0);
     cnt = 1;
   }
   Eigen::VectorXd jtr = srt + noise;
 
   // invert the permutation to return jittered x in original order
-  for (size_t i = 0; i < perm.size(); ++i)
+  for (i = 0; i < static_cast<size_t>(perm.size()); ++i)
     srt(perm(i)) = jtr(i);
 
   return srt;
@@ -208,7 +207,7 @@ inline Eigen::VectorXd
 simulate_uniform(size_t n, std::vector<int> seeds)
 {
   if (n < 1)
-    throw std::runtime_error("n  must be at least 1.");
+    throw std::invalid_argument("n  must be at least 1.");
 
   if (seeds.size() == 0) { // no seeds provided, seed randomly
     std::random_device rd{};
