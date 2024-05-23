@@ -213,6 +213,16 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
     xx =
       (w.array() == 0.0).select(Eigen::VectorXd::Constant(x.size(), NAN), xx);
     tools::remove_nans(xx, w);
+    if (xx.size() == 0) {
+      bandwidth_ = NAN;
+      loglik_ = 0.0;
+      edf_ = 1.0;
+      Eigen::VectorXd grid_points(5);
+      grid_points << -2, -1, 0, 1, 2;
+      auto values = Eigen::VectorXd::Constant(5, 0.0);
+      grid_ = interp::InterpolationGrid(grid_points, values, 0);
+      return;
+    }
   } else if (type_ == "discrete") {
     xx = stats::equi_jitter(xx);
   }
@@ -360,9 +370,9 @@ inline Eigen::VectorXd
 Kde1d::cdf_zi(const Eigen::VectorXd& x) const
 {
   auto ones = Eigen::VectorXd::Ones(x.size());
-  auto zeros = ones.array() * 0;
+  auto zeros = Eigen::VectorXd::Zero(x.size());
   Eigen::VectorXd zi = (x.array() >= 0).array().select(ones, zeros);
-  return prob0_ * zi + cdf_continuous(x) * (1 - prob0_);
+  return prob0_ * zi + (1 - prob0_) * (prob0_ < 1 ? cdf_continuous(x) : zeros);
 }
 
 //! computes the cdf of the kernel density estimate by numerical inversion.
