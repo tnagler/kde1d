@@ -208,7 +208,7 @@ inline Kde1d::Kde1d(const interp::InterpolationGrid& grid,
   , prob0_(prob0)
 {
   this->check_xmin_xmax(xmin, xmax);
-  if ((prob0 < 0) | (prob0 > 1)) {
+  if ((prob0 < 0) || (prob0 > 1)) {
     throw std::invalid_argument("prob0 must lie in the interval [0, 1].");
   }
 }
@@ -322,7 +322,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
-    grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
+      grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
   Eigen::VectorXd influences = infl_grid.interpolate(xx).array() * (1 - prob0_);
   edf_ = influences.sum() + (prob0_ > 0);
 
@@ -343,12 +343,12 @@ Kde1d::pdf(const Eigen::VectorXd& x, const bool& check_fitted) const
   check_inputs(x);
 
   switch (type_) {
-    default:
-      return pdf_continuous(x);
-    case VarType::discrete:
-      return pdf_discrete(x);
-    case VarType::zero_inflated:
-      return pdf_zi(x);
+  default:
+    return pdf_continuous(x);
+  case VarType::discrete:
+    return pdf_discrete(x);
+  case VarType::zero_inflated:
+    return pdf_zi(x);
   }
 }
 
@@ -384,7 +384,7 @@ Kde1d::pdf_zi(const Eigen::VectorXd& x) const
 {
   auto ones = Eigen::VectorXd::Ones(x.size());
   return (x.array() == 0)
-    .select(prob0_ * ones.array(), (1 - prob0_) * pdf_continuous(x).array());
+           .select(prob0_ * ones.array(), (1 - prob0_) * pdf_continuous(x).array());
 }
 
 //! computes the cdf of the kernel density estimate by numerical
@@ -401,12 +401,12 @@ Kde1d::cdf(const Eigen::VectorXd& x, const bool& check_fitted) const
   check_inputs(x);
 
   switch (type_) {
-    default:
-      return cdf_continuous(x);
-    case VarType::discrete:
-      return cdf_discrete(x);
-    case VarType::zero_inflated:
-      return cdf_zi(x);
+  default:
+    return cdf_continuous(x);
+  case VarType::discrete:
+    return cdf_discrete(x);
+  case VarType::zero_inflated:
+    return cdf_zi(x);
   }
 }
 
@@ -462,12 +462,12 @@ Kde1d::quantile(const Eigen::VectorXd& x, const bool& check_fitted) const
     throw std::invalid_argument("probabilities must lie in (0, 1).");
 
   switch (type_) {
-    default:
-      return quantile_continuous(x);
-    case VarType::discrete:
-      return quantile_discrete(x);
-    case VarType::zero_inflated:
-      return quantile_zi(x);
+  default:
+    return quantile_continuous(x);
+  case VarType::discrete:
+    return quantile_discrete(x);
+  case VarType::zero_inflated:
+    return quantile_zi(x);
   }
 }
 
@@ -513,7 +513,7 @@ Kde1d::quantile_zi(const Eigen::VectorXd& x) const
   auto p0 = this->cdf(Eigen::VectorXd::Zero(1), false)(0);
   auto newx = (x.array() <= p0 - prob0_)
                 .select(x / (1 - prob0_),
-                        (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_));
+  (x.array() - prob0_).cwiseMax(0.0) / (1 - prob0_));
   qs = this->quantile_continuous(newx);
   for (Eigen::Index i = 0; i < x.size(); i++) {
     if ((x(i) > p0 - prob0_) && (x(i) <= p0)) {
@@ -569,7 +569,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 {
   size_t m = grid_points.size();
   fft::KdeFFT kde_fft(
-    x, bandwidth_, grid_points(0), grid_points(m - 1), weights);
+      x, bandwidth_, grid_points(0), grid_points(m - 1), weights);
   Eigen::VectorXd f0 = kde_fft.kde_drv(0);
 
   Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
@@ -621,42 +621,42 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 //! calculate influence for data point for density estimate based on
 //! quantities pre-computed in `fit_lp()`.
 inline double
-Kde1d::calculate_infl(const size_t& n,
-                      const double& f0,
-                      const double& b,
-                      const double& bandwidth,
-                      const double& s,
-                      const double& weight)
-{
-  double M_inverse00;
-  double bandwidth2 = std::pow(bandwidth, 2);
-  double b2 = std::pow(b, 2);
-  if (degree_ == 0) {
-    M_inverse00 = 1 / f0;
-  } else if (degree_ == 1) {
-    Eigen::Matrix2d M;
-    M(0, 0) = f0;
-    M(0, 1) = bandwidth2 * b * f0;
-    M(1, 0) = M(0, 1);
-    M(1, 1) = f0 * bandwidth2 + f0 * bandwidth2 * bandwidth2 * b2;
-    M_inverse00 = M.inverse()(0, 0);
-  } else {
-    Eigen::Matrix3d M;
-    M(0, 0) = f0;
-    M(0, 1) = f0 * b;
-    M(1, 0) = M(0, 1);
-    M(1, 1) = f0 * bandwidth2 + f0 * b2;
-    M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
-    M(2, 1) = M(1, 2);
-    M(2, 2) = 0.25 * f0;
-    M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2 + b2 * b2;
-    M(0, 2) = M(2, 2);
-    M(2, 0) = M(2, 2);
-    M_inverse00 = M.inverse()(0, 0);
-  }
+  Kde1d::calculate_infl(const size_t& n,
+                        const double& f0,
+                        const double& b,
+                        const double& bandwidth,
+                        const double& s,
+                        const double& weight)
+  {
+    double M_inverse00;
+    double bandwidth2 = std::pow(bandwidth, 2);
+    double b2 = std::pow(b, 2);
+    if (degree_ == 0) {
+      M_inverse00 = 1 / f0;
+    } else if (degree_ == 1) {
+      Eigen::Matrix2d M;
+      M(0, 0) = f0;
+      M(0, 1) = bandwidth2 * b * f0;
+      M(1, 0) = M(0, 1);
+      M(1, 1) = f0 * bandwidth2 + f0 * bandwidth2 * bandwidth2 * b2;
+      M_inverse00 = M.inverse()(0, 0);
+    } else {
+      Eigen::Matrix3d M;
+      M(0, 0) = f0;
+      M(0, 1) = f0 * b;
+      M(1, 0) = M(0, 1);
+      M(1, 1) = f0 * bandwidth2 + f0 * b2;
+      M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
+      M(2, 1) = M(1, 2);
+      M(2, 2) = 0.25 * f0;
+      M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2 + b2 * b2;
+      M(0, 2) = M(2, 2);
+      M(2, 0) = M(2, 2);
+      M_inverse00 = M.inverse()(0, 0);
+    }
 
-  return K0_ * weight / (static_cast<double>(n) * bandwidth) * M_inverse00;
-}
+    return K0_ * weight / (static_cast<double>(n) * bandwidth) * M_inverse00;
+  }
 
 //! transformations for density estimates with bounded support.
 //! @param x evaluation points.
@@ -671,7 +671,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
 
   Eigen::VectorXd x_new = x;
   if (!inverse) {
-    if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+    if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
       x_new = (x.array() - xmin_ + 5e-5 * rng) / (1.0001 * rng);
@@ -686,7 +686,7 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
       // no boundary -> no transform
     }
   } else {
-    if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+    if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
       // two boundaries -> probit transform
       auto rng = xmax_ - xmin_;
       x_new = stats::pnorm(x).array() * 1.0001 * rng + xmin_ - 5e-5 * rng;
@@ -717,7 +717,7 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   }
 
   Eigen::VectorXd corr_term(fhat.size());
-  if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
+  if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
     // two boundaries -> probit transform
     auto rng = xmax_ - xmin_;
     corr_term = (x.array() - xmin_ + 5e-5 * rng) / (xmax_ - xmin_ + 1e-4 * rng);
@@ -736,7 +736,7 @@ Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
   }
 
   Eigen::VectorXd f_corr = fhat.cwiseProduct(corr_term);
-  if (std::isnan(xmin_) & !std::isnan(xmax_))
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
     f_corr.reverseInPlace();
 
   return f_corr;
@@ -763,7 +763,7 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 inline Eigen::VectorXd
 Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
-  if (std::isnan(xmin_) & !std::isnan(xmax_))
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
     grid_points.reverseInPlace();
   if (!std::isnan(xmin_))
     grid_points(0) = xmin_;
@@ -775,32 +775,32 @@ Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 
 //  Bandwidth for Kernel Density Estimation
 //' @param x vector of observations
-//' @param bandwidth bandwidth parameter, NA for automatic selection.
-//' @param multiplier bandwidth multiplieriplier.
-//' @param discrete whether a jittered estimate is computed.
-//' @param weights vector of weights for each observation (can be empty).
-//' @param degree polynomial degree.
-//' @return the selected bandwidth
-//' @noRd
-inline double
-Kde1d::select_bandwidth(const Eigen::VectorXd& x,
-                        double bandwidth,
-                        double multiplier,
-                        size_t degree,
-                        const Eigen::VectorXd& weights) const
-{
-  if (std::isnan(bandwidth)) {
-    bandwidth::PluginBandwidthSelector selector(x, weights);
-    bandwidth = selector.select_bandwidth(degree);
-  }
+ //' @param bandwidth bandwidth parameter, NA for automatic selection.
+ //' @param multiplier bandwidth multiplieriplier.
+ //' @param discrete whether a jittered estimate is computed.
+ //' @param weights vector of weights for each observation (can be empty).
+ //' @param degree polynomial degree.
+ //' @return the selected bandwidth
+ //' @noRd
+ inline double
+  Kde1d::select_bandwidth(const Eigen::VectorXd& x,
+                          double bandwidth,
+                          double multiplier,
+                          size_t degree,
+                          const Eigen::VectorXd& weights) const
+  {
+    if (std::isnan(bandwidth)) {
+      bandwidth::PluginBandwidthSelector selector(x, weights);
+      bandwidth = selector.select_bandwidth(degree);
+    }
 
-  bandwidth *= multiplier;
-  if (type_ == VarType::discrete) {
-    bandwidth = std::max(bandwidth, 0.5 / 5);
-  }
+    bandwidth *= multiplier;
+    if (type_ == VarType::discrete) {
+      bandwidth = std::max(bandwidth, 0.5 / 5);
+    }
 
-  return bandwidth;
-}
+    return bandwidth;
+  }
 
 inline void
 Kde1d::check_xmin_xmax(const double& xmin, const double& xmax) const
@@ -822,7 +822,7 @@ Kde1d::check_notfitted() const
 {
   if (!std::isnan(loglik_)) {
     throw std::runtime_error(
-      "This method can't be used for already fitted objects.");
+        "This method can't be used for already fitted objects.");
   }
 }
 
@@ -840,7 +840,7 @@ Kde1d::check_inputs(const Eigen::VectorXd& x,
 inline void
 Kde1d::check_boundaries(const Eigen::VectorXd& x) const
 {
-  if ((x.array() < xmin_).any() | (x.array() > xmax_).any()) {
+  if ((x.array() < xmin_).any() || (x.array() > xmax_).any()) {
     throw std::invalid_argument("x must be contained in [xmin, xmax].");
   }
 }
@@ -865,26 +865,26 @@ Kde1d::as_str(VarType type) const
 {
   std::string type_str;
   switch (type) {
-    case VarType::continuous:
-      return "continuous";
-    case VarType::discrete:
-      return "discrete";
-    case VarType::zero_inflated:
-      return "zero-inflated";
-    default:
-      throw std::invalid_argument("unknown variable type.");
+  case VarType::continuous:
+    return "continuous";
+  case VarType::discrete:
+    return "discrete";
+  case VarType::zero_inflated:
+    return "zero-inflated";
+  default:
+    throw std::invalid_argument("unknown variable type.");
   }
 }
 
 VarType
 Kde1d::as_enum(std::string type) const
 {
-  if ((type == "c") | (type == "cont") | (type == "continuous")) {
+  if ((type == "c") || (type == "cont") || (type == "continuous")) {
     return VarType::continuous;
-  } else if ((type == "d") | (type == "disc") | (type == "discrete")) {
+  } else if ((type == "d") || (type == "disc") || (type == "discrete")) {
     return VarType::discrete;
-  } else if ((type == "zi") | (type == "zinfl") | (type == "zero-inflated") |
-             (type == "zero_inflated")) {
+  } else if ((type == "zi") || (type == "zinfl") || (type == "zero-inflated") ||
+    (type == "zero_inflated")) {
     return VarType::zero_inflated;
   } else {
     std::stringstream ss;
