@@ -9,17 +9,37 @@
 
 namespace kde1d {
 
+enum class VarType
+{
+  continuous,
+  discrete,
+  zero_inflated
+};
+
 //! Local-polynomial density estimation in 1-d.
 class Kde1d
 {
 public:
   // constructors
+  Kde1d(double xmin,
+        double xmax,
+        VarType type,
+        double multiplier = 1.0,
+        double bandwidth = NAN,
+        size_t degree = 2);
+
   Kde1d(double xmin = NAN,
         double xmax = NAN,
         std::string type = "continuous",
         double multiplier = 1.0,
         double bandwidth = NAN,
         size_t degree = 2);
+
+  Kde1d(const interp::InterpolationGrid& grid,
+        double xmin,
+        double xmax,
+        VarType type,
+        double prob0_ = 0.0);
 
   Kde1d(const interp::InterpolationGrid& grid,
         double xmin = NAN,
@@ -46,7 +66,8 @@ public:
   Eigen::VectorXd get_grid_points() const { return grid_.get_grid_points(); }
   double get_xmin() const { return xmin_; }
   double get_xmax() const { return xmax_; }
-  std::string get_type() const { return type_; }
+  VarType get_type() const { return type_; }
+  std::string get_type_str() const { return this->as_str(type_); }
   double get_prob0() const { return prob0_; }
   double get_multiplier() const { return multiplier_; }
   double get_bandwidth() const { return bandwidth_; }
@@ -59,7 +80,8 @@ public:
   {
     std::stringstream ss;
     ss << "Kde1d("
-       << "xmin=" << xmin_ << ", xmax=" << xmax_ << ", type='" << type_ << "'"
+       << "xmin=" << xmin_ << ", xmax=" << xmax_ << ", type='"
+       << this->as_str(type_) << "'"
        << ", bandwidth=" << bandwidth_ << ", multiplier=" << multiplier_
        << ", degree=" << degree_ << ")";
     return ss.str();
@@ -73,7 +95,7 @@ private:
   interp::InterpolationGrid grid_;
   double xmin_;
   double xmax_;
-  std::string type_;
+  VarType type_;
   double multiplier_;
   double bandwidth_;
   size_t degree_;
@@ -85,7 +107,6 @@ private:
   // private methods
   void check_fitted() const;
   void check_notfitted() const;
-  std::string standardize_type(std::string type) const;
   void check_xmin_xmax(const double& xmin, const double& xmax) const;
   void check_inputs(const Eigen::VectorXd& x,
                     const Eigen::VectorXd& weights = Eigen::VectorXd()) const;
@@ -121,6 +142,9 @@ private:
                           double multiplier,
                           size_t degree,
                           const Eigen::VectorXd& weights) const;
+
+  std::string as_str(VarType type) const;
+  VarType as_enum(std::string type) const;
 };
 
 //! constructor for fitting the density estimate.
@@ -128,9 +152,9 @@ private:
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
-//! @param type variable type; muste be one of {c, cont, continuous} for
-//!   continuous variables, one of {d, disc, discrete} for discrete integer
-//!   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
+//! @param type variable type: `VarType::continuous`  for
+//!   continuous variables, `VarType::discrete` for discrete integer
+//!   variables, or `VarType::zero_inflated` for zero-inflated
 //!   variables.
 //! @param multiplier bandwidth multiplier (default is 1.0).
 //! @param bandwidth positive bandwidth parameter (`NaN` means automatic
@@ -138,17 +162,17 @@ private:
 //! @param degree degree of the local polynomial.
 inline Kde1d::Kde1d(double xmin,
                     double xmax,
-                    std::string type,
+                    VarType type,
                     double multiplier,
                     double bandwidth,
                     size_t degree)
   : xmin_(xmin)
   , xmax_(xmax)
+  , type_(type)
   , multiplier_(multiplier)
   , bandwidth_(bandwidth)
   , degree_(degree)
 {
-  type_ = this->standardize_type(type);
   this->check_xmin_xmax(xmin, xmax);
   if (multiplier <= 0.0) {
     throw std::invalid_argument("multiplier must be positive");
@@ -167,26 +191,69 @@ inline Kde1d::Kde1d(double xmin,
 //!   boundary.
 //! @param xmax upper bound for the support of the density, `NaN` means no
 //!   boundary.
-//! @param type variable type; muste be one of {c, cont, continuous} for
-//!   continuous variables, one of {d, disc, discrete} for discrete integer
-//!   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
+//! @param type variable type: `VarType::continuous`  for
+//!   continuous variables, `VarType::discrete` for discrete integer
+//!   variables, or `VarType::zero_inflated` for zero-inflated
 //!   variables.
+//! @param prob0 point mass at 0.
+inline Kde1d::Kde1d(const interp::InterpolationGrid& grid,
+                    double xmin,
+                    double xmax,
+                    VarType type,
+                    double prob0)
+  : grid_(grid)
+  , xmin_(xmin)
+  , xmax_(xmax)
+  , type_(type)
+  , prob0_(prob0)
+{
+  this->check_xmin_xmax(xmin, xmax);
+  if ((prob0 < 0) | (prob0 > 1)) {
+    throw std::invalid_argument("prob0 must lie in the interval [0, 1].");
+  }
+}
+
+//! constructor for fitting the density estimate.
+//! @param xmin lower bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param xmax upper bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param type variable type; must be one of {"c", "cont", "continuous"} for
+//!   continuous variables, one of {"d", "disc", "discrete"} for discrete
+//!   integer variables, or one of {"zi", "zinfl", "zero-inflated"} for
+//!   zero-inflated variables.
+//! @param multiplier bandwidth multiplier (default is 1.0).
+//! @param bandwidth positive bandwidth parameter (`NaN` means automatic
+//! selection).
+//! @param degree degree of the local polynomial.
+inline Kde1d::Kde1d(double xmin,
+                    double xmax,
+                    std::string type,
+                    double multiplier,
+                    double bandwidth,
+                    size_t degree)
+  : Kde1d(xmin, xmax, this->as_enum(type), multiplier, bandwidth, degree)
+{
+}
+
+//! construct model from an already fit interpolation grid.
+//! @param grid the interpolation grid.
+//! @param xmin lower bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param xmax upper bound for the support of the density, `NaN` means no
+//!   boundary.
+//! @param type variable type; must be one of {"c", "cont", "continuous"} for
+//!   continuous variables, one of {"d", "disc", "discrete"} for discrete
+//!   integer variables, or one of {"zi", "zinfl", "zero-inflated"} for
+//!   zero-inflated variables.
 //! @param prob0 point mass at 0.
 inline Kde1d::Kde1d(const interp::InterpolationGrid& grid,
                     double xmin,
                     double xmax,
                     std::string type,
                     double prob0)
-  : grid_(grid)
-  , xmin_(xmin)
-  , xmax_(xmax)
-  , prob0_(prob0)
+  : Kde1d(grid, xmin, xmax, this->as_enum(type), prob0)
 {
-  type_ = this->standardize_type(type);
-  this->check_xmin_xmax(xmin, xmax);
-  if ((prob0 < 0) | (prob0 > 1)) {
-    throw std::invalid_argument("prob0 must lie in the interval [0, 1].");
-  }
 }
 
 //! @param x vector of observations
@@ -205,13 +272,13 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   if (w.size() > 0)
     w /= w.mean();
 
-  if (type_ == "zero-inflated") {
+  if (type_ == VarType::zero_inflated) {
     if (w.size() == 0)
-      w = Eigen::VectorXd::Ones(x.size());
-    w = (x.array() == 0.0).select(Eigen::VectorXd::Zero(x.size()), w);
+      w = Eigen::VectorXd::Ones(xx.size());
+    w = (xx.array() == 0.0).select(Eigen::VectorXd::Zero(xx.size()), w);
     prob0_ = 1 - w.mean();
     xx =
-      (w.array() == 0.0).select(Eigen::VectorXd::Constant(x.size(), NAN), xx);
+      (w.array() == 0.0).select(Eigen::VectorXd::Constant(xx.size(), NAN), xx);
     tools::remove_nans(xx, w);
     if (xx.size() == 0) {
       bandwidth_ = NAN;
@@ -223,7 +290,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
       grid_ = interp::InterpolationGrid(grid_points, values, 0);
       return;
     }
-  } else if (type_ == "discrete") {
+  } else if (type_ == VarType::discrete) {
     xx = stats::equi_jitter(xx);
   }
 
@@ -247,12 +314,16 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   grid_ = interp::InterpolationGrid(grid_points, values, 3);
 
   // calculate log-likelihood of final estimate
-  loglik_ = this->pdf(x, false).array().log().sum();
+  xx = boundary_transform(xx, true);
+  if (type_ == VarType::discrete) {
+    xx = xx.array().round();
+  }
+  loglik_ = (this->pdf(xx, false).array().log()).sum();
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
     grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
-  Eigen::VectorXd influences = infl_grid.interpolate(x).array() * (1 - prob0_);
+  Eigen::VectorXd influences = infl_grid.interpolate(xx).array() * (1 - prob0_);
   edf_ = influences.sum() + (prob0_ > 0);
 
   // store bandwidth in standardized format
@@ -271,12 +342,13 @@ Kde1d::pdf(const Eigen::VectorXd& x, const bool& check_fitted) const
   }
   check_inputs(x);
 
-  if (type_ == "continuous") {
-    return pdf_continuous(x);
-  } else if (type_ == "discrete") {
-    return pdf_discrete(x);
-  } else { // type_ == "zero-inflated"
-    return pdf_zi(x);
+  switch (type_) {
+    default:
+      return pdf_continuous(x);
+    case VarType::discrete:
+      return pdf_discrete(x);
+    case VarType::zero_inflated:
+      return pdf_zi(x);
   }
 }
 
@@ -328,12 +400,13 @@ Kde1d::cdf(const Eigen::VectorXd& x, const bool& check_fitted) const
   }
   check_inputs(x);
 
-  if (type_ == "continuous") {
-    return cdf_continuous(x);
-  } else if (type_ == "discrete") {
-    return cdf_discrete(x);
-  } else { // type_ == "zero-inflated"
-    return cdf_zi(x);
+  switch (type_) {
+    default:
+      return cdf_continuous(x);
+    case VarType::discrete:
+      return cdf_discrete(x);
+    case VarType::zero_inflated:
+      return cdf_zi(x);
   }
 }
 
@@ -388,12 +461,13 @@ Kde1d::quantile(const Eigen::VectorXd& x, const bool& check_fitted) const
   if ((x.minCoeff() < 0) || (x.maxCoeff() > 1))
     throw std::invalid_argument("probabilities must lie in (0, 1).");
 
-  if (type_ == "continuous") {
-    return quantile_continuous(x);
-  } else if (type_ == "discrete") {
-    return quantile_discrete(x);
-  } else { // type_ == "zero-inflated"
-    return quantile_zi(x);
+  switch (type_) {
+    default:
+      return quantile_continuous(x);
+    case VarType::discrete:
+      return quantile_discrete(x);
+    case VarType::zero_inflated:
+      return quantile_zi(x);
   }
 }
 
@@ -591,8 +665,9 @@ Kde1d::calculate_infl(const size_t& n,
 inline Eigen::VectorXd
 Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
 {
-  if (type_ == "discrete")
+  if (type_ == VarType::discrete) {
     return x; // no transform for discrete variables
+  }
 
   Eigen::VectorXd x_new = x;
   if (!inverse) {
@@ -637,8 +712,9 @@ Kde1d::boundary_transform(const Eigen::VectorXd& x, bool inverse)
 inline Eigen::VectorXd
 Kde1d::boundary_correct(const Eigen::VectorXd& x, const Eigen::VectorXd& fhat)
 {
-  if (type_ == "discrete")
+  if (type_ == VarType::discrete) {
     return fhat; // no transform for discrete variables
+  }
 
   Eigen::VectorXd corr_term(fhat.size());
   if (!std::isnan(xmin_) & !std::isnan(xmax_)) {
@@ -719,30 +795,11 @@ Kde1d::select_bandwidth(const Eigen::VectorXd& x,
   }
 
   bandwidth *= multiplier;
-  if (type_ == "discrete") {
+  if (type_ == VarType::discrete) {
     bandwidth = std::max(bandwidth, 0.5 / 5);
   }
 
   return bandwidth;
-}
-
-inline std::string
-Kde1d::standardize_type(std::string type) const
-{
-  if ((type == "c") | (type == "cont") | (type == "continuous")) {
-    type = "continuous";
-  } else if ((type == "d") | (type == "disc") | (type == "discrete")) {
-    type = "discrete";
-  } else if ((type == "zi") | (type == "zinfl") | (type == "zero-inflated")) {
-    type = "zero-inflated";
-  } else {
-    std::stringstream ss;
-    ss << "type '" << type << "' unknown; must be one of"
-       << "{c, cont, continuous, d, disc, discrete, zi, zinfl, zero-inflated}."
-       << std::endl;
-    throw std::invalid_argument(ss.str());
-  }
-  return type;
 }
 
 inline void
@@ -801,6 +858,42 @@ Kde1d::set_xmin_xmax(double xmin, double xmax)
   this->check_xmin_xmax(xmin, xmax);
   xmin_ = xmin;
   xmax_ = xmax;
+}
+
+std::string
+Kde1d::as_str(VarType type) const
+{
+  std::string type_str;
+  switch (type) {
+    case VarType::continuous:
+      return "continuous";
+    case VarType::discrete:
+      return "discrete";
+    case VarType::zero_inflated:
+      return "zero-inflated";
+    default:
+      throw std::invalid_argument("unknown variable type.");
+  }
+}
+
+VarType
+Kde1d::as_enum(std::string type) const
+{
+  if ((type == "c") | (type == "cont") | (type == "continuous")) {
+    return VarType::continuous;
+  } else if ((type == "d") | (type == "disc") | (type == "discrete")) {
+    return VarType::discrete;
+  } else if ((type == "zi") | (type == "zinfl") | (type == "zero-inflated") |
+             (type == "zero_inflated")) {
+    return VarType::zero_inflated;
+  } else {
+    std::stringstream ss;
+    ss << "variable type '" << type << "' unknown; must be one of"
+       << "{c, cont, continuous, d, disc, discrete, zi, zinfl, zero-inflated}."
+       << std::endl;
+    throw std::invalid_argument(ss.str());
+  }
+  return VarType::continuous;
 }
 
 } // end kde1d
