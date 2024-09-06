@@ -25,7 +25,7 @@ Imports:
     randtoolbox,
     stats,
     utils
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2.9000
 Suggests: 
     testthat
 URL: https://github.com/tnagler/kde1d
