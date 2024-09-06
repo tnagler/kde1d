@@ -3,11 +3,14 @@
 \name{plot.kde1d}
 \alias{plot.kde1d}
 \alias{lines.kde1d}
+\alias{points.kde1d}
 \title{Plotting kde1d objects}
 \usage{
 \method{plot}{kde1d}(x, ...)
 
 \method{lines}{kde1d}(x, ...)
+
+\method{points}{kde1d}(x, ...)
 }
 \arguments{
 \item{x}{\code{kde1d} object.}
@@ -37,6 +40,19 @@ points(ordered(0:20, 0:20), # add true density values
   dpois(0:20, 3),
   col = "red"
 )
+
+## zero-inflated data
+x <- rexp(500, 0.5)  # simulate data
+x[sample(1:500, 200)] <- 0 # add zero-inflation
+fit <- kde1d(x, xmin = 0, type = "zi") # estimate density
+plot(fit) # plot the density estimate
+lines(  # add true density
+  seq(0, 20, l = 100),
+  0.6 * dexp(seq(0, 20, l = 100), 0.5),
+  col = "red"
+)
+points(0, 0.4, col = "red")
+
 }
 \seealso{
 \code{\link[=kde1d]{kde1d()}}

@@ -32,11 +32,7 @@
 #' @export
 dkde1d <- function(x, obj) {
   x <- prep_eval_arg(x, obj)
-  sel <- is_below_support(x, obj) | is_above_support(x, obj)
-  x[sel] <- NA
-  d <- dkde1d_cpp(x, obj)
-  d[sel] <- 0
-  d
+  dkde1d_cpp(x, obj)
 }
 
 #' @param q vector of quantiles.
@@ -44,13 +40,7 @@ dkde1d <- function(x, obj) {
 #' @export
 pkde1d <- function(q, obj) {
   q <- prep_eval_arg(q, obj)
-  below <- is_below_support(q, obj)
-  above <- is_above_support(q, obj)
-  q[below | above] <- NA
-  p <- pkde1d_cpp(q, obj)
-  p[below] <- 0
-  p[above] <- 1
-  p
+  pkde1d_cpp(q, obj)
 }
 
 #' @param p vector of probabilities.
@@ -115,26 +105,26 @@ rkde1d <- function(n, obj, quasi = FALSE) {
 #'   dpois(0:20, 3),
 #'   col = "red"
 #' )
+#'
+#' ## zero-inflated data
+#' x <- rexp(500, 0.5)  # simulate data
+#' x[sample(1:500, 200)] <- 0 # add zero-inflation
+#' fit <- kde1d(x, xmin = 0, type = "zi") # estimate density
+#' plot(fit) # plot the density estimate
+#' lines(  # add true density
+#'   seq(0, 20, l = 100),
+#'   0.6 * dexp(seq(0, 20, l = 100), 0.5),
+#'   col = "red"
+#' )
+#' points(0, 0.4, col = "red")
+#'
 #' @importFrom graphics plot
 #' @importFrom utils modifyList
 #' @export
 plot.kde1d <- function(x, ...) {
-  plot_type <- "l" # for continuous variables, use a line plot
-  if (is.ordered(x$x)) {
-    ev <- ordered(levels(x$x), levels(x$x))
-    plot_type <- "h" # for discrete variables, use a histrogram
-  } else {
-    # adjust grid if necessary
-    ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
-    if (!is.nan(x$xmin)) {
-      ev[1] <- x$xmin
-    }
-    if (!is.nan(x$xmax)) {
-      ev[length(ev)] <- x$xmax
-    }
-  }
+  ev <- make_plotting_grid(x)
   vals <- dkde1d(ev, x)
-
+  plot_type <- ifelse(x$type == "discrete", "p", "l")
   pars <- list(
     x = ev,
     y = vals,
@@ -143,8 +133,11 @@ plot.kde1d <- function(x, ...) {
     ylab = "density",
     ylim = c(0, 1.1 * max(x$values))
   )
-
   do.call(plot, modifyList(pars, list(...)))
+
+  if (x$type == "zero-inflated") {
+    points(0, dkde1d(0, x))
+  }
 }
 
 #' @method lines kde1d
@@ -154,20 +147,51 @@ plot.kde1d <- function(x, ...) {
 #' @importFrom utils modifyList
 #' @export
 lines.kde1d <- function(x, ...) {
-  if (is.ordered(x$x)) {
-    stop("lines does not work for discrete estimates.")
+  if (x$type == "discrete") {
+    points(x, ...)
   }
-  ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
-  if (!is.nan(x$xmin)) {
-    ev[1] <- x$xmin
-  }
-  if (!is.nan(x$xmax)) {
-    ev[length(ev)] <- x$xmax
-  }
+  ev <- make_plotting_grid(x)
   vals <- dkde1d(ev, x)
-
   pars <- list(x = ev, y = vals)
   do.call(lines, modifyList(pars, list(...)))
+
+  if (x$type == "zero-inflated") {
+    points(0, dkde1d(0, x))
+  }
+}
+
+#' @method points kde1d
+#'
+#' @rdname plot.kde1d
+#' @importFrom graphics points
+#' @importFrom utils modifyList
+#' @export
+points.kde1d <- function(x, ...) {
+  ev <- make_plotting_grid(x)
+  vals <- dkde1d(ev, x)
+  pars <- list(x = ev, y = vals)
+  do.call(points, modifyList(pars, list(...)))
+}
+
+make_plotting_grid <- function(x) {
+  if (is.ordered(x$x)) {
+    ev <- ordered(levels(x$x), levels(x$x))
+  } else if (x$type == "discrete") {
+    ev <- seq.int(floor(min(x$grid_points)), ceiling(max(x$grid_points)))
+  } else {
+    # adjust grid if necessary
+    ev <- seq(min(x$grid_points), max(x$grid_points), l = 200)
+    if (!is.nan(x$xmin)) {
+      ev[1] <- x$xmin
+    }
+    if (!is.nan(x$xmax)) {
+      ev[length(ev)] <- x$xmax
+    }
+    if (x$type == "zero-inflated") {
+      ev <- setdiff(ev, 0)
+    }
+  }
+  ev
 }
 
 #' @importFrom stats logLik
@@ -181,8 +205,10 @@ logLik.kde1d <- function(object, ...) {
 #' @method print kde1d
 #' @export
 print.kde1d <- function(x, ...) {
-  if (is.ordered(x$x)) {
+  if (x$type == "discrete") {
     cat("(jittered) ")
+  } else  if (x$type == "zero-inflated") {
+    cat("(zero-inflated) ")
   }
   cat("kernel density estimate ('kde1d')")
   if (x$deg > 0) {
@@ -213,12 +239,13 @@ print.kde1d <- function(x, ...) {
 #' @method summary kde1d
 #' @export
 summary.kde1d <- function(object, ...) {
-  df <- rep(NA, 4)
-  names(df) <- c("nobs", "bw", "loglik", "d.f.")
+  df <- rep(NA, 5)
+  names(df) <- c("nobs", "bw", "mult", "loglik", "d.f.")
   df[1] <- object$nobs
   df[2] <- object$bw
-  df[3] <- object$loglik
-  df[4] <- object$edf
+  df[3] <- object$mult
+  df[4] <- object$loglik
+  df[5] <- object$edf
 
   print(object)
   cat(strrep("-", 65), "\n", sep = "")
