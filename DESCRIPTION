@@ -28,6 +28,6 @@ Imports:
 RoxygenNote: 7.3.2.9000
 Suggests: 
     testthat
-URL: https://github.com/tnagler/kde1d
+URL: https://tnagler.github.io/kde1d
 BugReports: https://github.com/tnagler/kde1d/issues
 Roxygen: list(markdown = TRUE)

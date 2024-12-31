@@ -1,36 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dkde1d.html</loc>
-  </url>
-  <url>
-    <loc>/reference/equi_jitter.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/kde1d-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/kde1d.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.kde1d.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://tnagler.github.io/kde1d/404.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/LICENSE-text.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/authors.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/index.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/news/index.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/dkde1d.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/equi_jitter.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/index.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/kde1d-package.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/kde1d.html</loc></url>
+<url><loc>https://tnagler.github.io/kde1d/reference/plot.kde1d.html</loc></url>
 </urlset>
+
