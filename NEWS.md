@@ -1,3 +1,19 @@
+# kde1d 1.1.0
+
+NEW FEATURES
+
+* Added functionality for estimating zero-inflated discrete-continuous mixtures.
+
+* New `kde1d(..., type = "...")` argument to specify the data type. Options are 
+  {c, cont, continuous} for continuous variables, {d, disc, discrete} for 
+  discrete integer variables, or {zi, zinfl, zero-inflated} for zero-inflated
+  variables.
+
+BREAKING CHANGE
+
+* New C++ API, making  it easier to use stand-alone.
+
+
 # kde1d 1.0.7
 
 DEPENDS
