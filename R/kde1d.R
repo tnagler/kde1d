@@ -9,19 +9,22 @@
 #'   data); `NaN` means no boundary.
 #' @param xmax upper bound for the support of the density (only for continuous
 #'   data); `NaN` means no boundary.
+#' @param type variable type; must be one of `{c, cont, continuous}` for
+#'   continuous variables, one of `{d, disc, discrete}` for discrete integer
+#'   variables, or one of `{zi, zinfl, zero-inflated}` for zero-inflated
+#'   variables.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
 #'   latter uses the plug-in methodology of Sheather and Jones (1991) with
 #'   appropriate modifications for `deg > 0`.
-#'
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for
 #'   log-constant, log-linear, and log-quadratic fitting, respectively.
 #' @param weights optional vector of weights for individual observations.
 #'
 #' @return An object of class `kde1d`.
 #'
-#' @details A gaussian kernel is used in all cases. If `xmin` or `xmax` are
+#' @details A Gaussian kernel is used in all cases. If `xmin` or `xmax` are
 #'   finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
 #'   log-transform is used if there is only one boundary (see, Geenens and Wang,
 #'   2018); a probit transform is used if there are two (see, Geenens, 2014).
@@ -29,6 +32,8 @@
 #'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 #'   A specific form of deterministic jittering is used, see [equi_jitter()].
 #'
+#'   Zero-inflated densities are estimated by a hurdle-model with discrete
+#'   mass at 0 and the remainder estimated as for `type = "continuous"`.
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
@@ -81,8 +86,8 @@
 #'
 #' ## discrete data
 #' x <- rbinom(500, size = 5, prob = 0.5) # simulate data
-#' x <- ordered(x, levels = 0:5) # declare as ordered
-#' fit <- kde1d(x) # estimate density
+#' fit <- kde1d(x, xmin = 0, xmax = 5, type = "discrete") # estimate density
+#' fit <- kde1d(ordered(x, levels = 0:5)) # alternative API
 #' dkde1d(sort(unique(x)), fit) # evaluate density estimate
 #' summary(fit) # information about the estimate
 #' plot(fit) # plot the density estimate
@@ -90,6 +95,20 @@
 #'   dbinom(0:5, 5, 0.5),
 #'   col = "red"
 #' )
+#'
+#' ## zero-inflated data
+#' x <- rexp(500, 0.5)  # simulate data
+#' x[sample(1:500, 200)] <- 0 # add zero-inflation
+#' fit <- kde1d(x, xmin = 0, type = "zi") # estimate density
+#' dkde1d(sort(unique(x)), fit) # evaluate density estimate
+#' summary(fit) # information about the estimate
+#' plot(fit) # plot the density estimate
+#' lines(  # add true density
+#'   seq(0, 20, l = 100),
+#'   0.6 * dexp(seq(0, 20, l = 100), 0.5),
+#'   col = "red"
+#' )
+#' points(0, 0.4, col = "red")
 #'
 #' ## weighted estimate
 #' x <- rnorm(100) # simulate data
@@ -99,16 +118,22 @@
 #' lines(kde1d(x), col = 2)
 #' @importFrom stats na.omit
 #' @export
-kde1d <- function(x, xmin = NaN, xmax = NaN, mult = 1, bw = NA,  deg = 2,
-                  weights = numeric(0)) {
+kde1d <- function(x, xmin = NaN, xmax = NaN, type = "continuous",
+                  mult = 1, bw = NA,  deg = 2, weights = numeric(0)) {
+
+  if (is.ordered(x)) {
+    type <- "discrete"
+    xmin <- 0
+    xmax <- nlevels(x) - 1
+  }
 
   # fit model
   fit <- fit_kde1d_cpp(x = if (is.numeric(x)) x else (as.numeric(x) - 1),
-                       nlevels = length(levels(x)),
-                       bandwidth = bw,
-                       mult = mult,
                        xmin = xmin,
                        xmax = xmax,
+                       type = type,
+                       bandwidth = bw,
+                       mult = mult,
                        degree = deg,
                        weights = weights)
 

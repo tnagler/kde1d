@@ -1,19 +1,15 @@
-Patch to prevent possible false positive on valgrind (only on some platforms):  https://cran.r-project.org/web/checks/check_results_kde1d.html
+## WARNING 
+
+This update includes a change to the C++ internals API. This will fail some 
+tests of reverse dependencies 'rvinecopulib' and 'vinereg'. Both libraries 
+have patches prepared that will be submitted as soon kde1d 1.1.0 is on CRAN:
+https://github.com/vinecopulib/rvinecopulib/pull/280
+https://github.com/tnagler/vinereg/pull/18
 
 ## Test environments
-* ubuntu 18.04 with gcc7 and valgrind (release)
-* ubuntu 18.04 clang 9 and valgrind (release)
-* ubuntu 18.04 with clang ASAN/UBSAN on rocker (devel)
-* ubuntu 14.04 on travis-ci (release, devel, oldrel)
-* win-builder (devel, release)
+* ubuntu 22.04 on (devel, release, oldrel)
+* macOS (release)
+* Windows server 2022 (release)
+* CRAN win-builder (devel)
 
-## R CMD check results
 
-0 errors | 0 warnings | 0 notes
-
-## revdepcheck results
-
-Checked 2 reverse dependencies (Note is unrelated to this package):
-
-rvinecopulib 0.3.2.1.1    0 errors | 0 warnings | 1 note                                
-vinereg 0.5.0             0 errors | 0 warnings | 0 notes                            

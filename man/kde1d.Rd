@@ -8,6 +8,7 @@ kde1d(
   x,
   xmin = NaN,
   xmax = NaN,
+  type = "continuous",
   mult = 1,
   bw = NA,
   deg = 2,
@@ -23,6 +24,11 @@ data); \code{NaN} means no boundary.}
 
 \item{xmax}{upper bound for the support of the density (only for continuous
 data); \code{NaN} means no boundary.}
+
+\item{type}{variable type; must be one of \verb{\{c, cont, continuous\}} for
+continuous variables, one of \verb{\{d, disc, discrete\}} for discrete integer
+variables, or one of \verb{\{zi, zinfl, zero-inflated\}} for zero-inflated
+variables.}
 
 \item{mult}{positive bandwidth multiplier; the actual bandwidth used is
 \eqn{bw*mult}.}
@@ -44,13 +50,16 @@ The estimators can handle data with bounded, unbounded, and discrete support,
 see \emph{Details}.
 }
 \details{
-A gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
+A Gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
 finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
 log-transform is used if there is only one boundary (see, Geenens and Wang,
 2018); a probit transform is used if there are two (see, Geenens, 2014).
 
 Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
 A specific form of deterministic jittering is used, see \code{\link[=equi_jitter]{equi_jitter()}}.
+
+Zero-inflated densities are estimated by a hurdle-model with discrete
+mass at 0 and the remainder estimated as for \code{type = "continuous"}.
 }
 \examples{
 
@@ -78,8 +87,8 @@ curve(dgamma(x, shape = 1), # add true density
 
 ## discrete data
 x <- rbinom(500, size = 5, prob = 0.5) # simulate data
-x <- ordered(x, levels = 0:5) # declare as ordered
-fit <- kde1d(x) # estimate density
+fit <- kde1d(x, xmin = 0, xmax = 5, type = "discrete") # estimate density
+fit <- kde1d(ordered(x, levels = 0:5)) # alternative API
 dkde1d(sort(unique(x)), fit) # evaluate density estimate
 summary(fit) # information about the estimate
 plot(fit) # plot the density estimate
@@ -87,6 +96,20 @@ points(ordered(0:5, 0:5), # add true density
   dbinom(0:5, 5, 0.5),
   col = "red"
 )
+
+## zero-inflated data
+x <- rexp(500, 0.5)  # simulate data
+x[sample(1:500, 200)] <- 0 # add zero-inflation
+fit <- kde1d(x, xmin = 0, type = "zi") # estimate density
+dkde1d(sort(unique(x)), fit) # evaluate density estimate
+summary(fit) # information about the estimate
+plot(fit) # plot the density estimate
+lines(  # add true density
+  seq(0, 20, l = 100),
+  0.6 * dexp(seq(0, 20, l = 100), 0.5),
+  col = "red"
+)
+points(0, 0.4, col = "red")
 
 ## weighted estimate
 x <- rnorm(100) # simulate data

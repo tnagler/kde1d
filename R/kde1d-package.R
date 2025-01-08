@@ -1,7 +1,8 @@
 #' One-Dimensional Kernel Density Estimation
 #'
 #' Provides an efficient implementation of univariate local polynomial
-#' kernel density estimators that can handle bounded and discrete data. The
+#' kernel density estimators that can handle bounded, discrete, and
+#' zero-inflated data. The
 #' implementation utilizes spline interpolation to reduce memory usage and
 #' computational demand for large data sets.
 #'
@@ -12,7 +13,7 @@
 #'
 #'   Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel
 #'   density estimation for positive random variables.* Journal of Computational
-#'   and Graphical Statistics, to appear,
+#'   and Graphical Statistics, 27(4), 822-835.
 #'   [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
 #'
 #'   Nagler, T. (2018a). *A generic approach to nonparametric function
@@ -20,13 +21,12 @@
 #'   [arXiv:1704.07457](https://arxiv.org/abs/1704.07457)
 #'
 #'   Nagler, T. (2018b). *Asymptotic analysis of the jittering kernel density
-#'   estimator.* Mathematical Methods of Statistics, in press,
+#'   estimator.* Mathematical Methods of Statistics, 27, 32-46.
 #'   [arXiv:1705.05431](https://arxiv.org/abs/1705.05431)
 #'
 #' @name kde1d-package
 #' @docType package
-NULL
-
 #' @useDynLib kde1d
 #' @importFrom Rcpp sourceCpp
-NULL
+"_PACKAGE"
+

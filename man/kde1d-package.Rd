@@ -6,7 +6,8 @@
 \title{One-Dimensional Kernel Density Estimation}
 \description{
 Provides an efficient implementation of univariate local polynomial
-kernel density estimators that can handle bounded and discrete data. The
+kernel density estimators that can handle bounded, discrete, and
+zero-inflated data. The
 implementation utilizes spline interpolation to reduce memory usage and
 computational demand for large data sets.
 }
@@ -17,7 +18,7 @@ the unit interval}. Journal of the American Statistical Association,
 
 Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel
 density estimation for positive random variables.} Journal of Computational
-and Graphical Statistics, to appear,
+and Graphical Statistics, 27(4), 822-835.
 \href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
 
 Nagler, T. (2018a). \emph{A generic approach to nonparametric function
@@ -25,6 +26,23 @@ estimation with mixed data.} Statistics & Probability Letters, 137:326–330,
 \href{https://arxiv.org/abs/1704.07457}{arXiv:1704.07457}
 
 Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density
-estimator.} Mathematical Methods of Statistics, in press,
+estimator.} Mathematical Methods of Statistics, 27, 32-46.
 \href{https://arxiv.org/abs/1705.05431}{arXiv:1705.05431}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://tnagler.github.io/kde1d/}
+  \item Report bugs at \url{https://github.com/tnagler/kde1d/issues/}
+}
+
+}
+\author{
+\strong{Maintainer}: Thomas Nagler \email{mail@tnagler.com}
+
+Authors:
+\itemize{
+  \item Thibault Vatter \email{thibault.vatter@gmail.com}
+}
+
 }

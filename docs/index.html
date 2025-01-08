@@ -4,73 +4,49 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Univariate Kernel Density Estimation • kde1d</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
-<script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Univariate Kernel Density Estimation">
-<meta property="og:description" content="Provides an efficient implementation of univariate local polynomial
-    kernel density estimators that can handle bounded and discrete data. See 
-    Geenens (2014) &lt;arXiv:1303.4121&gt;, 
-    Geenens and Wang (2018) &lt;arXiv:1602.04862&gt;, 
-    Nagler (2018a) &lt;arXiv:1704.07457&gt;, 
-    Nagler (2018b) &lt;arXiv:1705.05431&gt;.">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Univariate Kernel Density Estimation">
+<meta name="description" content="Provides an efficient implementation of univariate local polynomial kernel density estimators that can handle bounded and discrete data. See Geenens (2014) &lt;arXiv:1303.4121&gt;, Geenens and Wang (2018) &lt;arXiv:1602.04862&gt;, Nagler (2018a) &lt;arXiv:1704.07457&gt;, Nagler (2018b) &lt;arXiv:1705.05431&gt;.">
+<meta property="og:description" content="Provides an efficient implementation of univariate local polynomial kernel density estimators that can handle bounded and discrete data. See Geenens (2014) &lt;arXiv:1303.4121&gt;, Geenens and Wang (2018) &lt;arXiv:1602.04862&gt;, Nagler (2018a) &lt;arXiv:1704.07457&gt;, Nagler (2018b) &lt;arXiv:1705.05431&gt;.">
 </head>
-<body data-spy="scroll" data-target="#toc">
-    
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
-    <div class="container template-home">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">kde1d</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.5</span>
-      </span>
-    </div>
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="reference/index.html">Reference</a>
-</li>
-<li>
-  <a href="news/index.html">Changelog</a>
-</li>
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
+    <a class="navbar-brand me-2" href="index.html">kde1d</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/tnagler/kde1d/" class="external-link">
-    <span class="fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tnagler/kde1d/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
-<!--/.nav-collapse -->
+
+
   </div>
-<!--/.container -->
-</div>
-<!--/.navbar -->
-
-      
-
-      </header><div class="row">
-  <div class="contents col-md-9">
-<div class="section level1">
+</nav><div class="container template-home">
+<div class="row">
+  <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="kde1d">kde1d<a class="anchor" aria-label="anchor" href="#kde1d"></a>
 </h1></div>
 <!-- badges: start -->
@@ -79,11 +55,11 @@
 <h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h3>
 <ul>
-<li>implements a univariate kernel density estimator that can handle bounded and discrete data.</li>
+<li>implements a univariate kernel density estimator that can handle bounded, discrete, and zero-inflated data.</li>
 <li>provides classical kernel density as well as log-linear and log-quadratic methods.</li>
 <li>is highly efficient due to the Fast Fourier Transform, spline interpolation, and a C++ backend.</li>
 </ul>
-<p>For details, see the <a href="https://tnagler.github.io/kde1d/" class="external-link">API documentation</a>.</p>
+<p>For details, see the <a href="https://tnagler.github.io/kde1d/">API documentation</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
@@ -92,13 +68,13 @@
 <li>the stable release from CRAN:</li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"kde1d"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"kde1d"</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li>the latest development version:</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># install.packages("remotes")</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"tnagler/kde1d@dev"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"tnagler/kde1d@dev"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
@@ -107,65 +83,79 @@
 <h5 id="unbounded-data">Unbounded data<a class="anchor" aria-label="anchor" href="#unbounded-data"></a>
 </h5>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                    <span class="co"># simulate data</span>
-<span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                    <span class="co"># estimate density</span>
-<span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">fit</span><span class="op">)</span>                     <span class="co"># evaluate density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                       <span class="co"># information about the estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                          <span class="co"># plot the density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>,        <span class="co"># add true density</span>
-      col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                    <span class="co"># simulate data</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                    <span class="co"># estimate density</span></span>
+<span><span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">fit</span><span class="op">)</span>                     <span class="co"># evaluate density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                       <span class="co"># information about the estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                          <span class="co"># plot the density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>,        <span class="co"># add true density</span></span>
+<span>      col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="bounded-data-log-linear">Bounded data, log-linear<a class="anchor" aria-label="anchor" href="#bounded-data-log-linear"></a>
 </h5>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="fl">100</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>        <span class="co"># simulate data</span>
-<span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, xmin <span class="op">=</span> <span class="fl">0</span>, deg <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># estimate density</span>
-<span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">fit</span><span class="op">)</span>     <span class="co"># evaluate density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                       <span class="co"># information about the estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                          <span class="co"># plot the density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">x</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,        <span class="co"># add true density</span>
-      add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span>,
-      from <span class="op">=</span> <span class="fl">1e-3</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="fl">100</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>        <span class="co"># simulate data</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, xmin <span class="op">=</span> <span class="fl">0</span>, deg <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># estimate density</span></span>
+<span><span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">fit</span><span class="op">)</span>     <span class="co"># evaluate density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                       <span class="co"># information about the estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                          <span class="co"># plot the density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">x</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,        <span class="co"># add true density</span></span>
+<span>      add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>      from <span class="op">=</span> <span class="fl">1e-3</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="discrete-data">Discrete data<a class="anchor" aria-label="anchor" href="#discrete-data"></a>
 </h5>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">100</span>, size <span class="op">=</span> <span class="fl">5</span>, prob <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>  <span class="co"># simulate data</span>
-<span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">ordered</a></span><span class="op">(</span><span class="va">x</span>, levels <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>           <span class="co"># declare as ordered</span>
-<span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                         <span class="co"># estimate density</span>
-<span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, <span class="va">fit</span><span class="op">)</span>            <span class="co"># evaluate density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                            <span class="co"># information about the estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                               <span class="co"># plot the density estimate</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">ordered</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,               <span class="co"># add true density</span>
-       <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">0.5</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">100</span>, size <span class="op">=</span> <span class="fl">5</span>, prob <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>  <span class="co"># simulate data</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">ordered</a></span><span class="op">(</span><span class="va">x</span>, levels <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>           <span class="co"># declare as ordered</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, xmin <span class="op">=</span> <span class="fl">0</span>, xmax <span class="op">=</span> <span class="fl">5</span>,     <span class="co"># estimate density</span></span>
+<span>            type <span class="op">=</span> <span class="st">"discrete"</span><span class="op">)</span> </span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">ordered</a></span><span class="op">(</span><span class="va">x</span>, levels <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>  <span class="co"># alternative API</span></span>
+<span><span class="fu"><a href="reference/dkde1d.html">dkde1d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, <span class="va">fit</span><span class="op">)</span>            <span class="co"># evaluate density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                            <span class="co"># information about the estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                               <span class="co"># plot the density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">ordered</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,               <span class="co"># add true density</span></span>
+<span>       <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">0.5</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level5">
+<h5 id="zero-inflated-data-data">Zero-inflated data data<a class="anchor" aria-label="anchor" href="#zero-inflated-data-data"></a>
+</h5>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">0.5</span><span class="op">)</span>                    <span class="co"># simulate data</span></span>
+<span><span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">500</span>, <span class="fl">200</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span>             <span class="co"># add zero-inflation</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, xmin <span class="op">=</span> <span class="fl">0</span>, type <span class="op">=</span> <span class="st">"zi"</span><span class="op">)</span> <span class="co"># estimate density</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                              <span class="co"># plot the density estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span>                                 <span class="co"># add true density        </span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, l <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  <span class="fl">0.6</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">dexp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, l <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  col <span class="op">=</span> <span class="st">"red"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="weighted-estimate">Weighted estimate<a class="anchor" aria-label="anchor" href="#weighted-estimate"></a>
 </h5>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                         <span class="co"># simulate data</span>
-<span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                    <span class="co"># weights as in Bayesian bootstrap</span>
-<span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, weights <span class="op">=</span> <span class="va">weights</span><span class="op">)</span>      <span class="co"># weighted fit</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                               <span class="co"># compare with unweighted fit</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                         <span class="co"># simulate data</span></span>
+<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>                    <span class="co"># weights as in Bayesian bootstrap</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span>, weights <span class="op">=</span> <span class="va">weights</span><span class="op">)</span>      <span class="co"># weighted fit</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                               <span class="co"># compare with unweighted fit</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="reference/kde1d.html">kde1d</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
 <p>Geenens, G. (2014). <em>Probit transformation for kernel density estimation on the unit interval</em>. Journal of the American Statistical Association, 109:505, 346-358, <a href="https://arxiv.org/abs/1303.4121" class="external-link">arXiv:1303.4121</a></p>
-<p>Geenens, G., Wang, C. (2018). <em>Local-likelihood transformation kernel density estimation for positive random variables.</em> Journal of Computational and Graphical Statistics, to appear, <a href="https://arxiv.org/abs/1602.04862" class="external-link">arXiv:1602.04862</a></p>
+<p>Geenens, G., Wang, C. (2018). <em>Local-likelihood transformation kernel density estimation for positive random variables.</em> Journal of Computational and Graphical Statistics, 27(4), 822-835. <a href="https://arxiv.org/abs/1602.04862" class="external-link">arXiv:1602.04862</a></p>
 <p>Loader, C. (2006). <em>Local regression and likelihood</em>. Springer Science &amp; Business Media.</p>
 <p>Nagler, T. (2018a). <em>A generic approach to nonparametric function estimation with mixed data.</em> Statistics &amp; Probability Letters, 137:326–330, <a href="https://arxiv.org/abs/1704.07457" class="external-link">arXiv:1704.07457</a></p>
-<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density estimator.</em> Mathematical Methods of Statistics, in press, <a href="https://arxiv.org/abs/1705.05431" class="external-link">arXiv:1705.05431</a></p>
+<p>Nagler, T. (2018b). <em>Asymptotic analysis of the jittering kernel density estimator.</em> Mathematical Methods of Statistics, 27, 32-46. <a href="https://arxiv.org/abs/1705.05431" class="external-link">arXiv:1705.05431</a></p>
 </div>
 </div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="links">
+  </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
 <li><a href="https://cloud.r-project.org/package=kde1d" class="external-link">View on CRAN</a></li>
@@ -204,31 +194,27 @@
 <ul class="list-unstyled">
 <li><a href="https://github.com/tnagler/kde1d/actions" class="external-link"><img src="https://github.com/tnagler/kde1d/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
 <li><a href="https://cran.r-project.org/package=kde1d" class="external-link"><img src="http://www.r-pkg.org/badges/version/kde1d" alt="CRAN version"></a></li>
-<li><a href="https://codecov.io/github/tnagler/kde1d?branch=master" class="external-link"><img src="https://img.shields.io/codecov/c/github/tnagler/kde1d/master.svg" alt="Coverage Status"></a></li>
 </ul>
 </div>
 
-  </div>
+  </aside>
 </div>
 
 
-      <footer><div class="copyright">
-  <p></p>
-<p>Developed by Thomas Nagler, Thibault Vatter.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p>Developed by Thomas Nagler, Thibault Vatter.</p>
 </div>
 
-<div class="pkgdown">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<div class="pkgdown-footer-right">
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
 
-  
 
 
-  
+
 
   </body>
 </html>
