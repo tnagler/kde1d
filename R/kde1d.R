@@ -9,9 +9,9 @@
 #'   data); `NaN` means no boundary.
 #' @param xmax upper bound for the support of the density (only for continuous
 #'   data); `NaN` means no boundary.
-#' @param type variable type; must be one of {c, cont, continuous} for
-#'   continuous variables, one of {d, disc, discrete} for discrete integer
-#'   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
+#' @param type variable type; must be one of `{c, cont, continuous}` for
+#'   continuous variables, one of `{d, disc, discrete}` for discrete integer
+#'   variables, or one of `{zi, zinfl, zero-inflated}` for zero-inflated
 #'   variables.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.

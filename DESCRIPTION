@@ -25,9 +25,9 @@ Imports:
     randtoolbox,
     stats,
     utils
-RoxygenNote: 7.3.2.9000
 Suggests: 
     testthat
-URL: https://tnagler.github.io/kde1d
-BugReports: https://github.com/tnagler/kde1d/issues
+URL: https://tnagler.github.io/kde1d/
+BugReports: https://github.com/tnagler/kde1d/issues/
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2

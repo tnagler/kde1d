@@ -29,3 +29,20 @@ Nagler, T. (2018b). \emph{Asymptotic analysis of the jittering kernel density
 estimator.} Mathematical Methods of Statistics, 27, 32-46.
 \href{https://arxiv.org/abs/1705.05431}{arXiv:1705.05431}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://tnagler.github.io/kde1d/}
+  \item Report bugs at \url{https://github.com/tnagler/kde1d/issues/}
+}
+
+}
+\author{
+\strong{Maintainer}: Thomas Nagler \email{mail@tnagler.com}
+
+Authors:
+\itemize{
+  \item Thibault Vatter \email{thibault.vatter@gmail.com}
+}
+
+}

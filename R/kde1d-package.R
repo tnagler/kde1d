@@ -26,8 +26,7 @@
 #'
 #' @name kde1d-package
 #' @docType package
-NULL
-
 #' @useDynLib kde1d
 #' @importFrom Rcpp sourceCpp
-NULL
+"_PACKAGE"
+

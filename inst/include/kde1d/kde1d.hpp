@@ -35,6 +35,7 @@ public:
         double bandwidth = NAN,
         size_t degree = 2);
 
+
   Kde1d(const interp::InterpolationGrid& grid,
         double xmin,
         double xmax,
@@ -46,6 +47,18 @@ public:
         double xmax = NAN,
         std::string type = "continuous",
         double prob0_ = 0.0);
+
+
+  // old API, to be deprecated after this version
+  Kde1d(const Eigen::VectorXd& x,
+        size_t nlevels = 0,
+        double bw = NAN,
+        double mult = 1.0,
+        double xmin = NAN,
+        double xmax = NAN,
+        size_t deg = 2,
+        const Eigen::VectorXd& weights = Eigen::VectorXd());
+
 
   void fit(const Eigen::VectorXd& x,
            const Eigen::VectorXd& weights = Eigen::VectorXd());
@@ -255,6 +268,22 @@ inline Kde1d::Kde1d(const interp::InterpolationGrid& grid,
   : Kde1d(grid, xmin, xmax, this->as_enum(type), prob0)
 {
 }
+
+// old API, to be deprecated after this version
+Kde1d::Kde1d(const Eigen::VectorXd& x,
+             size_t nlevels,
+             double bw,
+             double mult,
+             double xmin,
+             double xmax,
+             size_t deg,
+             const Eigen::VectorXd& weights)
+  : Kde1d(xmin, xmax, nlevels > 0 ? VarType::discrete : VarType::continuous,
+    mult, bw, deg)
+{
+  this->fit(x, weights);
+}
+
 
 //! @param x vector of observations
 //! @param weights vector of weights for each observation (optional).
