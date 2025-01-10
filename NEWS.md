@@ -1,3 +1,11 @@
+# kde1d 1.1.1
+
+BUG FIX
+
+* Fix template deduction ambiguity in pre-CXX17 compilers.
+
+
+
 # kde1d 1.1.0
 
 NEW FEATURES

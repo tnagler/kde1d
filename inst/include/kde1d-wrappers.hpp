@@ -54,9 +54,9 @@ inline Kde1d kde1d_wrap(const Rcpp::List& kde1d_r)
 {
   auto grid = interp::InterpolationGrid(
     kde1d_r["grid_points"], kde1d_r["values"], 0);
+  std::string var_type = kde1d_r["type"];
   return Kde1d(grid, kde1d_r["xmin"], kde1d_r["xmax"],
-               wrap_var_type(static_cast<std::string>(kde1d_r["type"])),
-               kde1d_r["prob0"]);
+               wrap_var_type(var_type), kde1d_r["prob0"]);
 }
 
 
