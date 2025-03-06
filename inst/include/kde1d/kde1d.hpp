@@ -140,7 +140,8 @@ private:
                          const Eigen::VectorXd& weights);
   double calculate_infl(const size_t& n,
                         const double& f0,
-                        const double& b,
+                        const double& f1,
+                        const double& f2,
                         const double& bandwidth,
                         const double& s,
                         const double& weight);
@@ -351,7 +352,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
-      grid_points, fitted.col(1).cwiseMin(2.0).cwiseMax(0), 0);
+      grid_points, fitted.col(1).cwiseMin(3.0).cwiseMax(0), 0);
   Eigen::VectorXd influences = infl_grid.interpolate(xx).array() * (1 - prob0_);
   edf_ = influences.sum() + (prob0_ > 0);
 
@@ -600,6 +601,7 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
   fft::KdeFFT kde_fft(
       x, bandwidth_, grid_points(0), grid_points(m - 1), weights);
   Eigen::VectorXd f0 = kde_fft.kde_drv(0);
+  Eigen::VectorXd f1(f0.size()), f2(f0.size());
 
   Eigen::VectorXd wbin = Eigen::VectorXd::Ones(m);
   if (weights.size()) {
@@ -621,11 +623,11 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
     return res;
 
   // degree > 0
-  Eigen::VectorXd f1 = kde_fft.kde_drv(1);
+  f1 = kde_fft.kde_drv(1);
   Eigen::VectorXd S = Eigen::VectorXd::Constant(f0.size(), bandwidth_);
   Eigen::VectorXd b = f1.cwiseQuotient(f0);
   if (degree_ == 2) {
-    Eigen::VectorXd f2 = kde_fft.kde_drv(2);
+    f2 = kde_fft.kde_drv(2);
     // D/R is notation from Hjort and Jones' AoS paper
     Eigen::VectorXd D = f2.cwiseQuotient(f0) - b.cwiseProduct(b);
     Eigen::VectorXd R = 1 / (1.0 + bandwidth_ * bandwidth_ * D.array()).sqrt();
@@ -637,9 +639,8 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
   res.col(0) = res.col(0).array() * (-0.5 * b.array().pow(2) * S.array()).exp();
 
   for (size_t k = 0; k < m; k++) {
-    // TODO: weights
     res(k, 1) =
-      calculate_infl(x.size(), f0(k), b(k), bandwidth_, S(k), wbin(k));
+      calculate_infl(x.size(), f0(k), f1(k), f2(k), bandwidth_, S(k), wbin(k));
     if (std::isnan(res(k, 0)))
       res.row(k).setZero();
   }
@@ -652,35 +653,35 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
 inline double
   Kde1d::calculate_infl(const size_t& n,
                         const double& f0,
-                        const double& b,
+                        const double& f1,
+                        const double& f2,
                         const double& bandwidth,
                         const double& s,
                         const double& weight)
   {
     double M_inverse00;
-    double bandwidth2 = std::pow(bandwidth, 2);
-    double b2 = std::pow(b, 2);
+    double B = bandwidth * bandwidth;
     if (degree_ == 0) {
       M_inverse00 = 1 / f0;
     } else if (degree_ == 1) {
       Eigen::Matrix2d M;
       M(0, 0) = f0;
-      M(0, 1) = bandwidth2 * b * f0;
+      M(0, 1) = B * f1;
       M(1, 0) = M(0, 1);
-      M(1, 1) = f0 * bandwidth2 + f0 * bandwidth2 * bandwidth2 * b2;
+      M(1, 1) = f0 * B + B * f1 * f1 * B / f0;
       M_inverse00 = M.inverse()(0, 0);
     } else {
       Eigen::Matrix3d M;
       M(0, 0) = f0;
-      M(0, 1) = f0 * b;
+      M(0, 1) = B * f1;
       M(1, 0) = M(0, 1);
-      M(1, 1) = f0 * bandwidth2 + f0 * b2;
-      M(1, 2) = 0.5 * f0 * (3.0 / s * b + b * b2);
+      M(1, 1) = B * f2 * B + B * f0;
+      M(2, 0) = M(1, 1) / 2;
+      M(0, 2) = M(1, 1) / 2;
+      double s2 = B * f1 / f0;
+      M(1, 2) = f0 / 2 * (3 / s * s2 + std::pow(s2, 3));
       M(2, 1) = M(1, 2);
-      M(2, 2) = 0.25 * f0;
-      M(2, 2) *= 3.0 / std::pow(s, 2) + 6.0 / s * b2 + b2 * b2;
-      M(0, 2) = M(2, 2);
-      M(2, 0) = M(2, 2);
+      M(2, 2) = f0 / 4 * (3 / (s * s) + 6 / s * std::pow(s2, 2) + std::pow(s2, 4));
       M_inverse00 = M.inverse()(0, 0);
     }
 
