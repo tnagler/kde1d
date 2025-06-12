@@ -17,3 +17,6 @@
 .github/
 
 ^\.github$
+^CRAN-SUBMISSION$
+
+*.Rproj
