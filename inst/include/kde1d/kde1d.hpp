@@ -348,13 +348,19 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   if (type_ == VarType::discrete) {
     xx = xx.array().round();
   }
-  loglik_ = (this->pdf(xx, false).array().log()).sum();
+
+  if (w.size() == 0) {
+    w = Eigen::VectorXd::Ones(xx.size());
+  }
+  loglik_ = (this->pdf(xx, false).array().log().array() * w.array()).sum();  if (prob0_ > 0) {
+    loglik_ += static_cast<double>(x.size()) * prob0_ * std::log(prob0_);
+  }
 
   // calculate effective degrees of freedom
   interp::InterpolationGrid infl_grid(
       grid_points, fitted.col(1).cwiseMin(3.0).cwiseMax(0), 0);
-  Eigen::VectorXd influences = infl_grid.interpolate(xx).array() * (1 - prob0_);
-  edf_ = influences.sum() + (prob0_ > 0);
+  Eigen::VectorXd influences = infl_grid.interpolate(xx).array();
+  edf_ = influences.sum() + static_cast<double>(prob0_ > 0);
 
   // store bandwidth in standardized format
   bandwidth_ = bandwidth_ / multiplier_;
@@ -612,7 +618,10 @@ Kde1d::fit_lp(const Eigen::VectorXd& x,
                                grid_points(m - 1),
                                m - 1,
                                Eigen::VectorXd::Ones(x.size()));
-    wbin = wcount.cwiseQuotient(count);
+    wbin = (count.array() == 0).select(
+      Eigen::VectorXd::Zero(m),
+      wcount.cwiseQuotient(count)
+    );
   }
 
   Eigen::MatrixXd res(f0.size(), 2);
