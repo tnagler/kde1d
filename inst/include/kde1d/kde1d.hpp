@@ -352,7 +352,11 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   if (w.size() == 0) {
     w = Eigen::VectorXd::Ones(xx.size());
   }
-  loglik_ = (this->pdf(xx, false).array().log().array() * w.array()).sum();  if (prob0_ > 0) {
+  loglik_ = (this->pdf(xx, false).array().log().array() * w.array()).sum();
+  if (prob0_ > 0) {
+    // For zero inflated data, all observations with value 0 have been removed,
+    // so their likelihood contribution is missing. There were n * prob0_ such
+    // observations, each with log-likelihood contribution log(prob0_).
     loglik_ += static_cast<double>(x.size()) * prob0_ * std::log(prob0_);
   }
 
