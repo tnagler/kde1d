@@ -190,3 +190,13 @@ test_that("bounded fits are invariant under reflection", {
   expect_equal(fit$grid_points, 1 - rev(reflected_fit$grid_points))
   expect_equal(fit$values, rev(reflected_fit$values))
 })
+
+test_that("density interpolation is continuous at the right grid endpoint", {
+  set.seed(4)
+  fit <- kde1d(rnorm(500))
+
+  expect_equal(
+    dkde1d(tail(fit$grid_points, 1), fit),
+    tail(fit$values, 1)
+  )
+})

@@ -93,7 +93,7 @@ InterpolationGrid::interpolate(const Eigen::VectorXd& x) const
     if (xev <= 0) {
       return values_(k) * std::exp(-0.5 * xev * xev);
     } else if (xev >= 1) {
-      return values_(k + 1) * std::exp(-0.5 * xev * xev);
+      return values_(k + 1) * std::exp(-0.5 * (xev - 1) * (xev - 1));
     }
 
     return cubic_poly(xev, find_cell_coefs(k));
