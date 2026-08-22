@@ -191,6 +191,19 @@ test_that("bounded fits are invariant under reflection", {
   expect_equal(fit$values, rev(reflected_fit$values))
 })
 
+test_that("one-boundary fits are invariant under reflection", {
+  set.seed(7)
+  observations <- rexp(500)
+  fit <- kde1d(observations, xmin = 0)
+  reflected_fit <- kde1d(-observations, xmax = 0)
+
+  expect_equal(fit$bw, reflected_fit$bw)
+  expect_equal(fit$grid_points, -rev(reflected_fit$grid_points))
+  expect_equal(fit$values, rev(reflected_fit$values))
+  expect_equal(fit$loglik, reflected_fit$loglik)
+  expect_equal(fit$edf, reflected_fit$edf)
+})
+
 test_that("boundary grids resolve the support beyond the observations", {
   set.seed(5)
 

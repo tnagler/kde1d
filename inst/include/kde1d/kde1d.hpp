@@ -389,9 +389,11 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   }
 
   // calculate effective degrees of freedom
-  interp::InterpolationGrid infl_grid(
-      grid_points, fitted.col(1).cwiseMin(3.0).cwiseMax(0), 0);
-  Eigen::VectorXd influences = infl_grid.interpolate(xx).array();
+  Eigen::VectorXd influences = fitted.col(1).cwiseMin(3.0).cwiseMax(0);
+  if (std::isnan(xmin_) && !std::isnan(xmax_))
+    influences.reverseInPlace();
+  interp::InterpolationGrid infl_grid(grid_points, influences, 0);
+  influences = infl_grid.interpolate(xx).array();
   edf_ = influences.sum() + static_cast<double>(prob0_ > 0);
 
   // store bandwidth in standardized format
