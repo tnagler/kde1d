@@ -159,3 +159,23 @@ test_that("works with weights", {
   fit0 <- kde1d(x[seq_len(n_sim / 2)])
   expect_equal(dkde1d(x, fit), dkde1d(x, fit0), tolerance = 0.01)
 })
+
+test_that("reports the weighted log-likelihood", {
+  set.seed(1)
+  observations <- rnorm(100)
+  weights <- rexp(100)
+  fit <- kde1d(observations, weights = weights)
+
+  expect_equal(
+    fit$loglik,
+    sum(weights / mean(weights) * log(dkde1d(observations, fit)))
+  )
+})
+
+test_that("includes the point mass in zero-inflated log-likelihood", {
+  set.seed(2)
+  observations <- c(rep(0, 40), rexp(60))
+  fit <- kde1d(observations, xmin = 0, type = "zero-inflated")
+
+  expect_equal(fit$loglik, sum(log(dkde1d(observations, fit))))
+})

@@ -19,7 +19,8 @@ public:
          double bandwidth,
          double lower,
          double upper,
-         const Eigen::VectorXd& weights = Eigen::VectorXd());
+         const Eigen::VectorXd& weights = Eigen::VectorXd(),
+         size_t num_bins = 400);
 
   Eigen::VectorXd kde_drv(unsigned drv) const;
   Eigen::VectorXd get_bin_counts() const { return bin_counts_; };
@@ -29,7 +30,7 @@ private:
   double bandwidth_;
   double lower_;
   double upper_;
-  static constexpr size_t num_bins_{ 400 };
+  size_t num_bins_;
   Eigen::VectorXd bin_counts_;
 };
 
@@ -38,14 +39,17 @@ private:
 //! @param lower lower bound of the grid.
 //! @param upper bound of the grid.
 //! @param weigths optional vector of weights for each observation.
+//! @param num_bins number of bins for the FFT grid.
 inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
                       double bandwidth,
                       double lower,
                       double upper,
-                      const Eigen::VectorXd& weights)
+                      const Eigen::VectorXd& weights,
+                      size_t num_bins)
   : bandwidth_(bandwidth)
   , lower_(lower)
   , upper_(upper)
+  , num_bins_(num_bins)
 {
   if (weights.size() > 0 && (weights.size() != x.size()))
     throw std::invalid_argument("x and weights must have the same size");
@@ -65,7 +69,7 @@ inline KdeFFT::KdeFFT(const Eigen::VectorXd& x,
 inline Eigen::VectorXd
 KdeFFT::kde_drv(unsigned drv) const
 {
-  double delta = (upper_ - lower_) / num_bins_;
+  double delta = (upper_ - lower_) / static_cast<double>(num_bins_);
   double tau = 4.0 + drv;
   size_t L = static_cast<size_t>(std::floor(tau * bandwidth_ / delta));
   L = std::min(L, num_bins_ + 1);
