@@ -1,0 +1,2 @@
+^include/kde1d-cpp/([.]git|[.]github|cmake|docs|test)(/|$)
+^include/kde1d-cpp/([.]clang-format|[.]gitignore|CMakeLists[.]txt|README[.]md|codecov[.]yml)$

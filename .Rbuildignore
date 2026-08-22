@@ -12,8 +12,9 @@
 \.o$
 \.so$
 \.dll$
-^src/update_kde1d-cpp\.sh$
 ^docs$
 .github/
 
 ^\.github$
+^inst/include/kde1d-cpp/([.]git|[.]github|cmake|docs|test)(/|$)
+^inst/include/kde1d-cpp/([.]clang-format|[.]gitignore|CMakeLists[.]txt|README[.]md|codecov[.]yml)$
