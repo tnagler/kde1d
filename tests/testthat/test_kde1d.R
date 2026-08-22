@@ -191,6 +191,42 @@ test_that("bounded fits are invariant under reflection", {
   expect_equal(fit$values, rev(reflected_fit$values))
 })
 
+test_that("boundary grids resolve the support beyond the observations", {
+  set.seed(5)
+
+  observations <- runif(500, 0.2, 0.8)
+  fit <- kde1d(observations, xmin = 0, xmax = 1, bw = 0.3)
+  expect_true(all(diff(fit$grid_points) > 0))
+  expect_equal(range(fit$grid_points), c(0, 1))
+  expect_lt(fit$grid_points[2], min(observations))
+  expect_gt(fit$grid_points[length(fit$grid_points) - 1], max(observations))
+
+  observations <- rexp(500)
+  fit <- kde1d(observations, xmin = 0, bw = 0.3)
+  expect_true(all(diff(fit$grid_points) > 0))
+  expect_equal(head(fit$grid_points, 1), 0)
+  expect_lt(fit$grid_points[2], min(observations))
+  expect_gt(tail(fit$grid_points, 1), max(observations))
+
+  observations <- -rexp(500)
+  fit <- kde1d(observations, xmax = 0, bw = 0.3)
+  expect_true(all(diff(fit$grid_points) > 0))
+  expect_equal(tail(fit$grid_points, 1), 0)
+  expect_lt(head(fit$grid_points, 1), min(observations))
+  expect_gt(fit$grid_points[length(fit$grid_points) - 1], max(observations))
+})
+
+test_that("two-boundary fits are affine equivariant", {
+  set.seed(6)
+  observations <- rbeta(500, 2, 3)
+  fit <- kde1d(observations, xmin = 0, xmax = 1)
+  scaled_fit <- kde1d(2 + 3 * observations, xmin = 2, xmax = 5)
+
+  expect_equal(scaled_fit$bw, fit$bw)
+  expect_equal(scaled_fit$grid_points, 2 + 3 * fit$grid_points)
+  expect_equal(scaled_fit$values, fit$values / 3)
+})
+
 test_that("density interpolation is continuous at the right grid endpoint", {
   set.seed(4)
   fit <- kde1d(rnorm(500))

@@ -363,7 +363,7 @@ Kde1d::fit(const Eigen::VectorXd& x, const Eigen::VectorXd& weights)
   // correct estimated density for transformation
   Eigen::VectorXd values = boundary_correct(grid_points, fitted.col(0));
 
-  // move boundary points to xmin/xmax
+  // order grid points from left to right
   grid_points = finalize_grid(grid_points);
 
   // construct interpolation grid
@@ -822,25 +822,47 @@ Kde1d::construct_grid_points(const Eigen::VectorXd& x)
 {
   Eigen::VectorXd rng(2);
   rng << x.minCoeff(), x.maxCoeff();
-  if (std::isnan(xmin_) && std::isnan(xmax_)) {
+  if (type_ == VarType::discrete) {
+    // Discrete estimates use jittered observations without transformation.
+  } else if (std::isnan(xmin_) && std::isnan(xmax_)) {
     rng(0) -= 4 * bandwidth_;
+    rng(1) += 4 * bandwidth_;
+  } else if (!std::isnan(xmin_) && !std::isnan(xmax_)) {
+    Eigen::VectorXd boundaries(2);
+    boundaries << xmin_, xmax_;
+    rng = boundary_transform(boundaries);
+  } else {
+    rng(0) = boundary_transform(Eigen::VectorXd::Constant(
+      1, std::isnan(xmin_) ? xmax_ : xmin_))(0);
     rng(1) += 4 * bandwidth_;
   }
   auto zgrid = Eigen::VectorXd::LinSpaced(grid_size_ + 1, rng(0), rng(1));
-  return boundary_transform(zgrid, true);
+  Eigen::VectorXd grid_points = boundary_transform(zgrid, true);
+
+  // Avoid round-off at finite support boundaries before evaluating the fit.
+  if (type_ != VarType::discrete) {
+    if (!std::isnan(xmin_))
+      grid_points(0) = xmin_;
+    if (!std::isnan(xmax_))
+      grid_points(std::isnan(xmin_) ? 0 : grid_size_) = xmax_;
+  }
+
+  return grid_points;
 }
 
-//! moves the boundary points of the grid to xmin/xmax (if non-NaN).
+//! orders grid points from left to right.
 //! @param grid_points the grid points.
 inline Eigen::VectorXd
 Kde1d::finalize_grid(Eigen::VectorXd& grid_points)
 {
   if (std::isnan(xmin_) && !std::isnan(xmax_))
     grid_points.reverseInPlace();
-  if (!std::isnan(xmin_))
-    grid_points(0) = xmin_;
-  if (!std::isnan(xmax_))
-    grid_points(grid_points.size() - 1) = xmax_;
+  if (type_ == VarType::discrete) {
+    if (!std::isnan(xmin_))
+      grid_points(0) = xmin_;
+    if (!std::isnan(xmax_))
+      grid_points(grid_points.size() - 1) = xmax_;
+  }
 
   return grid_points;
 }
