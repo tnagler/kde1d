@@ -1,3 +1,31 @@
+# kde1d 1.1.2
+
+DEPENDENCIES
+
+* The `kde1d-cpp` backend is now maintained as a pinned Git submodule while
+  preserving the existing public include paths for downstream packages.
+
+NEW FEATURES
+
+* The standalone C++ API now allows configuring the interpolation grid size.
+
+BUG FIXES
+
+* Automatic bandwidth selection is run again when a standalone C++ estimator
+  is refitted.
+
+* Fixed weighted and zero-inflated log-likelihood and effective degrees of
+  freedom calculations in the standalone C++ backend.
+
+* Initialized metadata for models constructed from an interpolation grid and
+  avoided division by zero for empty weighted bins.
+
+* Fixed binning and interpolation behavior at right endpoints, aligned
+  right-boundary influence values, resolved transformed grids across bounded
+  supports, stabilized negligible FFT tail values, truncated densities outside
+  finite support bounds, and kept discrete CDF values inside the unit interval.
+
+
 # kde1d 1.1.1
 
 BUG FIX
