@@ -427,7 +427,12 @@ Kde1d::pdf_continuous(const Eigen::VectorXd& x) const
 {
   Eigen::VectorXd fhat = grid_.interpolate(x);
   auto trunc = [](const double& xx) { return std::max(xx, 0.0); };
-  return tools::unaryExpr_or_nan(fhat, trunc);
+  fhat = tools::unaryExpr_or_nan(fhat, trunc);
+  if (!std::isnan(xmin_))
+    fhat = (x.array() < xmin_).select(0.0, fhat);
+  if (!std::isnan(xmax_))
+    fhat = (x.array() > xmax_).select(0.0, fhat);
+  return fhat;
 }
 
 inline Eigen::VectorXd

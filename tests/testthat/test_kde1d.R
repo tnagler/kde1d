@@ -229,6 +229,14 @@ test_that("boundary grids resolve the support beyond the observations", {
   expect_gt(fit$grid_points[length(fit$grid_points) - 1], max(observations))
 })
 
+test_that("finite support truncates density without extrapolation", {
+  observations <- c(rep(0, 20), seq(0, 1, length.out = 200), rep(1, 20))
+  fit <- kde1d(observations, xmin = 0, xmax = 1, bw = 0.5)
+
+  expect_true(all(dkde1d(c(0, 1), fit) > 0))
+  expect_equal(dkde1d(c(-1e-8, 1 + 1e-8), fit), c(0, 0))
+})
+
 test_that("two-boundary fits are affine equivariant", {
   set.seed(6)
   observations <- rbeta(500, 2, 3)
