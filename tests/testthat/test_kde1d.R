@@ -179,3 +179,14 @@ test_that("includes the point mass in zero-inflated log-likelihood", {
 
   expect_equal(fit$loglik, sum(log(dkde1d(observations, fit))))
 })
+
+test_that("bounded fits are invariant under reflection", {
+  set.seed(3)
+  observations <- runif(500)
+  fit <- kde1d(observations, xmin = 0, xmax = 1)
+  reflected_fit <- kde1d(1 - observations, xmin = 0, xmax = 1)
+
+  expect_equal(fit$bw, reflected_fit$bw)
+  expect_equal(fit$grid_points, 1 - rev(reflected_fit$grid_points))
+  expect_equal(fit$values, rev(reflected_fit$values))
+})

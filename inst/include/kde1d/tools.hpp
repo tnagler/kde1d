@@ -118,6 +118,8 @@ linbin(const Eigen::VectorXd& x,
     if (li < num_bins) {
       gcnts(li) += (1 - rem) * weights(i);
       gcnts(li + 1) += rem * weights(i);
+    } else if (x(i) == upper) {
+      gcnts(num_bins) += weights(i);
     }
   }
 
