@@ -3,11 +3,13 @@
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 name: revdepcheck
 
 jobs:
   R-CMD-check:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'dev'
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -24,7 +26,9 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - uses: r-lib/actions/setup-pandoc@v2
 
