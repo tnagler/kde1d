@@ -179,3 +179,47 @@ test_that("includes the point mass in zero-inflated log-likelihood", {
 
   expect_equal(fit$loglik, sum(log(dkde1d(observations, fit))))
 })
+
+test_that("one-sided bounded estimates are scale equivariant", {
+  set.seed(3)
+  observations <- rexp(300)
+  scale <- 1e6
+  probabilities <- seq(0.05, 0.95, length.out = 31)
+  evaluation_points <- quantile(observations, probabilities, names = FALSE)
+
+  check_equivariance <- function(x, boundary, eval) {
+    if (boundary == "left") {
+      fit <- kde1d(x, xmin = 0)
+      fit_scaled <- kde1d(x * scale, xmin = 0)
+    } else {
+      fit <- kde1d(x, xmax = 0)
+      fit_scaled <- kde1d(x * scale, xmax = 0)
+    }
+
+    expect_equal(
+      dkde1d(eval, fit),
+      scale * dkde1d(eval * scale, fit_scaled),
+      tolerance = 1e-10
+    )
+    expect_equal(
+      pkde1d(eval, fit),
+      pkde1d(eval * scale, fit_scaled),
+      tolerance = 1e-10
+    )
+    expect_equal(
+      qkde1d(probabilities, fit),
+      qkde1d(probabilities, fit_scaled) / scale,
+      tolerance = 1e-10
+    )
+  }
+
+  check_equivariance(observations, "left", evaluation_points)
+  check_equivariance(-observations, "right", -evaluation_points)
+})
+
+test_that("quantiles work for fully zero-inflated estimates", {
+  fit <- kde1d(rep(0, 20), xmin = 0, type = "zero-inflated")
+
+  expect_equal(qkde1d(c(0, 0.25, 0.5, 0.75, 1), fit), rep(0, 5))
+  expect_true(is.nan(qkde1d(NaN, fit)))
+})

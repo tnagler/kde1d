@@ -24,7 +24,7 @@ rkde1d(n, obj, quasi = FALSE)
 
 \item{q}{vector of quantiles.}
 
-\item{p}{vector of probabilities.}
+\item{p}{vector of probabilities in \eqn{[0, 1]}.}
 
 \item{n}{integer; number of observations.}
 
