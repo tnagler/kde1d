@@ -67,9 +67,39 @@ test_that("returns proper 'kde1d' object", {
 
   class_members <- c(
     "grid_points", "values", "xmin", "xmax", "type", "bw", "mult", "deg",
-    "prob0", "edf", "loglik", "x", "weights", "nobs",  "var_name"
+    "boundary_repair", "prob0", "edf", "loglik", "x", "weights", "nobs",
+    "var_name"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
+})
+
+test_that("boundary repair can be disabled", {
+  probabilities <- seq(0.5 / 200, 1 - 0.5 / 200, length.out = 200)
+  observations <- qexp(probabilities)
+  repaired <- kde1d(observations, xmin = 0)
+  bulk <- kde1d(observations, xmin = 0, boundary_repair = FALSE)
+
+  expect_true(repaired$boundary_repair)
+  expect_false(bulk$boundary_repair)
+  expect_false(isTRUE(all.equal(repaired$values, bulk$values)))
+})
+
+test_that("finite bounds support discrete and zero-inflated data", {
+  discrete <- kde1d(
+    rep(-2:1, 30), xmin = -2, xmax = 1, type = "discrete"
+  )
+  expect_equal(sum(dkde1d(-2:1, discrete)), 1)
+  expect_equal(dkde1d(c(-3, 2), discrete), c(0, 0))
+  expect_error(kde1d(c(0, 1.5), type = "discrete"))
+  expect_error(kde1d(0:2, xmin = 0.5, type = "discrete"))
+
+  observations <- c(rep(0, 40), seq(1.01, 1.99, length.out = 160))
+  zero_inflated <- kde1d(
+    observations, xmin = 1, xmax = 2, type = "zero_inflated"
+  )
+  expect_equal(dkde1d(0, zero_inflated), 0.2)
+  expect_equal(dkde1d(0.5, zero_inflated), 0)
+  expect_error(kde1d(c(0, 0.5, 1.5), xmin = 1, xmax = 2, type = "zi"))
 })
 
 u <- runif(20)
@@ -158,4 +188,68 @@ test_that("works with weights", {
   fit <- kde1d(x, weights = c(rep(1, n_sim / 2), rep(0, n_sim / 2)))
   fit0 <- kde1d(x[seq_len(n_sim / 2)])
   expect_equal(dkde1d(x, fit), dkde1d(x, fit0), tolerance = 0.01)
+})
+
+test_that("reports the weighted log-likelihood", {
+  set.seed(1)
+  observations <- rnorm(100)
+  weights <- rexp(100)
+  fit <- kde1d(observations, weights = weights)
+
+  expect_equal(
+    fit$loglik,
+    sum(weights / mean(weights) * log(dkde1d(observations, fit)))
+  )
+})
+
+test_that("includes the point mass in zero-inflated log-likelihood", {
+  set.seed(2)
+  observations <- c(rep(0, 40), rexp(60))
+  fit <- kde1d(observations, xmin = 0, type = "zero-inflated")
+
+  expect_equal(fit$loglik, sum(log(dkde1d(observations, fit))))
+})
+
+test_that("one-sided bounded estimates are scale equivariant", {
+  set.seed(3)
+  observations <- rexp(300)
+  scale <- 1e6
+  probabilities <- seq(0.05, 0.95, length.out = 31)
+  evaluation_points <- quantile(observations, probabilities, names = FALSE)
+
+  check_equivariance <- function(x, boundary, eval) {
+    if (boundary == "left") {
+      fit <- kde1d(x, xmin = 0)
+      fit_scaled <- kde1d(x * scale, xmin = 0)
+    } else {
+      fit <- kde1d(x, xmax = 0)
+      fit_scaled <- kde1d(x * scale, xmax = 0)
+    }
+
+    expect_equal(
+      dkde1d(eval, fit),
+      scale * dkde1d(eval * scale, fit_scaled),
+      tolerance = 1e-10
+    )
+    expect_equal(
+      pkde1d(eval, fit),
+      pkde1d(eval * scale, fit_scaled),
+      tolerance = 1e-10
+    )
+    expect_equal(
+      qkde1d(probabilities, fit),
+      qkde1d(probabilities, fit_scaled) / scale,
+      tolerance = 1e-10
+    )
+  }
+
+  check_equivariance(observations, "left", evaluation_points)
+  check_equivariance(-observations, "right", -evaluation_points)
+})
+
+test_that("quantiles work for fully zero-inflated estimates", {
+  fit <- kde1d(rep(0, 20), xmin = 0, type = "zero-inflated")
+
+  expect_equal(qkde1d(c(0, 0.25, 0.5, 0.75, 1), fit), rep(0, 5))
+  expect_true(is.nan(qkde1d(NaN, fit)))
 })

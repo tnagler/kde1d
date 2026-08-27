@@ -5,23 +5,23 @@
 #' freedom.
 #' @param x vector of observations; categorical data must be converted to
 #'   non-negative integers.
-#' @param xmin lower bound for the support of the density, `NaN` means no
-#'   boundary.
-#' @param xmax upper bound for the support of the density, `NaN` means no
-#'   boundary.
+#' @param xmin lower support bound, `NaN` means no boundary.
+#' @param xmax upper support bound, `NaN` means no boundary.
 #' @param type variable type; must be one of {c, cont, continuous} for
 #'   continuous variables, one of {d, disc, discrete} for discrete integer
-#'   variables, or one of {zi, zinfl, zero-inflated} for zero-inflated
-#'   variables.
+#'   variables, or one of {zi, zinfl, zero-inflated, zero_inflated} for
+#'   zero-inflated variables.
 #' @param bandwidth the bandwidth parameter.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   bw*mult.
 #' @param degree order of the local polynomial.
+#' @param boundary_repair whether finite endpoints are eligible for a
+#'   data-adaptive boundary estimate.
 #' @return `An Rcpp::List` containing the fitted density values on a grid and
 #'   additional information.
 #' @noRd
-fit_kde1d_cpp <- function(x, xmin, xmax, type, mult, bandwidth, degree, weights) {
-    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, xmin, xmax, type, mult, bandwidth, degree, weights)
+fit_kde1d_cpp <- function(x, xmin, xmax, type, mult, bandwidth, degree, weights, boundary_repair) {
+    .Call('_kde1d_fit_kde1d_cpp', PACKAGE = 'kde1d', x, xmin, xmax, type, mult, bandwidth, degree, weights, boundary_repair)
 }
 
 #' computes the pdf of a kernel density estimate by interpolation.
