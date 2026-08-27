@@ -12,6 +12,15 @@ NEW FEATURES
 
 * The standalone C++ API now allows configuring the interpolation grid size.
 
+* Added `boundary_repair` to control data-adaptive local-linear estimates at
+  finite support endpoints. One-sided fits now use a scale-equivariant Box-Cox
+  transformation with power parameter 1/4 instead of the previous log
+  transformation; two-sided fits retain the probit transformation.
+
+* Finite bounds now apply to discrete supports and to the continuous component
+  of zero-inflated fits. Discrete bounds are integer levels and are adjusted by
+  half a unit when fitting the jitter density.
+
 * Density and distribution evaluation now reuse cached spline coefficients,
   cumulative integrals, and cell lookups. Quantiles invert these cached
   integrals directly, substantially speeding up `qkde1d()` and `rkde1d()`.

@@ -67,9 +67,39 @@ test_that("returns proper 'kde1d' object", {
 
   class_members <- c(
     "grid_points", "values", "xmin", "xmax", "type", "bw", "mult", "deg",
-    "prob0", "edf", "loglik", "x", "weights", "nobs",  "var_name"
+    "boundary_repair", "prob0", "edf", "loglik", "x", "weights", "nobs",
+    "var_name"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
+})
+
+test_that("boundary repair can be disabled", {
+  probabilities <- seq(0.5 / 200, 1 - 0.5 / 200, length.out = 200)
+  observations <- qexp(probabilities)
+  repaired <- kde1d(observations, xmin = 0)
+  bulk <- kde1d(observations, xmin = 0, boundary_repair = FALSE)
+
+  expect_true(repaired$boundary_repair)
+  expect_false(bulk$boundary_repair)
+  expect_false(isTRUE(all.equal(repaired$values, bulk$values)))
+})
+
+test_that("finite bounds support discrete and zero-inflated data", {
+  discrete <- kde1d(
+    rep(-2:1, 30), xmin = -2, xmax = 1, type = "discrete"
+  )
+  expect_equal(sum(dkde1d(-2:1, discrete)), 1)
+  expect_equal(dkde1d(c(-3, 2), discrete), c(0, 0))
+  expect_error(kde1d(c(0, 1.5), type = "discrete"))
+  expect_error(kde1d(0:2, xmin = 0.5, type = "discrete"))
+
+  observations <- c(rep(0, 40), seq(1.01, 1.99, length.out = 160))
+  zero_inflated <- kde1d(
+    observations, xmin = 1, xmax = 2, type = "zero_inflated"
+  )
+  expect_equal(dkde1d(0, zero_inflated), 0.2)
+  expect_equal(dkde1d(0.5, zero_inflated), 0)
+  expect_error(kde1d(c(0, 0.5, 1.5), xmin = 1, xmax = 2, type = "zi"))
 })
 
 u <- runif(20)

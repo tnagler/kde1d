@@ -41,6 +41,7 @@ inline Rcpp::List kde1d_wrap(const Kde1d& kde1d_cpp)
     Rcpp::Named("bw") = kde1d_cpp.get_bandwidth(),
     Rcpp::Named("mult") = kde1d_cpp.get_multiplier(),
     Rcpp::Named("deg") = kde1d_cpp.get_degree(),
+    Rcpp::Named("boundary_repair") = kde1d_cpp.get_boundary_repair(),
     Rcpp::Named("prob0") = kde1d_cpp.get_prob0(),
     Rcpp::Named("edf") = kde1d_cpp.get_edf(),
     Rcpp::Named("loglik") = kde1d_cpp.get_loglik()

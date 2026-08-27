@@ -12,23 +12,26 @@ kde1d(
   mult = 1,
   bw = NA,
   deg = 2,
-  weights = numeric(0)
+  weights = numeric(0),
+  boundary_repair = TRUE
 )
 }
 \arguments{
 \item{x}{vector (or one-column matrix/data frame) of observations; can be
 \code{numeric} or \code{ordered}.}
 
-\item{xmin}{lower bound for the support of the density (only for continuous
-data); \code{NaN} means no boundary.}
+\item{xmin}{lower support bound; \code{NaN} means no boundary. For discrete data,
+this is the lowest possible integer level. For zero-inflated data, it
+bounds only the continuous component, so zeros are exempt.}
 
-\item{xmax}{upper bound for the support of the density (only for continuous
-data); \code{NaN} means no boundary.}
+\item{xmax}{upper support bound; \code{NaN} means no boundary. For discrete data,
+this is the highest possible integer level. For zero-inflated data, it
+bounds only the continuous component.}
 
 \item{type}{variable type; must be one of \verb{\{c, cont, continuous\}} for
 continuous variables, one of \verb{\{d, disc, discrete\}} for discrete integer
-variables, or one of \verb{\{zi, zinfl, zero-inflated\}} for zero-inflated
-variables.}
+variables, or one of \verb{\{zi, zinfl, zero-inflated, zero_inflated\}} for
+zero-inflated variables.}
 
 \item{mult}{positive bandwidth multiplier; the actual bandwidth used is
 \eqn{bw*mult}.}
@@ -41,6 +44,10 @@ appropriate modifications for \code{deg > 0}.}
 log-constant, log-linear, and log-quadratic fitting, respectively.}
 
 \item{weights}{optional vector of weights for individual observations.}
+
+\item{boundary_repair}{whether finite support endpoints are eligible for a
+data-adaptive boundary estimate. The default is \code{TRUE}; \code{FALSE} uses the
+transformed estimate throughout.}
 }
 \value{
 An object of class \code{kde1d}.
@@ -50,16 +57,26 @@ The estimators can handle data with bounded, unbounded, and discrete support,
 see \emph{Details}.
 }
 \details{
-A Gaussian kernel is used in all cases. If \code{xmin} or \code{xmax} are
-finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
-log-transform is used if there is only one boundary (see, Geenens and Wang,
-2018); a probit transform is used if there are two (see, Geenens, 2014).
+A Gaussian kernel is used in all cases. With one finite endpoint,
+the continuous component is fitted after an endpoint-anchored, scaled
+Box-Cox transformation with power parameter \eqn{1/4}. With two finite
+endpoints, it uses a regularized probit transformation (Geenens, 2014).
 
-Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
-A specific form of deterministic jittering is used, see \code{\link[=equi_jitter]{equi_jitter()}}.
+If \code{boundary_repair = TRUE}, each finite endpoint is classified from the
+observed tail. Endpoints consistent with a finite nonzero limiting density
+receive a nonnegative local-linear boundary estimate, which is fused with
+the transformed estimate using shrinking biweight weights. Other endpoints
+retain the transformed estimate. The result is normalized on the original
+scale.
+
+Discrete variables are handled via deterministic jittering (Nagler, 2018a,
+2018b), see \code{\link[=equi_jitter]{equi_jitter()}}. Finite integer bounds are shifted outward by
+one half before applying the same support transformations and boundary
+repair to the jitter density.
 
 Zero-inflated densities are estimated by a hurdle-model with discrete
-mass at 0 and the remainder estimated as for \code{type = "continuous"}.
+mass at 0 and the nonzero observations estimated as a continuous
+component. Finite bounds constrain this component only.
 }
 \examples{
 
@@ -124,10 +141,8 @@ estimation on the unit interval}. Journal of the American Statistical
 Association, 109:505, 346-358,
 \href{https://arxiv.org/abs/1303.4121}{arXiv:1303.4121}
 
-Geenens, G., Wang, C. (2018). \emph{Local-likelihood transformation kernel density
-estimation for positive random variables.} Journal of Computational and
-Graphical Statistics, to appear,
-\href{https://arxiv.org/abs/1602.04862}{arXiv:1602.04862}
+Box, G. E. P., Cox, D. R. (1964). \emph{An analysis of transformations.} Journal
+of the Royal Statistical Society, Series B, 26, 211--252.
 
 Nagler, T. (2018a). \emph{A generic approach to nonparametric function estimation
 with mixed data.} Statistics & Probability Letters, 137:326–330,
