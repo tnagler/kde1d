@@ -5,14 +5,16 @@
 #'
 #' @param x vector (or one-column matrix/data frame) of observations; can be
 #'   `numeric` or `ordered`.
-#' @param xmin lower bound for the support of the density (only for continuous
-#'   data); `NaN` means no boundary.
-#' @param xmax upper bound for the support of the density (only for continuous
-#'   data); `NaN` means no boundary.
+#' @param xmin lower support bound; `NaN` means no boundary. For discrete data,
+#'   this is the lowest possible integer level. For zero-inflated data, it
+#'   bounds only the continuous component, so zeros are exempt.
+#' @param xmax upper support bound; `NaN` means no boundary. For discrete data,
+#'   this is the highest possible integer level. For zero-inflated data, it
+#'   bounds only the continuous component.
 #' @param type variable type; must be one of `{c, cont, continuous}` for
 #'   continuous variables, one of `{d, disc, discrete}` for discrete integer
-#'   variables, or one of `{zi, zinfl, zero-inflated}` for zero-inflated
-#'   variables.
+#'   variables, or one of `{zi, zinfl, zero-inflated, zero_inflated}` for
+#'   zero-inflated variables.
 #' @param mult positive bandwidth multiplier; the actual bandwidth used is
 #'   \eqn{bw*mult}.
 #' @param bw bandwidth parameter; has to be a positive number or `NA`; the
@@ -21,19 +23,32 @@
 #' @param deg degree of the polynomial; either `0`, `1`, or `2` for
 #'   log-constant, log-linear, and log-quadratic fitting, respectively.
 #' @param weights optional vector of weights for individual observations.
+#' @param boundary_repair whether finite support endpoints are eligible for a
+#'   data-adaptive boundary estimate. The default is `TRUE`; `FALSE` uses the
+#'   transformed estimate throughout.
 #'
 #' @return An object of class `kde1d`.
 #'
-#' @details A Gaussian kernel is used in all cases. If `xmin` or `xmax` are
-#'   finite, the density estimate will be 0 outside of \eqn{[xmin, xmax]}. A
-#'   log-transform is used if there is only one boundary (see, Geenens and Wang,
-#'   2018); a probit transform is used if there are two (see, Geenens, 2014).
+#' @details A Gaussian kernel is used in all cases. With one finite endpoint,
+#'   the continuous component is fitted after an endpoint-anchored, scaled
+#'   Box-Cox transformation with power parameter \eqn{1/4}. With two finite
+#'   endpoints, it uses a regularized probit transformation (Geenens, 2014).
 #'
-#'   Discrete variables are handled via jittering (see, Nagler, 2018a, 2018b).
-#'   A specific form of deterministic jittering is used, see [equi_jitter()].
+#'   If `boundary_repair = TRUE`, each finite endpoint is classified from the
+#'   observed tail. Endpoints consistent with a finite nonzero limiting density
+#'   receive a nonnegative local-linear boundary estimate, which is fused with
+#'   the transformed estimate using shrinking biweight weights. Other endpoints
+#'   retain the transformed estimate. The result is normalized on the original
+#'   scale.
+#'
+#'   Discrete variables are handled via deterministic jittering (Nagler, 2018a,
+#'   2018b), see [equi_jitter()]. Finite integer bounds are shifted outward by
+#'   one half before applying the same support transformations and boundary
+#'   repair to the jitter density.
 #'
 #'   Zero-inflated densities are estimated by a hurdle-model with discrete
-#'   mass at 0 and the remainder estimated as for `type = "continuous"`.
+#'   mass at 0 and the nonzero observations estimated as a continuous
+#'   component. Finite bounds constrain this component only.
 #'
 #' @seealso [`dkde1d()`], [`pkde1d()`], [`qkde1d()`], [`rkde1d()`],
 #'   [`plot.kde1d()`], [`lines.kde1d()`]
@@ -43,10 +58,8 @@
 #' Association, 109:505, 346-358,
 #' [arXiv:1303.4121](https://arxiv.org/abs/1303.4121)
 #'
-#' Geenens, G., Wang, C. (2018). *Local-likelihood transformation kernel density
-#' estimation for positive random variables.* Journal of Computational and
-#' Graphical Statistics, to appear,
-#' [arXiv:1602.04862](https://arxiv.org/abs/1602.04862)
+#' Box, G. E. P., Cox, D. R. (1964). *An analysis of transformations.* Journal
+#' of the Royal Statistical Society, Series B, 26, 211--252.
 #'
 #' Nagler, T. (2018a). *A generic approach to nonparametric function estimation
 #' with mixed data.* Statistics & Probability Letters, 137:326–330,
@@ -119,7 +132,8 @@
 #' @importFrom stats na.omit
 #' @export
 kde1d <- function(x, xmin = NaN, xmax = NaN, type = "continuous",
-                  mult = 1, bw = NA,  deg = 2, weights = numeric(0)) {
+                  mult = 1, bw = NA, deg = 2, weights = numeric(0),
+                  boundary_repair = TRUE) {
 
   if (is.ordered(x)) {
     type <- "discrete"
@@ -135,7 +149,8 @@ kde1d <- function(x, xmin = NaN, xmax = NaN, type = "continuous",
                        bandwidth = bw,
                        mult = mult,
                        degree = deg,
-                       weights = weights)
+                       weights = weights,
+                       boundary_repair = boundary_repair)
 
   # add info
   fit$x <- x

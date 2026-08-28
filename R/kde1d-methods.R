@@ -43,7 +43,7 @@ pkde1d <- function(q, obj) {
   pkde1d_cpp(q, obj)
 }
 
-#' @param p vector of probabilities.
+#' @param p vector of probabilities in \eqn{[0, 1]}.
 #' @rdname dkde1d
 #' @export
 qkde1d <- function(p, obj) {

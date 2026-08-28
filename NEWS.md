@@ -1,3 +1,55 @@
+# kde1d 1.1.2
+
+DEPENDENCIES
+
+* The `kde1d-cpp` backend is now maintained as a pinned Git submodule while
+  preserving the existing public include paths for downstream packages.
+
+* Advanced the pinned `kde1d-cpp` backend to include its latest numerical and
+  performance improvements.
+
+NEW FEATURES
+
+* The standalone C++ API now allows configuring the interpolation grid size.
+
+* Added `boundary_repair` to control data-adaptive local-linear estimates at
+  finite support endpoints. One-sided fits now use a scale-equivariant Box-Cox
+  transformation with power parameter 1/4 instead of the previous log
+  transformation; two-sided fits retain the probit transformation.
+
+* Finite bounds now apply to discrete supports and to the continuous component
+  of zero-inflated fits. Discrete bounds are integer levels and are adjusted by
+  half a unit when fitting the jitter density.
+
+* Density and distribution evaluation now reuse cached spline coefficients,
+  cumulative integrals, and cell lookups. Quantiles invert these cached
+  integrals directly, substantially speeding up `qkde1d()` and `rkde1d()`.
+
+BUG FIXES
+
+* Automatic bandwidth selection is run again when a standalone C++ estimator
+  is refitted.
+
+* Fixed weighted and zero-inflated log-likelihood and effective degrees of
+  freedom calculations in the standalone C++ backend.
+
+* Initialized metadata for models constructed from an interpolation grid and
+  avoided division by zero for empty weighted bins.
+
+* Fixed binning and interpolation behavior at right endpoints, aligned
+  right-boundary influence values, resolved transformed grids across bounded
+  supports, stabilized negligible FFT tail values, truncated densities outside
+  finite support bounds, and kept discrete CDF values inside the unit interval.
+
+* Restored scale equivariance for one-sided bounded estimates by scaling the
+  boundary transformation offset in the units of the fitted data, and improved
+  numerical behavior in boundary tails by using exact transformation
+  Jacobians.
+
+* Fixed quantile evaluation for fully zero-inflated estimates and improved
+  quantile accuracy at spline-cell boundaries and in flat cells.
+
+
 # kde1d 1.1.1
 
 BUG FIX

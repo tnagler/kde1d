@@ -1,0 +1,3 @@
+[submodule "inst/include/kde1d-cpp"]
+	path = inst/include/kde1d-cpp
+	url = https://github.com/vinecopulib/kde1d-cpp.git
