@@ -1,7 +1,7 @@
 Package: kde1d
 Type: Package
 Title: Univariate Kernel Density Estimation
-Version: 1.1.2
+Version: 1.2.0
 Authors@R: c(
         person("Thomas", "Nagler",, "mail@tnagler.com", role = c("aut", "cre")),
         person("Thibault", "Vatter",, "thibault.vatter@gmail.com", role = c("aut"))
@@ -14,7 +14,6 @@ Description: Provides an efficient implementation of univariate local polynomial
     Nagler (2018b) <doi:10.48550/arXiv.1705.05431>.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 LinkingTo:
     BH,
     Rcpp,
