@@ -20,7 +20,7 @@ continuous case (see, Nagler, 2018a/b). The drawback is that estimates are
 random and the noise may deteriorate the estimate by chance.
 
 Here, we add a form of deterministic noise that makes estimators well
-behaved. Tied occurences of a factor level are spread out uniformly
+behaved. Tied occurrences of a factor level are spread out uniformly
 (i.e., equidistantly) on the interval \eqn{[-0.5, 0.5]}. This is similar to
 adding random noise that is uniformly distributed, conditional on the
 observed outcome. Integrating over the outcome, one can check that the
