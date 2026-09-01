@@ -1,4 +1,4 @@
-# kde1d 1.1.2
+# kde1d 1.2.0
 
 DEPENDENCIES
 

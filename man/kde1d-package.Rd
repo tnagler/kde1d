@@ -42,6 +42,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Thomas Nagler \email{mail@tnagler.com}
   \item Thibault Vatter \email{thibault.vatter@gmail.com}
 }
 
