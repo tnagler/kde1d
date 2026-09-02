@@ -1,7 +1,8 @@
 // [[Rcpp::depends(kde1d, RcppEigen, BH)]]
 
-#include <Rcpp.h>
+#include <RcppEigen.h>
 #include <kde1d.hpp>
+#include <kde1d-wrappers.hpp>
 #include <kde1d/dpik.hpp>
 #include <kde1d/interpolation.hpp>
 #include <kde1d/kde1d.hpp>
