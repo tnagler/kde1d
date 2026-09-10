@@ -66,11 +66,13 @@ test_that("returns proper 'kde1d' object", {
   lapply(fits, function(x) expect_s3_class(x, "kde1d"))
 
   class_members <- c(
-    "grid_points", "values", "xmin", "xmax", "type", "bw", "mult", "deg",
-    "boundary_repair", "prob0", "edf", "loglik", "x", "weights", "nobs",
-    "var_name"
+    "grid_points", "values", "xmin", "xmax", "type", "bw", "bw_spec",
+    "mult", "deg", "grid_size", "boundary_repair", "prob0", "edf",
+    "loglik", "x", "weights", "nobs", "var_name"
   )
   lapply(fits, function(x) expect_identical(names(x), class_members))
+  lapply(fits, function(x) expect_true(is.na(x$bw_spec)))
+  lapply(fits, function(x) expect_equal(x$grid_size, 400))
 })
 
 test_that("boundary repair can be disabled", {
