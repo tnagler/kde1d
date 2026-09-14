@@ -41,10 +41,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { name: valgrind,    image: valgrind }
-          - { name: clang-asan,  image: clang-asan }
-          - { name: clang-ubsan, image: clang-ubsan }
-          - { name: gcc-asan,    image: gcc-asan }
+          - { name: valgrind,    image: valgrind,    kind: valgrind }
+          - { name: clang-asan,  image: clang-asan,  kind: sanitizer }
+          - { name: clang-ubsan, image: clang-ubsan, kind: sanitizer }
+          - { name: gcc-asan,    image: gcc-asan,    kind: sanitizer }
 
     container:
       image: ghcr.io/r-hub/containers/${{ matrix.config.image }}:latest
@@ -56,16 +56,27 @@ jobs:
           # compile and the check fails for the wrong reason.
           submodules: recursive
 
-      - name: Session info
+      - name: Session info and instrumentation check
+        # A sanitizer that is not actually enabled reports nothing, which is
+        # indistinguishable from a clean run, so the toolchain is checked
+        # before spending an hour on a check that could not have found
+        # anything. valgrind gets the equivalent assurance after the fact,
+        # from the `--require` marker in the scan step.
         run: |
           R -q -e 'sessionInfo()'
           R CMD config CC
           R CMD config CXX
+          if [ '${{ matrix.config.kind }}' = 'sanitizer' ]; then
+            if ! R CMD config CXX | grep -q -- '-fsanitize'; then
+              echo "::error::this R's CXX carries no -fsanitize flag"
+              exit 1
+            fi
+          fi
         shell: bash
 
       - name: Build the source tarball
-        # `r-check` checks every tarball in the directory it is given, so the
-        # tarball gets a directory of its own.
+        # Built and checked outside the workspace so the check directory cannot
+        # pick up the checkout's own files.
         run: |
           mkdir -p /check
           R CMD build --no-build-vignettes --no-manual .
@@ -73,14 +84,26 @@ jobs:
         shell: bash
 
       - name: Check under ${{ matrix.config.name }}
-        # The container sets CHECK_ARGS for its own tool (`--use-valgrind` for
-        # valgrind, `--extra-arch` for the sanitizers), so `r-check` is invoked
-        # exactly as r-hub and CRAN invoke it. A non-zero status here is a
-        # `R CMD check` ERROR; memory findings are picked up by the next step,
-        # which must run either way.
+        # This is what the containers' own `r-check` helper does -- install the
+        # tarball's dependencies with pak, then check it with the CHECK_ARGS the
+        # container sets for its tool (`--use-valgrind` for valgrind,
+        # `--extra-arch` for the sanitizers), so the check still runs the way
+        # r-hub and CRAN run it.
+        #
+        # `r-check` itself is not used, because it ends with
+        #     testfiles=$(ls tests | grep ".Rout.fail$")
+        # under `set -e`: with no failing test there is no `.Rout.fail`, grep
+        # exits 1 and takes the script with it. It reports failure precisely
+        # when the package is clean, which is not a signal a gate can use.
+        #
+        # A non-zero status here is a real `R CMD check` ERROR. Memory findings
+        # are the next step's job, and it must run either way.
         run: |
+          cd /check
+          pkg=$(ls kde1d_*.tar.gz)
+          R -q -e "pak::pkg_install('deps::$pkg', dependencies = TRUE)"
           status=0
-          r-check /check || status=$?
+          R CMD check $CHECK_ARGS "$pkg" || status=$?
           echo "CHECK_STATUS=$status" >> "$GITHUB_ENV"
         shell: bash
 
@@ -94,7 +117,11 @@ jobs:
             echo "::notice::no check directory; R CMD check did not get that far"
             exit 0
           fi
-          .github/scripts/scan-memcheck-output.sh /check/kde1d.Rcheck
+          args=()
+          if [ '${{ matrix.config.kind }}' = 'valgrind' ]; then
+            args+=(--require 'ERROR SUMMARY:')
+          fi
+          .github/scripts/scan-memcheck-output.sh "${args[@]}" /check/kde1d.Rcheck
         shell: bash
 
       - name: Fail if R CMD check itself failed
