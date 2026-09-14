@@ -1,0 +1,115 @@
+# Runs the package's examples and tests under valgrind and under the address /
+# undefined-behaviour sanitizers, using the r-hub containers that CRAN's own
+# memory-test machines are modelled on. Each container ships an R built with
+# the instrumentation already enabled, so the package and its dependencies are
+# compiled against it -- a plain runner cannot reproduce these reports.
+#
+# The pair of jobs exists because the tools are not interchangeable: valgrind
+# sees allocator misuse that no sanitizer flags (the zero-size realloc() that
+# CRAN reported against 1.2.0), while the sanitizers see signed overflow, bad
+# shifts and invalid casts that valgrind cannot. They also cannot share a
+# process, so they are separate jobs rather than one instrumented build.
+name: memcheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays, 05:00 UTC: catches breakage from new R-devel or backend pins
+    # between releases rather than at submission time.
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: memcheck-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  memcheck:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.config.name }}
+    # Dependencies are compiled from source against the instrumented R, and the
+    # checks themselves run 20-50x slower than normal under valgrind.
+    timeout-minutes: 150
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: valgrind,    image: valgrind }
+          - { name: clang-asan,  image: clang-asan }
+          - { name: clang-ubsan, image: clang-ubsan }
+          - { name: gcc-asan,    image: gcc-asan }
+
+    container:
+      image: ghcr.io/r-hub/containers/${{ matrix.config.image }}:latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # The C++ backend is a submodule; without it there are no headers to
+          # compile and the check fails for the wrong reason.
+          submodules: recursive
+
+      - name: Session info
+        run: |
+          R -q -e 'sessionInfo()'
+          R CMD config CC
+          R CMD config CXX
+        shell: bash
+
+      - name: Build the source tarball
+        # `r-check` checks every tarball in the directory it is given, so the
+        # tarball gets a directory of its own.
+        run: |
+          mkdir -p /check
+          R CMD build --no-build-vignettes --no-manual .
+          mv kde1d_*.tar.gz /check/
+        shell: bash
+
+      - name: Check under ${{ matrix.config.name }}
+        # The container sets CHECK_ARGS for its own tool (`--use-valgrind` for
+        # valgrind, `--extra-arch` for the sanitizers), so `r-check` is invoked
+        # exactly as r-hub and CRAN invoke it. A non-zero status here is a
+        # `R CMD check` ERROR; memory findings are picked up by the next step,
+        # which must run either way.
+        run: |
+          status=0
+          r-check /check || status=$?
+          echo "CHECK_STATUS=$status" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Scan the check output for memory findings
+        # Runs even when the previous step failed: a `R CMD check` ERROR and a
+        # memory finding are independent, and the findings are the more useful
+        # half of the report.
+        if: always()
+        run: |
+          if [ ! -d /check/kde1d.Rcheck ]; then
+            echo "::notice::no check directory; R CMD check did not get that far"
+            exit 0
+          fi
+          .github/scripts/scan-memcheck-output.sh /check/kde1d.Rcheck
+        shell: bash
+
+      - name: Fail if R CMD check itself failed
+        if: always()
+        run: |
+          if [ "${CHECK_STATUS:-0}" != "0" ]; then
+            echo "R CMD check exited with ${CHECK_STATUS}" >&2
+            exit 1
+          fi
+        shell: bash
+
+      - name: Upload check directory
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.config.name }}-Rcheck
+          path: /check/kde1d.Rcheck
+          retention-days: 14
