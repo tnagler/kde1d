@@ -1,3 +1,18 @@
+# kde1d 1.2.2
+
+The version number skips 1.2.1 to match the pinned `kde1d-cpp` backend release.
+
+DEPENDENCIES
+
+* Advanced the pinned `kde1d-cpp` backend to v1.2.2.
+
+BUG FIXES
+
+* Avoid a zero-size `realloc()` when every observation is dropped as missing or
+  zero-weighted, which valgrind reports as an error. This was reached by
+  zero-inflated fits whose observations are all zero.
+
+
 # kde1d 1.2.0
 
 DEPENDENCIES
